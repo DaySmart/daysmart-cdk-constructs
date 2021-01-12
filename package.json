@@ -1,0 +1,22 @@
+{
+  "name": "daysmart-cdk-constructs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaySmart/daysmart-cdk-constructs.git"
+  },
+  "author": "Chris <christopher.dettloff@daysmart.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/DaySmart/daysmart-cdk-constructs/issues"
+  },
+  "homepage": "https://github.com/DaySmart/daysmart-cdk-constructs#readme",
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  }
+}
