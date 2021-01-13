@@ -118,5 +118,9 @@ export class CdkAppCloudfront extends cdk.Construct {
             recordName: props.domainName
         });
     }
+
+    new cdk.CfnOutput(this, "CloudfrontDistribution", {
+        value: distribution.distributionId
+    });
   }
 }

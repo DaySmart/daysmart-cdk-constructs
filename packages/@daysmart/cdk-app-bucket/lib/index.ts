@@ -33,5 +33,13 @@ export class AppBucket extends cdk.Construct {
                 resources: [bucket.bucketArn + "/*"],
             })
         );
+
+        new cdk.CfnOutput(this, "AppBucket", {
+            value: bucket.bucketName
+        });
+
+        new cdk.CfnOutput(this, "OriginAccessIdentity", {
+            value: originAccessIdentity.originAccessIdentityName
+        });
     }
 }

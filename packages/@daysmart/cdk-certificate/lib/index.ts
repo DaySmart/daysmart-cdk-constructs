@@ -17,13 +17,17 @@ export class CdkCertificate extends cdk.Construct {
         domainName: props.domainName
     });
 
-    new acm.Certificate(this, 'Certificate', {
+    const cert = new acm.Certificate(this, 'Certificate', {
         domainName: props.domainName,
         subjectAlternativeNames: [
             `${props.stage}.${props.project}.${props.domainName}`,
             `*.${props.stage}.${props.project}.${props.domainName}`
         ],
         validation: acm.CertificateValidation.fromDns(hostedZone)
+    });
+
+    new cdk.CfnOutput(this, "CertificateArn",{
+        value: cert.certificateArn
     });
   }
 }
