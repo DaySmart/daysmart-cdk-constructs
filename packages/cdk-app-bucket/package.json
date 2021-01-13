@@ -24,5 +24,9 @@
     "@aws-cdk/aws-iam": "^1.84.0",
     "@aws-cdk/aws-s3": "^1.84.0",
     "@aws-cdk/core": "1.84.0"
+  },
+  "gitHead": "ee505163f0cbd67206dfe03fe5840b7a5e949efe",
+  "publishConfig": {
+    "access": "public"
   }
 }

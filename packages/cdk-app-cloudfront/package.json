@@ -23,5 +23,9 @@
     "@aws-cdk/aws-cloudfront": "^1.84.0",
     "@aws-cdk/aws-route53-targets": "^1.84.0",
     "@aws-cdk/core": "1.77.0"
+  },
+  "gitHead": "ee505163f0cbd67206dfe03fe5840b7a5e949efe",
+  "publishConfig": {
+    "access": "public"
   }
 }
