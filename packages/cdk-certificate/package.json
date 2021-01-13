@@ -1,6 +1,6 @@
 {
-  "name": "cdk-certificate",
-  "version": "0.1.0",
+  "name": "@daysmart/cdk-certificate",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
