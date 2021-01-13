@@ -1,15 +1,13 @@
-import { expect as expectCDK, countResources } from '@aws-cdk/assert';
-import * as cdk from '@aws-cdk/core';
-import * as CdkAppBucket from '../lib/index';
+import { SynthUtils } from '@aws-cdk/assert';
+import { Stack } from '@aws-cdk/core';
+import { AppBucket } from '../lib/index';
 
-/*
- * Example test 
- */
-test('SNS Topic Created', () => {
-  const app = new cdk.App();
-  const stack = new cdk.Stack(app, "TestStack");
-  // WHEN
-  new CdkAppBucket.CdkAppBucket(stack, 'MyTestConstruct');
-  // THEN
-  expectCDK(stack).to(countResources("AWS::SNS::Topic",0));
-});
+test("AppBucket", () => {
+    const stack = new Stack();
+    new AppBucket(stack, 'AppBucket', {
+        stage: 'test',
+        appName: 'test2'
+    });
+
+    expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot();
+})
