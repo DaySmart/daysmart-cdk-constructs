@@ -34,12 +34,15 @@ export class AppBucket extends cdk.Construct {
             })
         );
 
-        new cdk.CfnOutput(this, "AppBucket", {
+        let output = new cdk.CfnOutput(this, "AppBucket", {
             value: bucket.bucketName
         });
 
-        new cdk.CfnOutput(this, "OriginAccessIdentity", {
+        let output2 = new cdk.CfnOutput(this, "OriginAccessIdentity", {
             value: originAccessIdentity.originAccessIdentityName
         });
+
+        output.overrideLogicalId("AppBucket");
+        output2.overrideLogicalId("OriginAccessIdentity");
     }
 }

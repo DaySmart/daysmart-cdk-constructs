@@ -12,6 +12,7 @@ export interface CdkAppCloudfrontProps {
     project: string;
     certArn: string;
     domainName: string;
+    hostedZoneId: string;
 }
 
 export class CdkAppCloudfront extends cdk.Construct {
@@ -95,9 +96,7 @@ export class CdkAppCloudfront extends cdk.Construct {
 
     const cloudfrontTarget = new targets.CloudFrontTarget(distribution);
     
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-        domainName: props.domainName
-    });
+    const hostedZone = route53.HostedZone.fromHostedZoneId(this, 'HostedZone', props.hostedZoneId);
 
     new route53.ARecord(this, "Environment Record Set", {
         zone: hostedZone,
@@ -119,8 +118,10 @@ export class CdkAppCloudfront extends cdk.Construct {
         });
     }
 
-    new cdk.CfnOutput(this, "CloudfrontDistribution", {
+    let output = new cdk.CfnOutput(this, "CloudfrontDistribution", {
         value: distribution.distributionId
     });
+
+    output.overrideLogicalId("CloudfrontDistribution");
   }
 }
