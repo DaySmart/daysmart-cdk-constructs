@@ -100,7 +100,7 @@ export class CdkAppCloudfront extends cdk.Construct {
         hostedZoneId: props.hostedZoneId,
         zoneName: props.domainName
     });
-    
+
     new route53.ARecord(this, "Environment Record Set", {
         zone: hostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
@@ -125,6 +125,11 @@ export class CdkAppCloudfront extends cdk.Construct {
         value: distribution.distributionId
     });
 
+    let output2 = new cdk.CfnOutput(this, "DistributionDomainName", {
+        value: distribution.distributionDomainName
+    })
+
     output.overrideLogicalId("CloudfrontDistribution");
+    output2.overrideLogicalId("DistributionDomainName");
   }
 }
