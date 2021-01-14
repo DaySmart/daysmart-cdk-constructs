@@ -96,8 +96,11 @@ export class CdkAppCloudfront extends cdk.Construct {
 
     const cloudfrontTarget = new targets.CloudFrontTarget(distribution);
     
-    const hostedZone = route53.HostedZone.fromHostedZoneId(this, 'HostedZone', props.hostedZoneId);
-
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+        hostedZoneId: props.hostedZoneId,
+        zoneName: props.domainName
+    });
+    
     new route53.ARecord(this, "Environment Record Set", {
         zone: hostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),

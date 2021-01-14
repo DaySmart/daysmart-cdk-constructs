@@ -14,7 +14,10 @@ export class CdkCertificate extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkCertificateProps) {
     super(scope, id);
 
-    const hostedZone = route53.HostedZone.fromHostedZoneId(this, 'HostedZone', props.hostedZoneId);
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+        hostedZoneId: props.hostedZoneId,
+        zoneName: props.domainName
+    });
 
     const cert = new acm.Certificate(this, 'Certificate', {
         domainName: props.domainName,
