@@ -33,8 +33,8 @@ export class CdkAppCloudfront extends cdk.Construct {
     );
 
     let aliases = [
-        `${props.stage}.${props.project}.${props.domainName}`,
-        `*.${props.stage}.${props.project}.${props.domainName}`
+        `${props.stage}.${props.project}.daysmart.com`,
+        `*.${props.stage}.${props.project}.daysmart.com`
     ];
 
     if(props.stage === "prod") {
@@ -104,13 +104,13 @@ export class CdkAppCloudfront extends cdk.Construct {
     new route53.ARecord(this, "Environment Record Set", {
         zone: hostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `${props.stage}.${props.project}.${props.domainName}`
+        recordName: `${props.stage}.${props.project}.daysmart.com`
     });
 
     new route53.ARecord(this, "Dynamic Environment Record Set", {
         zone: hostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `*.${props.stage}.${props.project}.${props.domainName}`
+        recordName: `*.${props.stage}.${props.project}.daysmart.com`
     });
 
     if(props.stage === "prod") {

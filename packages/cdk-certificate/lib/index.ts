@@ -22,8 +22,8 @@ export class CdkCertificate extends cdk.Construct {
     const cert = new acm.Certificate(this, 'Certificate', {
         domainName: props.domainName,
         subjectAlternativeNames: [
-            `${props.stage}.${props.project}.${props.domainName}`,
-            `*.${props.stage}.${props.project}.${props.domainName}`
+            `${props.stage}.${props.project}.daysmart.com`,
+            `*.${props.stage}.${props.project}.daysmart.com`
         ],
         validation: acm.CertificateValidation.fromDns(hostedZone)
     });
