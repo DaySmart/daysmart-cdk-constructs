@@ -6,13 +6,15 @@ import iam = require('@aws-cdk/aws-iam');
 export interface AppBucketProps {
     stage: string;
     appName: string;
+    dynamicEnvName: string;
+    projectName: string;
 }
 export class AppBucket extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, props: AppBucketProps) {
         super(scope, id);
 
         const bucket = new s3.Bucket(this, 'Bucket', {
-            bucketName: `${props.stage}-${props.appName.toLowerCase()}-website-bucket`,
+            bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
             publicReadAccess: true,
             versioned: true,
         });

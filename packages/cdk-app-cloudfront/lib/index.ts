@@ -11,8 +11,12 @@ export interface CdkAppCloudfrontProps {
     stage: string;
     project: string;
     certArn: string;
-    domainName: string;
-    hostedZoneId: string;
+    companyDomainName: string;
+    companyHostedZoneId: string;
+    dynamicEnvName?: string;
+    appName: string;
+    projectHostedZoneId?: string;
+    projectDomainName?: string;
 }
 
 export class CdkAppCloudfront extends cdk.Construct {
@@ -32,15 +36,26 @@ export class CdkAppCloudfront extends cdk.Construct {
         props.originAccessIdentity
     );
 
-    let aliases = [
-        `${props.stage}.${props.project}.daysmart.com`,
-        `*.${props.stage}.${props.project}.daysmart.com`
-    ];
+    let aliases: string[] = [];
 
-    if(props.stage === "prod") {
-        aliases.push(props.domainName);
+    if(props.dynamicEnvName) {
+        aliases.push(`${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
+    } else {
+        aliases.push(`${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
     }
 
+    if(props.projectDomainName && props.projectHostedZoneId) {
+        if(props.dynamicEnvName) {
+            aliases.push(`${props.dynamicEnvName}.${props.stage}.${props.projectDomainName}`);
+        } else {
+            aliases.push(`${props.stage}.${props.projectDomainName}`);
+        }
+
+        if(props.stage === "prod") {
+            aliases.push(props.projectDomainName);
+        }
+    }
+  
     const distribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', {
         originConfigs: [
             {
@@ -96,29 +111,36 @@ export class CdkAppCloudfront extends cdk.Construct {
 
     const cloudfrontTarget = new targets.CloudFrontTarget(distribution);
     
-    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-        hostedZoneId: props.hostedZoneId,
-        zoneName: props.domainName
+    const companyHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+        hostedZoneId: props.companyHostedZoneId,
+        zoneName: props.companyDomainName
     });
 
-    new route53.ARecord(this, "Environment Record Set", {
-        zone: hostedZone,
+    new route53.ARecord(this, "Company Record Set", {
+        zone: companyHostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `${props.stage}.${props.project}.daysmart.com`
+        recordName: `${props.stage}.${props.project}.${props.companyDomainName}`
     });
 
-    new route53.ARecord(this, "Dynamic Environment Record Set", {
-        zone: hostedZone,
-        target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `*.${props.stage}.${props.project}.daysmart.com`
-    });
-
-    if(props.stage === "prod") {
-        new route53.ARecord(this, "Prod Record Set", {
-            zone: hostedZone,
-            target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-            recordName: props.domainName
+    if(props.projectDomainName && props.projectHostedZoneId) {
+        const projectHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'ProjectHostedZone', {
+            hostedZoneId: props.projectHostedZoneId,
+            zoneName: props.projectDomainName
         });
+
+        new route53.ARecord(this, "Project Environment Record Set", {
+            zone: projectHostedZone,
+            target: route53.RecordTarget.fromAlias(cloudfrontTarget),
+            recordName: props.dynamicEnvName ? `${props.dynamicEnvName}.${props.stage}.${props.projectDomainName}` : `${props.stage}.${props.projectDomainName}`
+        });
+
+        if(props.stage === "prod") {
+            new route53.ARecord(this, "Prod Record Set", {
+                zone: projectHostedZone,
+                target: route53.RecordTarget.fromAlias(cloudfrontTarget),
+                recordName: props.projectDomainName
+            });
+        }
     }
 
     let output = new cdk.CfnOutput(this, "CloudfrontDistribution", {
