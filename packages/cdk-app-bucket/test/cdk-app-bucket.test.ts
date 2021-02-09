@@ -6,7 +6,9 @@ test("AppBucket", () => {
     const stack = new Stack();
     new AppBucket(stack, 'AppBucket', {
         stage: 'test',
-        appName: 'test2'
+        appName: 'test2',
+        dynamicEnvName: 'test3',
+        projectName: 'test4'
     });
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot();
