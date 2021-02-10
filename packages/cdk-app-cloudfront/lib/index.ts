@@ -14,7 +14,7 @@ export interface CdkAppCloudfrontProps {
     companyDomainName: string;
     companyHostedZoneId: string;
     dynamicEnvName?: string;
-    appName: string;
+    appName?: string;
     projectHostedZoneId?: string;
     projectDomainName?: string;
 }
@@ -37,23 +37,10 @@ export class CdkAppCloudfront extends cdk.Construct {
     );
 
     let aliases: string[] = [];
-
-    if(props.dynamicEnvName) {
-        aliases.push(`${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
-    } else {
-        aliases.push(`${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
-    }
-
+    aliases.push(...this.getCompanyDomainAliases(props));
+    
     if(props.projectDomainName && props.projectHostedZoneId) {
-        if(props.dynamicEnvName) {
-            aliases.push(`${props.dynamicEnvName}.${props.stage}.${props.projectDomainName}`);
-        } else {
-            aliases.push(`${props.stage}.${props.projectDomainName}`);
-        }
-
-        if(props.stage === "prod") {
-            aliases.push(props.projectDomainName);
-        }
+        aliases.push(...this.getProjectDomainAliases(props));    
     }
   
     const distribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', {
@@ -116,31 +103,27 @@ export class CdkAppCloudfront extends cdk.Construct {
         zoneName: props.companyDomainName
     });
 
-    new route53.ARecord(this, "Company Record Set", {
-        zone: companyHostedZone,
-        target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `${props.stage}.${props.project}.${props.companyDomainName}`
+    this.getCompanyDomainAliases(props).forEach(alias => {
+        new route53.ARecord(this, alias, {
+            zone: companyHostedZone,
+            target: route53.RecordTarget.fromAlias(cloudfrontTarget),
+            recordName: alias
+        });
     });
-
+    
     if(props.projectDomainName && props.projectHostedZoneId) {
         const projectHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'ProjectHostedZone', {
             hostedZoneId: props.projectHostedZoneId,
             zoneName: props.projectDomainName
         });
 
-        new route53.ARecord(this, "Project Environment Record Set", {
-            zone: projectHostedZone,
-            target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-            recordName: props.dynamicEnvName ? `${props.dynamicEnvName}.${props.stage}.${props.projectDomainName}` : `${props.stage}.${props.projectDomainName}`
-        });
-
-        if(props.stage === "prod") {
-            new route53.ARecord(this, "Prod Record Set", {
+        this.getProjectDomainAliases(props).forEach(alias => {
+            new route53.ARecord(this, alias, {
                 zone: projectHostedZone,
                 target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-                recordName: props.projectDomainName
+                recordName: alias
             });
-        }
+        });
     }
 
     let output = new cdk.CfnOutput(this, "CloudfrontDistribution", {
@@ -153,5 +136,39 @@ export class CdkAppCloudfront extends cdk.Construct {
 
     output.overrideLogicalId("CloudfrontDistribution");
     output2.overrideLogicalId("DistributionDomainName");
+  }
+
+  getCompanyDomainAliases(props: CdkAppCloudfrontProps): Array<string> {
+    let aliases: Array<string> = [];
+    if(props.dynamicEnvName && props.appName) {
+        aliases.push(`${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
+    } else if(props.appName) {
+        aliases.push(`${props.appName}.${props.stage}.${props.project}.${props.companyDomainName}`);
+    } else {
+        aliases.push(`${props.stage}.${props.project}.${props.companyDomainName}`);
+
+        if(props.stage === 'prod') {
+            aliases.push(`${props.project}.${props.companyDomainName}`);
+        }
+    }
+
+    return aliases;
+  }
+
+  getProjectDomainAliases(props: CdkAppCloudfrontProps): Array<string> {
+    let aliases: Array<string> = []
+    if(props.dynamicEnvName && props.appName) {
+        aliases.push(`${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectDomainName}`);
+    } else if (props.appName) {
+        aliases.push(`${props.appName}.${props.stage}.${props.projectDomainName}`);
+    } else {
+        aliases.push(`${props.stage}.${props.projectDomainName}`);
+    }
+
+    if(props.stage === "prod") {
+        aliases.push(props.projectDomainName as string);
+    }
+
+    return aliases;
   }
 }
