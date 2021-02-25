@@ -23,11 +23,17 @@ export class CdkS3Deployment extends cdk.Construct {
       domainName: props.distributionDomain
     });
 
+    let destinationPrefix = props.distributionPath;
+    if(destinationPrefix && destinationPrefix.startsWith('/')) {
+      destinationPrefix = destinationPrefix.substring(1);
+    } 
+
     new BucketDeployment(this, 'BucketDeployment', {
       destinationBucket: bucket,
       sources: [Source.asset(props.sourceDir ? props.sourceDir : '../dist')],
       distribution: distribution,
-      distributionPaths: [props.distributionPath ? props.distributionPath : '/*']
+      distributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
+      destinationKeyPrefix: destinationPrefix
     });
   }
 }

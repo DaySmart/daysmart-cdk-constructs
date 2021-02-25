@@ -26,6 +26,10 @@ export class CdkCertificate extends cdk.Construct {
         `*.${props.stage}.${props.project}.${props.companyDomainName}` 
     ];
 
+    if(props.stage === 'prod') {
+        subjectAlternativeNames.push(`${props.project}.${props.companyDomainName}`);
+    }
+
     let certificateValidation: acm.CertificateValidation;
 
     if(props.projectDomainName && props.projectHostedZoneId) {
