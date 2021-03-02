@@ -47,7 +47,8 @@ export class CdkCertificate extends cdk.Construct {
 
         certificateValidation = acm.CertificateValidation.fromDnsMultiZone({
             [props.companyDomainName]: companyHostedZone,
-            [props.projectDomainName]: projectHostedZone 
+            [props.projectDomainName]: projectHostedZone,
+            [`${props.stage}.${props.projectDomainName}`]: projectHostedZone
         });
     } else {
         certificateValidation = acm.CertificateValidation.fromDns(companyHostedZone);
