@@ -1,7 +1,10 @@
+import * as path from 'path';
 import * as cdk from '@aws-cdk/core';
-import { BucketDeployment, Source } from '@aws-cdk/aws-s3-deployment';
+import * as lambda from '@aws-cdk/aws-lambda';
+import { Source, SourceConfig, ISource } from '@aws-cdk/aws-s3-deployment';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import { AwsCliLayer } from '@aws-cdk/lambda-layer-awscli';
 
 export interface CdkS3DeploymentProps {
   bucketName: string;
@@ -26,14 +29,35 @@ export class CdkS3Deployment extends cdk.Construct {
     let destinationPrefix = props.distributionPath;
     if(destinationPrefix && destinationPrefix.startsWith('/')) {
       destinationPrefix = destinationPrefix.substring(1);
-    } 
+    }
 
-    new BucketDeployment(this, 'BucketDeployment', {
-      destinationBucket: bucket,
-      sources: [Source.asset(props.sourceDir ? props.sourceDir : '../dist')],
-      distribution: distribution,
-      distributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
-      destinationKeyPrefix: destinationPrefix
+    const handler = new lambda.SingletonFunction(this, 'BucketDeploymentHandler', {
+      code: lambda.Code.fromAsset(path.join(__dirname, 'lambda')),
+      layers: [new AwsCliLayer(this, 'AWSCliLayer')],
+      runtime: lambda.Runtime.PYTHON_3_6,
+      handler: 'handler.handler',
+      lambdaPurpose: 'Custom::BucketDeployment',
+      timeout: cdk.Duration.minutes(15),
+      uuid: '8693BB64-9689-44B6-9AAF-B0CC9EB8756C'
+    });
+
+    bucket.grantReadWrite(handler);
+
+    const handlerRole = handler.role;
+    if(!handlerRole) { throw new Error('lambda.SingletonFunction should have created a Role'); }
+    const sources: SourceConfig[] = [Source.asset(props.sourceDir ? props.sourceDir : '../dist')].map((source: ISource) => source.bind(this, {  handlerRole }));
+
+    new cdk.CustomResource(this, 'CustomResource', {
+      serviceToken: handler.functionArn,
+      resourceType: 'Custom::BucketDeployment',
+      properties: {
+        SourceBucketName: sources.map(source => source.bucket.bucketName),
+        SourceObjectKeys: sources.map(source => source.zipObjectKey),
+        DestinationBucketName: bucket.bucketName,
+        DestinationBucketKeyPrefix: destinationPrefix,
+        DistributionId: distribution.distributionId,
+        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*']
+      }
     });
   }
 }
