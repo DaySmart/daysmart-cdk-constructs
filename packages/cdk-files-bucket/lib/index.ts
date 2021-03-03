@@ -18,6 +18,7 @@ export class CdkFilesBucket extends cdk.Construct {
   ALLOWED_FILE_TYPES = [
     'png',
     'jpg',
+    'jpeg',
     'bmp',
     'img',
     'ico'
@@ -85,7 +86,7 @@ export class CdkFilesBucket extends cdk.Construct {
     if(restrictFileTypes) {
       const resources = [
         ...this.ALLOWED_FILE_TYPES.map(fileType => `${bucket.bucketArn}/${publicFilePath}/*.${fileType}`),
-        ...this.ALLOWED_FILE_TYPES.map(fileType => `${bucket.bucketArn}/*/images/*.${fileType}`)
+        ...this.ALLOWED_FILE_TYPES.map(fileType => `${bucket.bucketArn}/*/signatures/*.${fileType}`)
       ]
 
       policyDocuments.push(
