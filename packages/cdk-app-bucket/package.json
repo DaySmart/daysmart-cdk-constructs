@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-app-bucket",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
   "scripts": {
