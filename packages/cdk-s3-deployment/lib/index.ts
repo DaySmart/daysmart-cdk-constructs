@@ -4,6 +4,7 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import { Source, SourceConfig, ISource } from '@aws-cdk/aws-s3-deployment';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as iam from '@aws-cdk/aws-iam';
 import { AwsCliLayer } from '@aws-cdk/lambda-layer-awscli';
 
 export interface CdkS3DeploymentProps {
@@ -47,11 +48,20 @@ export class CdkS3Deployment extends cdk.Construct {
     if(!handlerRole) { throw new Error('lambda.SingletonFunction should have created a Role'); }
     const sources: SourceConfig[] = [Source.asset(props.sourceDir ? props.sourceDir : '../dist')].map((source: ISource) => source.bind(this, {  handlerRole }));
 
+    handler.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'cloudfront:GetInvalidation',
+        'cloudfront:CreateInvalidation'
+      ],
+      resources: ['*']
+    }));
+
     new cdk.CustomResource(this, 'CustomResource', {
       serviceToken: handler.functionArn,
       resourceType: 'Custom::BucketDeployment',
       properties: {
-        SourceBucketName: sources.map(source => source.bucket.bucketName),
+        SourceBucketNames: sources.map(source => source.bucket.bucketName),
         SourceObjectKeys: sources.map(source => source.zipObjectKey),
         DestinationBucketName: bucket.bucketName,
         DestinationBucketKeyPrefix: destinationPrefix,
