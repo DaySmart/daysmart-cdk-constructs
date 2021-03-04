@@ -165,7 +165,7 @@ export class CdkAppCloudfront extends cdk.Construct {
         aliases.push(`${props.stage}.${props.projectDomainName}`);
     }
 
-    if(props.stage === "prod") {
+    if(props.stage === "prod" && !props.appName) {
         aliases.push(props.projectDomainName as string);
     }
 
