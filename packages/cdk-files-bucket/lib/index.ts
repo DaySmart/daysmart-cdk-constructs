@@ -28,7 +28,16 @@ export class CdkFilesBucket extends cdk.Construct {
     super(scope, id);
 
     const bucket = new s3.Bucket(this, 'Bucket', {
-      bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`
+      bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
+      cors: [{
+        allowedMethods: [
+          s3.HttpMethods.GET, 
+          s3.HttpMethods.POST, 
+          s3.HttpMethods.PUT, 
+          s3.HttpMethods.DELETE
+        ],
+        allowedOrigins: ['*']
+      }]
     });
 
     const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OAIdentity', {
@@ -41,7 +50,13 @@ export class CdkFilesBucket extends cdk.Construct {
 
     const bucketWritePolicy = new iam.ManagedPolicy(this, 'BucketWriteIAMPolicy', {
       managedPolicyName: `${props.dynamicEnvName}-${props.stage}-${props.projectName}-${props.appName}-bucket-write`,
-      statements: this.getBucketPolicyDocuments(bucket, undefined, props.restrictFileTypes, props.publicFilePath)
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ['s3:PutObject'],
+          resources: [`${bucket.bucketArn}/*`]
+        })
+      ]
     });
 
     bucketPolicy.document.addStatements(
