@@ -10,6 +10,7 @@ export interface CdkEcsTaskDefinitionProps {
 }
 
 export class CdkEcsTaskDefinition extends cdk.Construct {
+  private _taskDefiniton: ecs.Ec2TaskDefinition;
 
   constructor(scope: cdk.Construct, id: string, props: CdkEcsTaskDefinitionProps) {
     super(scope, id);
@@ -38,5 +39,11 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
       memoryLimitMiB: 768,
       essential: true 
     });
+
+    this._taskDefiniton = taskDefinition;
+  }
+
+  public getEcsTaskDefinition(): ecs.Ec2TaskDefinition {
+    return this._taskDefiniton;
   }
 }

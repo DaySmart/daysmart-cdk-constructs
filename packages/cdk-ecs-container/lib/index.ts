@@ -8,6 +8,7 @@ export interface CdkEcsContainerProps {
   appName: string;
   dynamicEnvName: string;
   projectName: string;
+  isALB: boolean
 }
 // taskDefinition: CdkEcsTaskDefinition;
 
