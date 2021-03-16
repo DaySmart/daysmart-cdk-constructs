@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import * as asg from "@aws-cdk/aws-applicationautoscaling"
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
@@ -47,7 +48,15 @@ export class CdkEcsLoadBalancer extends cdk.Construct {
           targetGroupName: `alb-Target-Group-${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}`,
           targetType: elbv2.TargetType.INSTANCE,
           port: 80,
-          protocol: elbv2.ApplicationProtocol.HTTP
+          protocol: elbv2.ApplicationProtocol.HTTP,
+          healthCheck: {
+            port: '80',
+            path: /*TODO: Health Check Path */,
+            healthyThresholdCount: 4,
+            unhealthyThresholdCount: 2,
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
+          }
         });
 
         this.loadBalancer.addListener(`${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}-ApplicationLoadBalancerHttpsListener`, {
@@ -86,6 +95,44 @@ export class CdkEcsLoadBalancer extends cdk.Construct {
               'us-east-1c'
             ]
           }
+        });
+
+        const nlbTargetGroup = new elbv2.NetworkTargetGroup(this, `${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}-NetworkLoadBalancerTargetGroup`, {
+          targetGroupName: `nlb-Target-Group-${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}`,
+          targetType: elbv2.TargetType.INSTANCE,
+          port: 80,
+          protocol: elbv2.Protocol.TCP,
+          healthCheck: {
+            port: '80',
+            path: /*TODO: Health Check Path */,
+            healthyThresholdCount: 4,
+            unhealthyThresholdCount: 2,
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
+          }
+        });
+
+        this.loadBalancer.addListener(`${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}-NetworkLoadBalancerHttpsListener`, {
+          port: 443,
+          protocol: elbv2.Protocol.HTTPS,
+          sslPolicy: elbv2.SslPolicy.RECOMMENDED,
+          certificates: props.appName === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
+        })
+        .addTargetGroups(`nlb-Target-Group-${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}`, {
+          targetGroups: [
+            nlbTargetGroup
+          ]
+        });
+
+        this.loadBalancer.addListener(`${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}-NetworkLoadBalancerHttpListener`, {
+          port: 80,
+          protocol: elbv2.Protocol.HTTP,
+          sslPolicy: elbv2.SslPolicy.RECOMMENDED
+        })
+        .addTargetGroups(`nlb-Target-Group-${(props.dynamicEnvName) ? `${props.dynamicEnvName}-${props.appName}` : `${props.stage}-${props.appName}`}`, {
+          targetGroups: [
+            nlbTargetGroup
+          ]
         });
 
           break;
