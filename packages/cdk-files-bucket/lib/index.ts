@@ -36,7 +36,8 @@ export class CdkFilesBucket extends cdk.Construct {
           s3.HttpMethods.PUT, 
           s3.HttpMethods.DELETE
         ],
-        allowedOrigins: ['*']
+        allowedOrigins: ['*'],
+        allowedHeaders: ['*']
       }]
     });
 
