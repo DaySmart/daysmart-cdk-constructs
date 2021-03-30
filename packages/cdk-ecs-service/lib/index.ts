@@ -52,51 +52,6 @@ export class CdkEcsService extends cdk.Construct {
       healthCheckGracePeriod: cdk.Duration.seconds(45)
     });
 
-      //   //Load Balancer Call
-  //   switch(props.isALB) {
-  //     case true:
-  //       const applicationLoadBalancer = 
-  //         const classicLb = new DsiClassicLoadBalancer(this, "ApplicationELB", {
-  //             healthCheck: props.healthCheck,
-  //             public: props.public,
-  //             appName: props.appName,
-  //             dsiRegion: props.dsiRegion,
-  //             stage: props.stage,
-  //             stickySessions: props.stickySessions
-  //         });
-  //         codeDeployLoadBalancer = codedeploy.LoadBalancer.classic(classicLb.loadBalancer);
-  //         loadBalancerInfo = {
-  //             elbInfoList: [{
-  //                 name: classicLb.loadBalancer.loadBalancerName
-  //             }]
-  //         }
-  //         loadBalancerName = classicLb.loadBalancer.loadBalancerName;
-  //         dnsRecordTarget = new targets.ClassicLoadBalancerTarget(classicLb.loadBalancer);
-  //         classicElb = classicLb.loadBalancer;
-  //         break;
-  //     case false:
-  //         const networkLb = new DsiNetworkLoadBalancer(this, "ApplicationNLB", {
-  //             appName: props.appName,
-  //             dsiRegion: props.dsiRegion,
-  //             public: props.public,
-  //             stage: props.stage,
-  //             healthCheck: props.healthCheck,
-  //             port: props.port
-  //         });
-  //         codeDeployLoadBalancer = codedeploy.LoadBalancer.network(networkLb.targetGroup);
-  //         loadBalancerInfo = {
-  //             targetGroupInfoList: [{
-  //                 name: networkLb.targetGroup.targetGroupName
-  //             }]
-  //         }
-  //         loadBalancerName = networkLb.loadBalancer.loadBalancerName;
-  //         dnsRecordTarget = new targets.LoadBalancerTarget(networkLb.loadBalancer);
-  //         targetGroup = networkLb.targetGroup;
-  //         break;
-  //     default:
-  //         throw new Error("Load Balancer type not specified");
-  // }
-
 
     // serviceDefinition.attachToApplicationTargetGroup();
   }
