@@ -3,10 +3,11 @@ import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
+import * as logs from "@aws-cdk/aws-logs";
 
 export interface CdkEcsAlbProps {
-    stage: string;
-    project: string;
+    clusterName: string;
+    appName: string;
     vpcId: string;
     securityGroupId: string;
     repositoryName: string;
@@ -24,28 +25,53 @@ export class CdkEcsAlb extends cdk.Construct {
             props.repositoryName
         );
 
-        //get id
         const securityGroup = ec2.SecurityGroup.fromLookup(
             this,
             "Security Group",
             props.securityGroupId
         );
 
-        const cluster = ecs.Cluster.fromClusterAttributes(this, "VPC", {
-            clusterName: `${props.stage}-${props.project}`,
+        const cluster = ecs.Cluster.fromClusterAttributes(this, "Cluster", {
+            clusterName: props.clusterName,
             vpc: vpc,
             securityGroups: [securityGroup],
         });
 
+        const taskDefinition = new ecs.Ec2TaskDefinition(
+            this,
+            "TaskDefinition",
+            {
+                networkMode: ecs.NetworkMode.NAT,
+            }
+        );
+
+        taskDefinition.addContainer("Container", {
+            image: ecs.ContainerImage.fromEcrRepository(repository),
+            memoryLimitMiB: 4096,
+            cpu: 2048,
+            portMappings: [
+                {
+                    containerPort: 80,
+                    hostPort: 0,
+                    protocol: ecs.Protocol.TCP,
+                },
+            ],
+            entryPoint: ["powershell", "-Command"],
+            command: ["C:\\ServiceMonitor.exe w3svc"],
+            logging: ecs.LogDriver.awsLogs({
+                logGroup: new logs.LogGroup(this, "LogGroup", {
+                    logGroupName: `${props.appName}-ecs`,
+                }),
+                streamPrefix: "ecs",
+            }),
+        });
+
         new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB", {
             cluster,
-            memoryLimitMiB: 512,
-            cpu: 1,
+            serviceName: props.appName,
             desiredCount: 1,
-            taskImageOptions: {
-                image: ecs.ContainerImage.fromEcrRepository(repository),
-                containerPort: 8080,
-            },
+            taskDefinition: taskDefinition,
+            publicLoadBalancer: true,
         });
     }
 }
