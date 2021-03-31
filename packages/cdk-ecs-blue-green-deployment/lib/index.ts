@@ -29,11 +29,6 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
     let testHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
     let testHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
 
-    // const transform = new cfn.CfnMacro(this, "Transform", {
-    //   functionName: "AWS::CloudFormation::Macro.FunctionName",
-    //   name: "AWS::CloudFormation::Macro.Name"
-    // })
-
     const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
     const repository = ecr.Repository.fromRepositoryName(
@@ -60,27 +55,25 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
       family: `${props.stage}-${props.project}`
     });
 
-    taskDefinitionBlue.addContainer(props.project, {
+    const containerDefinition = taskDefinitionBlue.addContainer(props.project, {
       image: ecs.ContainerImage.fromEcrRepository(repository),
-      command: [`New-Item -Path C:\\inetpub\\wwwroot\\index.html -ItemType file -Value '<html> <head> <title>Amazon ECS Sample App</title> 
-      <style>body {margin-top: 40px; background-color: #333;} </style> </head><body> <div style=color:white;text-align:center> <h1>Amazon ECS Sample App</h1> 
-      <h2>Congratulations!</h2> <p>Your application is now running on a container in Amazon ECS.</p>' -Force ; C:\\ServiceMonitor.exe w3svc`],
-      cpu: 512,
+      command: [`C:\\ServiceMonitor.exe w3svc`],
+      cpu: 2048,
       entryPoint: ['powershell','-Command'],
       portMappings: [{
         containerPort: 80,
-        hostPort: 8080,
+        hostPort: 0,
         protocol: ecs.Protocol.TCP
       }],
-      memoryLimitMiB: 768,
-      essential: true 
+      memoryLimitMiB: 4096,
+      essential: false
     });
 
     //Service Definition Call
     const serviceDefinition = new ecs.Ec2Service(this, `${props.stage}-${props.project}-ServiceDefinition`, {
       taskDefinition: taskDefinitionBlue,
       cluster: cluster,
-      serviceName: 'windows-simple-iis',
+      serviceName: `${props.stage}-${props.project}-service`,
       desiredCount: 2,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
@@ -98,6 +91,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
       propagateTags: ecs.PropagatedTagSource.TASK_DEFINITION,
       healthCheckGracePeriod: cdk.Duration.seconds(45)
     });
+
+    // serviceDefinition.node.addDependency([cluster, taskDefinitionBlue]);
 
 
     switch(props.isALB) {
@@ -208,83 +203,83 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           }
         });
 
-        const nlbTargetGroupBlue = new elbv2.NetworkTargetGroup(this, `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupBlue`, {
-          targetGroupName: `nlb-Target-Group-${props.stage}-${props.project}`,
-          targetType: elbv2.TargetType.INSTANCE,
-          port: 80,
-          protocol: elbv2.Protocol.TCP,
-          healthCheck: {
-            port: '80',
-            path: "/",
-            healthyThresholdCount: 4,
-            unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
-          }
-        });
+        // const nlbTargetGroupBlue = new elbv2.NetworkTargetGroup(this, `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupBlue`, {
+        //   targetGroupName: `nlb-Target-Group-${props.stage}-${props.project}`,
+        //   targetType: elbv2.TargetType.INSTANCE,
+        //   port: 80,
+        //   protocol: elbv2.Protocol.TCP,
+        //   healthCheck: {
+        //     port: '80',
+        //     path: "/",
+        //     healthyThresholdCount: 4,
+        //     unhealthyThresholdCount: 2,
+        //     interval: cdk.Duration.seconds(30),
+        //     timeout: cdk.Duration.seconds(15)
+        //   }
+        // });
 
-        const nlbTargetGroupGreen = new elbv2.NetworkTargetGroup(this, `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupGreen`, {
-          targetGroupName: `nlb-Target-Group-${props.stage}-${props.project}`,
-          targetType: elbv2.TargetType.INSTANCE,
-          port: 80,
-          protocol: elbv2.Protocol.TCP,
-          healthCheck: {
-            port: '80',
-            path: "/",
-            healthyThresholdCount: 4,
-            unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
-          }
-        });
+        // const nlbTargetGroupGreen = new elbv2.NetworkTargetGroup(this, `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupGreen`, {
+        //   targetGroupName: `nlb-Target-Group-${props.stage}-${props.project}`,
+        //   targetType: elbv2.TargetType.INSTANCE,
+        //   port: 80,
+        //   protocol: elbv2.Protocol.TCP,
+        //   healthCheck: {
+        //     port: '80',
+        //     path: "/",
+        //     healthyThresholdCount: 4,
+        //     unhealthyThresholdCount: 2,
+        //     interval: cdk.Duration.seconds(30),
+        //     timeout: cdk.Duration.seconds(15)
+        //   }
+        // });
 
-        testHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestNetworkLoadBalancerHttpsListener`, {
-          port: 443,
-          protocol: elbv2.Protocol.HTTPS,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED,
-          // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
-        })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        // testHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestNetworkLoadBalancerHttpsListener`, {
+        //   port: 443,
+        //   protocol: elbv2.Protocol.HTTPS,
+        //   sslPolicy: elbv2.SslPolicy.RECOMMENDED,
+        //   // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
+        // })
+        //   .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+        //     targetGroups: [
+        //       nlbTargetGroupBlue
+        //     ]
+        //   });
 
-        testHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestNetworkLoadBalancerHttpListener`, {
-          port: 80,
-          protocol: elbv2.Protocol.HTTP,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED
-        })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        // testHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestNetworkLoadBalancerHttpListener`, {
+        //   port: 80,
+        //   protocol: elbv2.Protocol.HTTP,
+        //   sslPolicy: elbv2.SslPolicy.RECOMMENDED
+        // })
+        //   .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+        //     targetGroups: [
+        //       nlbTargetGroupBlue
+        //     ]
+        //   });
 
-        productionHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpsListener`, {
-          port: 443,
-          protocol: elbv2.Protocol.HTTPS,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED,
-          // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
-        })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        // productionHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpsListener`, {
+        //   port: 443,
+        //   protocol: elbv2.Protocol.HTTPS,
+        //   sslPolicy: elbv2.SslPolicy.RECOMMENDED,
+        //   // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
+        // })
+        //   .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+        //     targetGroups: [
+        //       nlbTargetGroupBlue
+        //     ]
+        //   });
 
-        productionHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpListener`, {
-          port: 80,
-          protocol: elbv2.Protocol.HTTP,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED
-        })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        // productionHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpListener`, {
+        //   port: 80,
+        //   protocol: elbv2.Protocol.HTTP,
+        //   sslPolicy: elbv2.SslPolicy.RECOMMENDED
+        // })
+        //   .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+        //     targetGroups: [
+        //       nlbTargetGroupBlue
+        //     ]
+        //   });
 
-        serviceDefinition.attachToApplicationTargetGroup(nlbTargetGroupBlue);
+        // serviceDefinition.attachToApplicationTargetGroup(nlbTargetGroupBlue);
           break;
       default:
           throw new Error("Load Balancer type not specified");
