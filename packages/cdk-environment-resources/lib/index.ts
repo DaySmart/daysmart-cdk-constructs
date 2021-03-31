@@ -26,6 +26,13 @@ export class CdkEnvironmentResources extends cdk.Construct {
             containerInsights: true,
         });
 
+        const cfnCluster = cluster.node.defaultChild as ecs.CfnCluster;
+        cfnCluster.configuration = {
+            executeCommandConfiguration: {
+                logging: 'DEFAULT'
+            }
+        }
+
         const autoScalingGroup = cluster.addCapacity(
             "DefaultAutoScalingGroupCapacity",
             {
@@ -34,8 +41,10 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 minCapacity: 1,
                 desiredCapacity: 2,
                 maxCapacity: 3,
-                machineImage: ecs.EcsOptimizedImage.windows(
-                    ecs.WindowsOptimizedVersion.SERVER_2019
+                machineImage: ec2.MachineImage.fromSSMParameter(
+                    '/aws/service/ami-windows-latest/Windows_Server-2019-English-Core-ECS_Optimized/image_id',
+                    ec2.OperatingSystemType.WINDOWS,
+                    ec2.UserData.forWindows()
                 ),
                 groupMetrics: [autoscaling.GroupMetrics.all()],
                 instanceMonitoring: autoscaling.Monitoring.DETAILED,
