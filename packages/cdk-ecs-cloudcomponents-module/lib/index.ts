@@ -3,13 +3,13 @@ import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
-import * as deployment from "@cloudcomponents/cdk-blue-green-container-deployment";
+import { EcsService, DummyTaskDefinition, EcsDeploymentGroup, PushImageProject } from '@cloudcomponents/cdk-blue-green-container-deployment';
 import * as cfnInclude from "@aws-cdk/cloudformation-include";
 import * as cfn from "@aws-cdk/aws-cloudformation"
 import * as elb from "@aws-cdk/aws-elasticloadbalancing";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 
-export interface CdkEcsBlueGreenDeploymentProps {
+export interface CdkEcsCloudcomponentsModuleProps {
   stage: string;
   project: string;
   vpcId: string;
@@ -18,46 +18,42 @@ export interface CdkEcsBlueGreenDeploymentProps {
   isALB: boolean;
 }
 
-export class CdkEcsBlueGreenDeployment extends cdk.Construct {
+export class CdkEcsCloudcomponentsModule extends cdk.Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsBlueGreenDeploymentProps) {
+  constructor(scope: cdk.Construct, id: string, props: CdkEcsCloudcomponentsModuleProps) {
     super(scope, id);
 
     let loadBalancer: elbv2.ApplicationLoadBalancer | elbv2.NetworkLoadBalancer;
-    let productionHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-    let productionHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
+    let httpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
     let testHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-    let testHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-
-    // const transform = new cfn.CfnMacro(this, "Transform", {
-    //   functionName: "AWS::CloudFormation::Macro.FunctionName",
-    //   name: "AWS::CloudFormation::Macro.Name"
-    // })
+    let httpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
 
     const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
     const repository = ecr.Repository.fromRepositoryName(
-        this,
-        "Repo",
-        props.repositoryName
+      this,
+      "Repo",
+      props.repositoryName
     );
 
     //get id
     const securityGroup = ec2.SecurityGroup.fromLookup(
-        this,
-        "Security Group",
-        props.securityGroupId
+      this,
+      "Security Group",
+      props.securityGroupId
     );
 
     const cluster = ecs.Cluster.fromClusterAttributes(this, "Cluster", {
-        clusterName: `${props.stage}-${props.project}`,
-        vpc: vpc,
-        securityGroups: [securityGroup],
+      clusterName: `${props.stage}-${props.project}`,
+      vpc: vpc,
+      securityGroups: [securityGroup],
     });
 
-    const taskDefinitionBlue = new ecs.Ec2TaskDefinition(this, `${props.stage}-${props.project}-TaskDefinitionBlue`, {
+    const taskDefinitionBlue = new DummyTaskDefinition(this, `${props.stage}-${props.project}-TaskDefinitionBlue`, {
       // compatibility: 0,
-      family: `${props.stage}-${props.project}`
+      family: `${props.stage}-${props.project}`,
+      image: ecs.ContainerImage.fromEcrRepository(repository).imageName,
+      containerPort: 80 
     });
 
     taskDefinitionBlue.addContainer(props.project, {
@@ -77,7 +73,7 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
     });
 
     //Service Definition Call
-    const serviceDefinition = new ecs.Ec2Service(this, `${props.stage}-${props.project}-ServiceDefinition`, {
+    const serviceDefinition = new EcsService(this, `${props.stage}-${props.project}-ServiceDefinition`, {
       taskDefinition: taskDefinitionBlue,
       cluster: cluster,
       serviceName: 'windows-simple-iis',
@@ -99,20 +95,26 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
       healthCheckGracePeriod: cdk.Duration.seconds(45)
     });
 
-
     switch(props.isALB) {
-      case true:      
-        securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
-        securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
-        securityGroup.addEgressRule(ec2.Peer.ipv4('10.128.0.0/16'), ec2.Port.tcp(80));
-        securityGroup.addEgressRule(ec2.Peer.ipv4('10.0.0.0/8'), ec2.Port.allTcp());
+      case true:
+        const lbSecurityGroup = new ec2.SecurityGroup(scope, `${props.stage}-${props.project}-SecurityGroup`, {
+          vpc: vpc,
+          description: `Enable communication to ${props.project} application Elb`,
+          allowAllOutbound: false,
+          securityGroupName: `${props.stage}-${props.project}-SecurityGroup`,
+        });
+      
+        lbSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
+        lbSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
+        lbSecurityGroup.addEgressRule(ec2.Peer.ipv4('10.128.0.0/16'), ec2.Port.tcp(80));
+        lbSecurityGroup.addEgressRule(ec2.Peer.ipv4('10.0.0.0/8'), ec2.Port.allTcp());
 
         loadBalancer = new elbv2.ApplicationLoadBalancer(this, `${props.stage}-${props.project}-ApplicationLoadBalancer`, {
           vpc: vpc,
           loadBalancerName: `alb-${props.stage}-${props.project}`,
           internetFacing: true,
           ipAddressType: elbv2.IpAddressType.IPV4,
-          securityGroup: securityGroup
+          securityGroup: lbSecurityGroup /*TODO: security group info*/
         });
 
         const albTargetGroupBlue = new elbv2.ApplicationTargetGroup(this, `${props.stage}-${props.project}-ApplicationLoadBalancerTargetGroupBlue`, {
@@ -125,8 +127,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
             path: "/",
             healthyThresholdCount: 4,
             unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
           }
         });
 
@@ -140,8 +142,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
             path: "/",
             healthyThresholdCount: 4,
             unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
           }
         });
 
@@ -151,45 +153,34 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           sslPolicy: elbv2.SslPolicy.RECOMMENDED,
           // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : undefined, //TODO: region information in these libraries?
         })
-          .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              albTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            albTargetGroupBlue
+          ]
+        });
 
-        testHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestApplicationLoadBalancerHttpListener`, {
-          port: 80,
-          protocol: elbv2.ApplicationProtocol.HTTP,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED
-        })
-          .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              albTargetGroupBlue
-            ]
-          });
-
-        productionHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-ApplicationLoadBalancerHttpsListener`, {
+        httpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-ApplicationLoadBalancerHttpsListener`, {
           port: 443,
           protocol: elbv2.ApplicationProtocol.HTTPS,
           sslPolicy: elbv2.SslPolicy.RECOMMENDED,
           // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : undefined, //TODO: region information in these libraries?
         })
-          .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              albTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            albTargetGroupBlue
+          ]
+        });
 
-        productionHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-ApplicationLoadBalancerHttpListener`, {
+        httpListener = loadBalancer.addListener(`${props.stage}-${props.project}-ApplicationLoadBalancerHttpListener`, {
           port: 80,
           protocol: elbv2.ApplicationProtocol.HTTP,
           sslPolicy: elbv2.SslPolicy.RECOMMENDED
         })
-          .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              albTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`alb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            albTargetGroupBlue
+          ]
+        });
 
         serviceDefinition.attachToApplicationTargetGroup(albTargetGroupBlue);
           break;
@@ -218,8 +209,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
             path: "/",
             healthyThresholdCount: 4,
             unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
           }
         });
 
@@ -233,8 +224,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
             path: "/",
             healthyThresholdCount: 4,
             unhealthyThresholdCount: 2,
-            interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(15)
+            interval: cdk.Duration.seconds(30),  // TODO: Type errors
+            timeout: cdk.Duration.seconds(15) // TODO: Type errors
           }
         });
 
@@ -244,45 +235,34 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           sslPolicy: elbv2.SslPolicy.RECOMMENDED,
           // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
         })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            nlbTargetGroupBlue
+          ]
+        });
 
-        testHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-TestNetworkLoadBalancerHttpListener`, {
-          port: 80,
-          protocol: elbv2.Protocol.HTTP,
-          sslPolicy: elbv2.SslPolicy.RECOMMENDED
-        })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
-
-        productionHttpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpsListener`, {
+        httpsListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpsListener`, {
           port: 443,
           protocol: elbv2.Protocol.HTTPS,
           sslPolicy: elbv2.SslPolicy.RECOMMENDED,
           // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : props.dsiRegion.elbCert, //TODO: region information in these libraries?
         })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            nlbTargetGroupBlue
+          ]
+        });
 
-        productionHttpListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpListener`, {
+        httpListener = loadBalancer.addListener(`${props.stage}-${props.project}-NetworkLoadBalancerHttpListener`, {
           port: 80,
           protocol: elbv2.Protocol.HTTP,
           sslPolicy: elbv2.SslPolicy.RECOMMENDED
         })
-          .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
-            targetGroups: [
-              nlbTargetGroupBlue
-            ]
-          });
+        .addTargetGroups(`nlb-Target-Group-${props.stage}-${props.project}`, {
+          targetGroups: [
+            nlbTargetGroupBlue
+          ]
+        });
 
         serviceDefinition.attachToApplicationTargetGroup(nlbTargetGroupBlue);
           break;
@@ -290,80 +270,78 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           throw new Error("Load Balancer type not specified");
     }
 
-
-    // ?????????????????????????
-    const taskSetBlue = new ecs.CfnTaskSet(this, `${props.stage}-${props.project}-TaskSetBlue`, {
-      cluster: cluster.clusterName,
-      service: serviceDefinition.serviceName,
-      taskDefinition: taskDefinitionBlue.family,
-      launchType: "EC2",
-      loadBalancers: [loadBalancer],
-      networkConfiguration: {
-        awsVpcConfiguration: {
-          securityGroups: [
-            securityGroup.securityGroupId
-          ],
-          subnets: vpc.privateSubnets.map(subnet => subnet.subnetId)
-        }
-      },
-      scale: {
-        unit: "PERCENT",
-        value: 10
-      }
+    const deploymentGroup = new EcsDeploymentGroup(this, 'DeploymentGroup', {
+      applicationName: 'blue-green-application',
+      deploymentGroupName: 'blue-green-deployment-group',
+      ecsServices: [serviceDefinition],
+      targetGroupNames: [prodTargetGroup.targetGroupName, testTargetGroup.targetGroupName],
+      prodTrafficListener: prodListener,
+      testTrafficListener: testListener,
+      terminationWaitTimeInMinutes: 100,
     });
 
-    const codeDeployBlueGreenHook = new cdk.CfnCodeDeployBlueGreenHook(this, "Hook", {
-      serviceRole: "ecsCodeDeployRole",
-      trafficRoutingConfig: {
-        type: cdk.CfnTrafficRoutingType.TIME_BASED_LINEAR,
-        timeBasedLinear: {
-          stepPercentage: 20,
-          bakeTimeMins: 2
-        }
-      },
-      additionalOptions: {
-        terminationWaitTimeInMinutes: 60
-      },
-      lifecycleEventHooks: {
-        beforeInstall: "",
-        afterInstall: "",
-        afterAllowTestTraffic: "",
-        beforeAllowTraffic: "",
-        afterAllowTraffic: ""
-      },
-      applications: [
+    // @see files: ./blue-green-repository for example content
+    const repository = new Repository(this, 'CodeRepository', {
+      repositoryName: 'blue-green-repository',
+    });
+
+    const imageRepository = new ImageRepository(this, 'ImageRepository', {
+      forceDelete: true, //Only for tests
+    });
+
+    const sourceArtifact = new Artifact();
+
+    const sourceAction = new CodeCommitSourceAction({
+      actionName: 'CodeCommit',
+      repository,
+      output: sourceArtifact,
+    });
+
+    const imageArtifact = new Artifact('ImageArtifact');
+    const manifestArtifact = new Artifact('ManifestArtifact');
+
+    const pushImageProject = new PushImageProject(this, 'PushImageProject', {
+      imageRepository,
+      taskDefinition,
+    });
+
+    const buildAction = new CodeBuildAction({
+      actionName: 'PushImage',
+      project: pushImageProject,
+      input: sourceArtifact,
+      outputs: [imageArtifact, manifestArtifact],
+    });
+
+    const deployAction = new CodeDeployEcsDeployAction({
+      actionName: 'CodeDeploy',
+      taskDefinitionTemplateInput: manifestArtifact,
+      appSpecTemplateInput: manifestArtifact,
+      containerImageInputs: [
         {
-          target: {
-            type: "AWS::ECS::Service",
-            logicalId: ""
-          },
-          ecsAttributes: {
-            taskDefinitions: [
-              `${props.stage}-${props.project}-TaskDefinitionBlue`,
-              `${props.stage}-${props.project}-TaskDefinitionGreen`
-            ],
-            taskSets: [
-              `${props.stage}-${props.project}-TaskSetBlue`,
-              `${props.stage}-${props.project}-TaskSetGreen`,
-            ],
-            trafficRouting: {
-              prodTrafficRoute: {
-                type: "AWS::ElasticLoadBalancingV2::Listener",
-                logicalId: (props.isALB) ? `${props.stage}-${props.project}-ApplicationLoadBalancerHttpsListener` : `${props.stage}-${props.project}-NetworkLoadBalancerHttpsListener`
-              },
-              testTrafficRoute: {
-                type: "AWS::ElasticLoadBalancingV2::Listener",
-                logicalId: (props.isALB) ? `${props.stage}-${props.project}-TestApplicationLoadBalancerHttpsListener` : `${props.stage}-${props.project}-TestNetworkLoadBalancerHttpsListener`
-              },
-              targetGroups: [
-                (props.isALB) ? `${props.stage}-${props.project}-ApplicationLoadBalancerTargetGroupBlue` : `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupBlue`,
-                (props.isALB) ? `${props.stage}-${props.project}-ApplicationLoadBalancerTargetGroupGreen` : `${props.stage}-${props.project}-NetworkLoadBalancerTargetGroupGreen`
-              ]
-            },
-          }
-        }
-      ]  
-      });
+          input: imageArtifact,
+          taskDefinitionPlaceholder: 'IMAGE1_NAME',
+        },
+      ],
+      deploymentGroup,
+    });
+
+    new Pipeline(this, 'Pipeline', {
+      pipelineName: 'blue-green-pipeline',
+      stages: [
+        {
+          stageName: 'Source',
+          actions: [sourceAction],
+        },
+        {
+          stageName: 'Build',
+          actions: [buildAction],
+        },
+        {
+          stageName: 'Deploy',
+          actions: [deployAction],
+        },
+      ],
+    });
 
   }
 }

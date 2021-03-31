@@ -8,8 +8,9 @@ import * as cfnInclude from "@aws-cdk/cloudformation-include";
 import * as cfn from "@aws-cdk/aws-cloudformation"
 import * as elb from "@aws-cdk/aws-elasticloadbalancing";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as codeDeploy from "@aws-cdk/aws-codedeploy";
 
-export interface CdkEcsBlueGreenDeploymentProps {
+export interface CdkEcsCodedeployBlueGreenProps {
   stage: string;
   project: string;
   vpcId: string;
@@ -18,9 +19,9 @@ export interface CdkEcsBlueGreenDeploymentProps {
   isALB: boolean;
 }
 
-export class CdkEcsBlueGreenDeployment extends cdk.Construct {
+export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsBlueGreenDeploymentProps) {
+  constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployBlueGreenProps) {
     super(scope, id);
 
     let loadBalancer: elbv2.ApplicationLoadBalancer | elbv2.NetworkLoadBalancer;
@@ -37,22 +38,22 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
     const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
     const repository = ecr.Repository.fromRepositoryName(
-        this,
-        "Repo",
-        props.repositoryName
+      this,
+      "Repo",
+      props.repositoryName
     );
 
     //get id
     const securityGroup = ec2.SecurityGroup.fromLookup(
-        this,
-        "Security Group",
-        props.securityGroupId
+      this,
+      "Security Group",
+      props.securityGroupId
     );
 
     const cluster = ecs.Cluster.fromClusterAttributes(this, "Cluster", {
-        clusterName: `${props.stage}-${props.project}`,
-        vpc: vpc,
-        securityGroups: [securityGroup],
+      clusterName: `${props.stage}-${props.project}`,
+      vpc: vpc,
+      securityGroups: [securityGroup],
     });
 
     const taskDefinitionBlue = new ecs.Ec2TaskDefinition(this, `${props.stage}-${props.project}-TaskDefinitionBlue`, {
@@ -66,14 +67,14 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
       <style>body {margin-top: 40px; background-color: #333;} </style> </head><body> <div style=color:white;text-align:center> <h1>Amazon ECS Sample App</h1> 
       <h2>Congratulations!</h2> <p>Your application is now running on a container in Amazon ECS.</p>' -Force ; C:\\ServiceMonitor.exe w3svc`],
       cpu: 512,
-      entryPoint: ['powershell','-Command'],
+      entryPoint: ['powershell', '-Command'],
       portMappings: [{
         containerPort: 80,
         hostPort: 8080,
         protocol: ecs.Protocol.TCP
       }],
       memoryLimitMiB: 768,
-      essential: true 
+      essential: true
     });
 
     //Service Definition Call
@@ -100,8 +101,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
     });
 
 
-    switch(props.isALB) {
-      case true:      
+    switch (props.isALB) {
+      case true:
         securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
         securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
         securityGroup.addEgressRule(ec2.Peer.ipv4('10.128.0.0/16'), ec2.Port.tcp(80));
@@ -112,7 +113,7 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           loadBalancerName: `alb-${props.stage}-${props.project}`,
           internetFacing: true,
           ipAddressType: elbv2.IpAddressType.IPV4,
-          securityGroup: securityGroup
+          securityGroup: securityGroup /*TODO: security group info*/
         });
 
         const albTargetGroupBlue = new elbv2.ApplicationTargetGroup(this, `${props.stage}-${props.project}-ApplicationLoadBalancerTargetGroupBlue`, {
@@ -192,7 +193,7 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           });
 
         serviceDefinition.attachToApplicationTargetGroup(albTargetGroupBlue);
-          break;
+        break;
       case false:
         loadBalancer = new elbv2.NetworkLoadBalancer(this, `${props.stage}-${props.project}-NetworkLoadBalancer`, {
           vpc: vpc,
@@ -285,31 +286,24 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
           });
 
         serviceDefinition.attachToApplicationTargetGroup(nlbTargetGroupBlue);
-          break;
+        break;
       default:
-          throw new Error("Load Balancer type not specified");
+        throw new Error("Load Balancer type not specified");
     }
+
+    const codeDeployApplication = codeDeploy.EcsApplication.fromEcsApplicationName(this, `${props.stage}-${props.project}-CodeDeployApplication`, `CodeDeploy-${props.stage}-${props.project}`);
+
+    const deploymentGroup = codeDeploy.EcsDeploymentGroup.fromEcsDeploymentGroupAttributes(this, `${props.stage}-${props.project}-DeploymentGroup`, {
+      application: codeDeployApplication,
+      deploymentGroupName: `Ecs-DeploymentGroup-${props.stage}-${props.project}`
+    });
 
 
     // ?????????????????????????
     const taskSetBlue = new ecs.CfnTaskSet(this, `${props.stage}-${props.project}-TaskSetBlue`, {
-      cluster: cluster.clusterName,
-      service: serviceDefinition.serviceName,
-      taskDefinition: taskDefinitionBlue.family,
-      launchType: "EC2",
-      loadBalancers: [loadBalancer],
-      networkConfiguration: {
-        awsVpcConfiguration: {
-          securityGroups: [
-            securityGroup.securityGroupId
-          ],
-          subnets: vpc.privateSubnets.map(subnet => subnet.subnetId)
-        }
-      },
-      scale: {
-        unit: "PERCENT",
-        value: 10
-      }
+      cluster: "Cluster",
+      service: `${props.stage}-${props.project}-ServiceDefinition`,
+      taskDefinition: `${props.stage}-${props.project}-TaskDefinitionBlue`
     });
 
     const codeDeployBlueGreenHook = new cdk.CfnCodeDeployBlueGreenHook(this, "Hook", {
@@ -362,8 +356,8 @@ export class CdkEcsBlueGreenDeployment extends cdk.Construct {
             },
           }
         }
-      ]  
-      });
+      ]
+    });
 
   }
 }
