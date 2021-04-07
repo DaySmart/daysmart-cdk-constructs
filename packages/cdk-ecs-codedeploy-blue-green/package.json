@@ -17,6 +17,7 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
+    "@aws-cdk/aws-autoscaling": "^1.95.2",
     "@aws-cdk/aws-cloudformation": "^1.95.1",
     "@aws-cdk/aws-codedeploy": "^1.95.1",
     "@aws-cdk/aws-ecr": "^1.95.1",
@@ -25,6 +26,8 @@
     "@aws-cdk/aws-elasticloadbalancingv2": "^1.95.1",
     "@aws-cdk/cloudformation-include": "^1.95.1",
     "@aws-cdk/core": "^1.95.1",
-    "@cloudcomponents/cdk-blue-green-container-deployment": "^1.31.0"
+    "@aws-cdk/custom-resources": "^1.95.1",
+    "@cloudcomponents/cdk-blue-green-container-deployment": "^1.31.0",
+    "aws-sdk": "^2.877.0"
   }
 }

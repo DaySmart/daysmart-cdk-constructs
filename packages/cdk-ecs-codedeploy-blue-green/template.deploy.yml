@@ -1,0 +1,21 @@
+env: dev
+components:
+  - name: ecs-posapi-matt-deployment-resources
+    provider:
+      name: cdk
+      config:
+        constructName: "CdkEcsCodedeployBlueGreen"
+        constructPath: "lib/index"
+        account: "022393549274"
+        region: "us-east-1"
+    inputs:
+      stage: "dev"
+      vpcId: ${dev:vpc:vpcId}
+      appName: posapi
+      securityGroupId: sg-0819814219a19b69c
+      repositoryName: posapitest
+      clusterName: dev-dsicollection
+      serviceName: posapi-service
+      lbType: "ALB"
+      lbName: alb-posapi
+      listenerARN: arn:aws:elasticloadbalancing:us-east-1:022393549274:listener/app/alb-posapi/3f8b2616f26b9fce/098aa314900adcdd
