@@ -1,0 +1,15 @@
+env: dev
+components:
+  - name: ecs-posapi-deploy-bucket
+    provider:
+      name: cdk
+      config:
+        constructName: "AppBucket"
+        constructPath: "dist/lib/index"
+        account: "022393549274"
+        region: "us-east-1"
+    inputs:
+      stage: dev
+      appName: posapi
+      dynamicEnvName: deploy
+      projectName: ecs

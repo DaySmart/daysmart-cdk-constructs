@@ -109,8 +109,9 @@ export class CdkEcsAlb extends cdk.Construct {
                     ipAddressType: elbv2.IpAddressType.IPV4,
                     securityGroup: securityGroup
                 });
+
                 const albTargetGroupBlue = new elbv2.ApplicationTargetGroup(this, `${props.appName}-ApplicationLoadBalancerTargetGroupBlue`, {
-                    targetGroupName: `alb-Target-Group-${props.appName}`,
+                    targetGroupName: `alb-Target-Group-${props.appName}-1`,
                     targetType: elbv2.TargetType.INSTANCE,
                     port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
@@ -123,20 +124,22 @@ export class CdkEcsAlb extends cdk.Construct {
                     },
                     vpc: vpc
                 });
-                // const albTargetGroupGreen = new elbv2.ApplicationTargetGroup(this, `${props.appName}-ApplicationLoadBalancerTargetGroupGreen`, {
-                //     targetGroupName: `alb-Target-Group-${props.appName}`,
-                //     targetType: elbv2.TargetType.INSTANCE,
-                //     port: 80,
-                //     protocol: elbv2.ApplicationProtocol.HTTP,
-                //     healthCheck: {
-                //         port: '80',
-                //         path: "/",
-                //         healthyThresholdCount: 4,
-                //         unhealthyThresholdCount: 2,
-                //         interval: cdk.Duration.seconds(30),
-                //         timeout: cdk.Duration.seconds(15)
-                //     }
-                // });
+
+                const albTargetGroupGreen = new elbv2.ApplicationTargetGroup(this, `${props.appName}-ApplicationLoadBalancerTargetGroupGreen`, {
+                    targetGroupName: `alb-Target-Group-${props.appName}-2`,
+                    targetType: elbv2.TargetType.INSTANCE,
+                    port: 80,
+                    protocol: elbv2.ApplicationProtocol.HTTP,
+                    healthCheck: {
+                        port: '80',
+                        path: "/",
+                        healthyThresholdCount: 4,
+                        unhealthyThresholdCount: 2,
+                        interval: cdk.Duration.seconds(30),
+                        timeout: cdk.Duration.seconds(15)
+                    }
+                });
+
                 // testHttpsListener = loadBalancer.addListener(`${props.appName}-TestApplicationLoadBalancerHttpsListener`, {
                 //     port: 443,
                 //     protocol: elbv2.ApplicationProtocol.HTTPS,
