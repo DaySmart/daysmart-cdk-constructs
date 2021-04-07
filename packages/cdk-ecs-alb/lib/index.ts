@@ -137,7 +137,8 @@ export class CdkEcsAlb extends cdk.Construct {
                         unhealthyThresholdCount: 2,
                         interval: cdk.Duration.seconds(30),
                         timeout: cdk.Duration.seconds(15)
-                    }
+                    },
+                    vpc: vpc
                 });
 
                 // testHttpsListener = loadBalancer.addListener(`${props.appName}-TestApplicationLoadBalancerHttpsListener`, {
