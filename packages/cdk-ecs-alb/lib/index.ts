@@ -94,7 +94,7 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             enableECSManagedTags: true,
             propagateTags: ecs.PropagatedTagSource.TASK_DEFINITION,
-            healthCheckGracePeriod: cdk.Duration.seconds(45)
+            healthCheckGracePeriod: cdk.Duration.seconds(300)
         });
         
         switch (props.lbType) {
