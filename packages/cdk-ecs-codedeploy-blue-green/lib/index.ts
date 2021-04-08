@@ -30,9 +30,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployBlueGreenProps) {
     super(scope, id);
 
-    const codedeployApplication = new codedeploy.EcsApplication(scope, 'CodeDeployApplication', {
-      applicationName: `${props.stage}-${props.appName}`
-    });
+    const codedeployApplication = codedeploy.EcsApplication.fromEcsApplicationName(this, "CodeDeployApplication", `${props.stage}-${props.appName}-CodeDeployApplication`)
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
@@ -188,6 +186,8 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
       physicalResourceId: customresource.PhysicalResourceId.of('deployment-group-update-custom-resource')
     }
 
+    customresource.AwsCustomResourcePolicy.ANY_RESOURCE.push("arn:aws:iam::022393549274:role/CodeDeployServiceRoleECS");
+
     const blueGreenDeployment = new customresource.AwsCustomResource(scope, 'BlueGreenDeployment', {
       onCreate: codedeployDeploymentGroupCall,
       onUpdate: blueGreenDeploymentCall,
@@ -195,7 +195,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
         service: 'CodeDeploy',
         action: 'deleteDeploymentGroup',
         parameters: {
-          applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+          applicationName: codedeployApplication.applicationName,
           deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`
         }
       },

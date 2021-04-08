@@ -18,4 +18,4 @@ components:
       serviceName: posapi-service
       lbType: "ALB"
       lbName: alb-posapi
-      listenerARN: arn:aws:elasticloadbalancing:us-east-1:022393549274:listener/app/alb-posapi/3f8b2616f26b9fce/098aa314900adcdd
+      listenerARN: arn:aws:elasticloadbalancing:us-east-1:022393549274:listener/app/alb-posapi/bae7b51a96245777/fd8968c7aa5b65d3
