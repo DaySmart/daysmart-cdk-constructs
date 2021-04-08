@@ -79,14 +79,14 @@ export class CdkEcsAlb extends cdk.Construct {
             taskDefinition: taskDefinition,
             cluster: cluster,
             serviceName: `${props.appName}-service`,
-            desiredCount: 2,
+            desiredCount: 1,
             minHealthyPercent: 100,
             maxHealthyPercent: 200,
-            circuitBreaker: {
-                rollback: true
-            },
+            // circuitBreaker: {
+            //     rollback: true
+            // },
             deploymentController: {
-                type: ecs.DeploymentControllerType.ECS
+                type: ecs.DeploymentControllerType.CODE_DEPLOY
             },
             placementStrategies: [
                 ecs.PlacementStrategy.spreadAcrossInstances(),
@@ -96,6 +96,7 @@ export class CdkEcsAlb extends cdk.Construct {
             propagateTags: ecs.PropagatedTagSource.TASK_DEFINITION,
             healthCheckGracePeriod: cdk.Duration.seconds(45)
         });
+        
         switch (props.lbType) {
             case "ALB":
                 // securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
