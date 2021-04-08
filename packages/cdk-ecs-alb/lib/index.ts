@@ -4,6 +4,7 @@ import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as logs from "@aws-cdk/aws-logs";
+import { Duration } from "@aws-cdk/core";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -55,6 +56,11 @@ export class CdkEcsAlb extends cdk.Construct {
                     hostPort: 0,
                     protocol: ecs.Protocol.TCP,
                 },
+                {
+                    containerPort: 443,
+                    hostPort: 0,
+                    protocol: ecs.Protocol.TCP,
+                },
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
@@ -72,6 +78,7 @@ export class CdkEcsAlb extends cdk.Construct {
             desiredCount: 1,
             taskDefinition: taskDefinition,
             publicLoadBalancer: true,
+            healthCheckGracePeriod: Duration.seconds(300),
         });
     }
 }
