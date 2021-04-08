@@ -82,9 +82,9 @@ export class CdkEcsAlb extends cdk.Construct {
             desiredCount: 1,
             minHealthyPercent: 100,
             maxHealthyPercent: 200,
-            circuitBreaker: {
-                rollback: true
-            },
+            // circuitBreaker: {
+            //     rollback: true
+            // },
             deploymentController: {
                 type: ecs.DeploymentControllerType.CODE_DEPLOY
             },
@@ -117,7 +117,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     // port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
                     healthCheck: {
-                        path: "/",
+                        path: "/api/v2/Health/Check",
                         healthyThresholdCount: 2,
                         unhealthyThresholdCount: 5,
                         interval: cdk.Duration.seconds(30),
@@ -132,7 +132,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     // port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
                     healthCheck: {
-                        path: "/",
+                        path: "/api/v2/Health/Check",
                         healthyThresholdCount: 2,
                         unhealthyThresholdCount: 5,
                         interval: cdk.Duration.seconds(30),
