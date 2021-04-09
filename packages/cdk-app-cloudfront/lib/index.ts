@@ -38,11 +38,11 @@ export class CdkAppCloudfront extends cdk.Construct {
 
     let aliases: string[] = [];
     aliases.push(...this.getCompanyDomainAliases(props));
-    
+
     if(props.projectDomainName && props.projectHostedZoneId) {
-        aliases.push(...this.getProjectDomainAliases(props));    
+        aliases.push(...this.getProjectDomainAliases(props));
     }
-  
+
     const distribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', {
         originConfigs: [
             {
@@ -68,7 +68,7 @@ export class CdkAppCloudfront extends cdk.Construct {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
         httpVersion: cloudfront.HttpVersion.HTTP2,
-        loggingConfig: props.loggingBucketName ? { 
+        loggingConfig: props.loggingBucketName ? {
             bucket: s3.Bucket.fromBucketName(
                 this,
                 "CloudfrontLoggingBucket",
@@ -80,6 +80,12 @@ export class CdkAppCloudfront extends cdk.Construct {
         errorConfigurations: [
             {
               errorCode: 404,
+              responseCode: 200,
+              errorCachingMinTtl: 1,
+              responsePagePath: "/index.html",
+            },
+            {
+              errorCode: 403,
               responseCode: 200,
               errorCachingMinTtl: 1,
               responsePagePath: "/index.html",
@@ -97,7 +103,7 @@ export class CdkAppCloudfront extends cdk.Construct {
     });
 
     const cloudfrontTarget = new targets.CloudFrontTarget(distribution);
-    
+
     const companyHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
         hostedZoneId: props.companyHostedZoneId,
         zoneName: props.companyDomainName
@@ -110,7 +116,7 @@ export class CdkAppCloudfront extends cdk.Construct {
             recordName: alias
         });
     });
-    
+
     if(props.projectDomainName && props.projectHostedZoneId) {
         const projectHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'ProjectHostedZone', {
             hostedZoneId: props.projectHostedZoneId,
