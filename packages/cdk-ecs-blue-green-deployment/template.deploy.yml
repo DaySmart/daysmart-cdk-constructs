@@ -1,0 +1,16 @@
+env: dev
+components:
+  - name: ecs-posapi-matt
+    provider:
+      name: cdk
+      config:
+        constructName: "CdkEcsBlueGreenDeployment"
+        constructPath: "lib/index"
+        account: "022393549274"
+        region: "us-east-1"
+    inputs:
+      vpcId: ${dev:vpc:vpcId}
+      appName: posapi
+      securityGroupId: sg-0819814219a19b69c
+      repositoryName: posapitest
+      clusterName: dev-dsicollection-matt
