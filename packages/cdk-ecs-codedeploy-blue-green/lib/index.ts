@@ -1,18 +1,14 @@
 import * as cdk from "@aws-cdk/core";
 import * as customresource from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
+import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 
 export interface CdkEcsCodedeployBlueGreenProps {
   stage: string;
   clusterName: string;
   serviceName: string;
   appName: string;
-  vpcId: string;
-  securityGroupId: string;
-  repositoryName: string;
   lbType: string;
-  lbName: string;
-  listenerARN: string;
 }
 
 export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
@@ -21,6 +17,10 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
     super(scope, id);
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
+
+    const listener = elbv2.ApplicationListener.fromLookup(this, `${props.appName}-ApplicationLoadBalancerHttpListener`, {
+      listenerProtocol: elbv2.ApplicationProtocol.HTTP
+    });
 
     let codedeployCreateApplicationCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
@@ -94,7 +94,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
             {
               prodTrafficRoute: {
                 listenerArns: [
-                  props.listenerARN
+                  listener.listenerArn
                 ]
               },
               targetGroups: [
@@ -150,7 +150,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
             {
               prodTrafficRoute: {
                 listenerArns: [
-                  props.listenerARN
+                  listener.listenerArn
                 ]
               },
               targetGroups: [
