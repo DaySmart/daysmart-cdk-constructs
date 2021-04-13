@@ -9,6 +9,7 @@ export interface CdkEcsCodedeployBlueGreenProps {
   serviceName: string;
   appName: string;
   lbType: string;
+  lbArn: string;
 }
 
 export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
@@ -18,8 +19,8 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
-    const listener = elbv2.ApplicationListener.fromLookup(this, `${props.appName}-ApplicationLoadBalancerHttpListener`, {
-      listenerProtocol: elbv2.ApplicationProtocol.HTTP
+    const listener = elbv2.ApplicationListener.fromLookup(this, `${props.stage}-${props.appName}-Listener`, {
+      loadBalancerArn: props.lbArn
     });
 
     let codedeployCreateApplicationCall: customresource.AwsSdkCall = {
