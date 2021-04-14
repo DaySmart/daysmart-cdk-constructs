@@ -10,12 +10,8 @@ components:
         region: "us-east-1"
     inputs:
       stage: "dev"
-      vpcId: ${dev:vpc:vpcId}
-      appName: posapi
-      securityGroupId: sg-0819814219a19b69c
-      repositoryName: posapitest
-      clusterName: dev-dsicollection
-      serviceName: posapi-service
+      appName: "posapi"
+      clusterName: "dev-dsicollection"
+      serviceName: "posapi-service"
       lbType: "ALB"
-      lbName: alb-posapi
-      listenerARN: arn:aws:elasticloadbalancing:us-east-1:022393549274:listener/app/alb-posapi/63c05eb161f645c4/7526a203f1229e84
+      lbArn: "arn:aws:elasticloadbalancing:us-east-1:022393549274:loadbalancer/app/alb-posapi/63c05eb161f645c4"
