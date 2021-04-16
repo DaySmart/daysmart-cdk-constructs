@@ -1,6 +1,6 @@
 env: dev
 components:
-  - name: ecs-posapi-deploy-bucket
+  - name: ecs-posapi-matt-envars-bucket
     provider:
       name: cdk
       config:
@@ -11,5 +11,5 @@ components:
     inputs:
       stage: dev
       appName: posapi
-      dynamicEnvName: deploy
+      dynamicEnvName: envars
       projectName: ecs

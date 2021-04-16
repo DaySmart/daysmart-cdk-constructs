@@ -6,6 +6,10 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as logs from "@aws-cdk/aws-logs";
 import * as elb from "@aws-cdk/aws-elasticloadbalancing";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as ssm from "@aws-cdk/aws-ssm";
+import * as iam from "@aws-cdk/aws-iam";
+import * as s3 from "@aws-cdk/aws-s3";
+
 export interface CdkEcsAlbProps {
     clusterName: string;
     appName: string;
@@ -24,6 +28,31 @@ export class CdkEcsAlb extends cdk.Construct {
         let productionHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
         let testHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
         let testHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
+
+        // const parameter = ecs.Secret.fromSsmParameter(ssm.StringParameter.fromSecureStringParameterAttributes(this, "Parameter", {
+        //     version: 26,
+        //     parameterName: `${props.stage}-${props.appName}`
+        // }));
+
+        var taskRole = new iam.Role(this, "EcsMattTaskRole", {
+            assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
+        });
+
+        taskRole.addToPolicy(new iam.PolicyStatement({
+            actions: [
+                "s3:GetObject",
+                "s3:GetBucketLocation",
+                "ssm:GetParameters",
+                "ssm:PutParameter",
+                "ssm:GetParameter",
+                "secretsmanager:GetSecretValue",
+                "kms:Decrypt"
+            ],
+            resources: [
+                "*"
+            ],
+            effect: iam.Effect.ALLOW
+        }))
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
@@ -50,6 +79,8 @@ export class CdkEcsAlb extends cdk.Construct {
             "TaskDefinition",
             {
                 networkMode: ecs.NetworkMode.NAT,
+                taskRole: taskRole,
+                executionRole: taskRole
             }
         );
 
@@ -66,6 +97,13 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
+            // secrets: {
+            //     "AWS_ACCESS_KEY_ID": parameter,
+            //     "AWS_SECRET_ACCESS_KEY": parameter
+            // },
+            // environmentFiles: [
+            //     ecs.EnvironmentFile.fromBucket(s3.Bucket.fromBucketName(this, "EnvVariableBucket", `envars-${props.appName}.${props.stage}.ecs`), `${props.stage}-${props.appName}-envars.env`)
+            // ],
             // logging: ecs.LogDriver.awsLogs({
             //     logGroup: new logs.LogGroup(this, "LogGroup", {
             //         logGroupName: `${props.appName}-ecs`,
@@ -96,7 +134,7 @@ export class CdkEcsAlb extends cdk.Construct {
             propagateTags: ecs.PropagatedTagSource.TASK_DEFINITION,
             healthCheckGracePeriod: cdk.Duration.seconds(300)
         });
-        
+
         switch (props.lbType) {
             case "ALB":
                 // securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
