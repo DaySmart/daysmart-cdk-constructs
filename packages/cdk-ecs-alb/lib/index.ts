@@ -9,6 +9,7 @@ import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
+import * as customresource from "@aws-cdk/custom-resources";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -80,7 +81,8 @@ export class CdkEcsAlb extends cdk.Construct {
             {
                 networkMode: ecs.NetworkMode.NAT,
                 taskRole: taskRole,
-                executionRole: taskRole
+                executionRole: taskRole,
+                family: `${props.appName}-matt-task-definition`
             }
         );
 
@@ -311,6 +313,59 @@ export class CdkEcsAlb extends cdk.Construct {
             default:
                 throw new Error("Load Balancer type not specified");
         }
+
+        let ecsOnCreateServiceCall: customresource.AwsSdkCall = {
+            service: 'ECS',
+            action: 'updateService',
+            parameters: {
+                service: serviceDefinition.serviceName,
+                cluster: cluster.clusterName
+            },
+            physicalResourceId: customresource.PhysicalResourceId.of('onCreate-service-update-custom-resource')
+        }
+
+        let ecsUpdateServiceCall: customresource.AwsSdkCall = {
+            service: 'ECS',
+            action: 'updateService',
+            parameters: {
+                service: serviceDefinition.serviceName,
+                // capacityProviderStrategy: [
+                //     {
+                //         capacityProvider: 'STRING_VALUE', /* required */
+                //         base: 'NUMBER_VALUE',
+                //         weight: 'NUMBER_VALUE'
+                //     },
+                //     /* more items */
+                // ],
+                cluster: cluster.clusterName,
+                // deploymentConfiguration: {
+                //     deploymentCircuitBreaker: {
+                //         enable: false,
+                //         rollback: false
+                //     }
+                // },
+                forceNewDeployment: true,
+                // networkConfiguration: {
+                //     awsvpcConfiguration: {
+                //         subnets: [
+                //             "us-east-1a",
+                //             "us-east-1b",
+                //             "us-east-1c"
+                //         ]
+                //     }
+                // },
+            },
+            physicalResourceId: customresource.PhysicalResourceId.of('service-update-custom-resource')
+        }
+
+        const ecsServiceUpdateTrigger = new customresource.AwsCustomResource(this, `Matt-Service-Update-${props.appName}`, {
+            onCreate: ecsOnCreateServiceCall,
+            onUpdate: ecsUpdateServiceCall,
+            policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
+            role: iam.Role.fromRoleArn(this, "EcsApplicationRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+        });
+
+        ecsServiceUpdateTrigger.node.addDependency(serviceDefinition);
 
         // new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB", {
         //     cluster,

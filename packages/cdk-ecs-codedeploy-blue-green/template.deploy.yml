@@ -14,4 +14,4 @@ components:
       clusterName: "dev-dsicollection"
       serviceName: "posapi-service"
       lbType: "ALB"
-      lbArn: "arn:aws:elasticloadbalancing:us-east-1:022393549274:loadbalancer/app/alb-posapi/ab8023604c95329d"
+      lbArn: "arn:aws:elasticloadbalancing:us-east-1:022393549274:loadbalancer/app/alb-posapi/8e7a1e978320f2ae"
