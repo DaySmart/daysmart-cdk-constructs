@@ -17,7 +17,11 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployBlueGreenProps) {
     super(scope, id);
 
+    const iamRole = iam.Role.fromRoleArn(this, "EcsBlueGreenDeploymentResourcesRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
+
+    let time: string = Date.UTC.toString() 
 
     const listener = elbv2.ApplicationListener.fromLookup(this, `${props.stage}-${props.appName}-Listener`, {
       loadBalancerArn: props.lbArn
@@ -53,7 +57,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
         }
       },
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: iam.Role.fromRoleArn(this, "CodeDeployApplicationRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+      role: iamRole
     });
 
     let codedeployCreateDeploymentGroupCall: customresource.AwsSdkCall = {
@@ -169,7 +173,7 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
       physicalResourceId: customresource.PhysicalResourceId.of('deployment-group-update-custom-resource')
     }
 
-    const blueGreenDeployment = new customresource.AwsCustomResource(this, 'BlueGreenDeployment', {
+    const codeDeployDeploymentGroup = new customresource.AwsCustomResource(this, 'CodeDeployDeploymentGroup', {
       onCreate: codedeployCreateDeploymentGroupCall,
       onUpdate: codedeployUpdateDeploymentGroupCall,
       onDelete: {
@@ -181,9 +185,43 @@ export class CdkEcsCodedeployBlueGreen extends cdk.Construct {
         }
       },
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: iam.Role.fromRoleArn(this, "EcsBlueGreenDeploymentRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+      role: iamRole
     })
 
-    blueGreenDeployment.node.addDependency(codeDeployApplication);
+    codeDeployDeploymentGroup.node.addDependency(codeDeployApplication);
+
+    let codedeployCreateDeploymentCall: customresource.AwsSdkCall = {
+      service: 'CodeDeploy',
+      action: 'createDeployment',
+      parameters: {
+        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+        autoRollbackConfiguration: {
+          enabled: true,
+          events: [
+            "DEPLOYMENT_FAILURE",
+            "DEPLOYMENT_STOP_ON_REQUEST"
+          ]
+        },
+        deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
+        description: `Blue/Green ECS Deployment Created for ${props.stage}-${props.appName}`,
+        revision: {
+          revisionType: "S3",
+          s3Location: {
+            bucket: `deploy-${props.appName}.${props.stage}.ecs`,
+            bundleType: "YAML",
+            key: 'appspec.yml'
+          }
+        },
+      },
+      physicalResourceId: customresource.PhysicalResourceId.of(time)
+    }
+
+    const blueGreenDeployment = new customresource.AwsCustomResource(this, `BlueGreenDeployment`, {
+      onUpdate: codedeployCreateDeploymentCall,
+      policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
+      role: iamRole
+    })
+
+    blueGreenDeployment.node.addDependency(codeDeployDeploymentGroup);
   }
 }
