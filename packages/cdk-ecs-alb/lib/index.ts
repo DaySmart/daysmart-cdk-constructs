@@ -314,65 +314,123 @@ export class CdkEcsAlb extends cdk.Construct {
                 throw new Error("Load Balancer type not specified");
         }
 
-        let ecsOnCreateServiceCall: customresource.AwsSdkCall = {
-            service: 'ECS',
-            action: 'updateService',
-            parameters: {
-                service: serviceDefinition.serviceName,
-                cluster: cluster.clusterName
-            },
-            physicalResourceId: customresource.PhysicalResourceId.of('onCreate-service-update-custom-resource')
-        }
+        // let ecsOnCreateServiceCall: customresource.AwsSdkCall = {
+        //     service: 'ECS',
+        //     action: 'updateService',
+        //     parameters: {
+        //         service: serviceDefinition.serviceName,
+        //         cluster: cluster.clusterName
+        //     },
+        //     physicalResourceId: customresource.PhysicalResourceId.of('onCreate-service-update-custom-resource')
+        // }
 
-        let ecsUpdateServiceCall: customresource.AwsSdkCall = {
-            service: 'ECS',
-            action: 'updateService',
-            parameters: {
-                service: serviceDefinition.serviceName,
-                // capacityProviderStrategy: [
-                //     {
-                //         capacityProvider: 'STRING_VALUE', /* required */
-                //         base: 'NUMBER_VALUE',
-                //         weight: 'NUMBER_VALUE'
-                //     },
-                //     /* more items */
-                // ],
-                cluster: cluster.clusterName,
-                // deploymentConfiguration: {
-                //     deploymentCircuitBreaker: {
-                //         enable: false,
-                //         rollback: false
-                //     }
-                // },
-                forceNewDeployment: true,
-                // networkConfiguration: {
-                //     awsvpcConfiguration: {
-                //         subnets: [
-                //             "us-east-1a",
-                //             "us-east-1b",
-                //             "us-east-1c"
-                //         ]
-                //     }
-                // },
-            },
-            physicalResourceId: customresource.PhysicalResourceId.of('service-update-custom-resource')
-        }
+        // let ecsUpdateServiceCall: customresource.AwsSdkCall = {
+        //     service: 'ECS',
+        //     action: 'updateService',
+        //     parameters: {
+        //         service: serviceDefinition.serviceName,
+        //         // capacityProviderStrategy: [
+        //         //     {
+        //         //         capacityProvider: 'STRING_VALUE', /* required */
+        //         //         base: 'NUMBER_VALUE',
+        //         //         weight: 'NUMBER_VALUE'
+        //         //     },
+        //         //     /* more items */
+        //         // ],
+        //         cluster: cluster.clusterName,
+        //         // deploymentConfiguration: {
+        //         //     deploymentCircuitBreaker: {
+        //         //         enable: false,
+        //         //         rollback: false
+        //         //     }
+        //         // },
+        //         forceNewDeployment: true,
+        //         // networkConfiguration: {
+        //         //     awsvpcConfiguration: {
+        //         //         subnets: [
+        //         //             "us-east-1a",
+        //         //             "us-east-1b",
+        //         //             "us-east-1c"
+        //         //         ]
+        //         //     }
+        //         // },
+        //     },
+        //     physicalResourceId: customresource.PhysicalResourceId.of('service-update-custom-resource')
+        // }
 
-        const ecsServiceUpdateTrigger = new customresource.AwsCustomResource(this, `Matt-Service-Update-${props.appName}`, {
-            onCreate: ecsOnCreateServiceCall,
-            onUpdate: ecsUpdateServiceCall,
-            policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-            role: iam.Role.fromRoleArn(this, "EcsApplicationRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
-        });
+        // const ecsServiceUpdateTrigger = new customresource.AwsCustomResource(this, `Matt-Service-Update-${props.appName}`, {
+        //     onCreate: ecsOnCreateServiceCall,
+        //     onUpdate: ecsUpdateServiceCall,
+        //     policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
+        //     role: iam.Role.fromRoleArn(this, "EcsApplicationRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+        // });
 
-        ecsServiceUpdateTrigger.node.addDependency(serviceDefinition);
+        // ecsServiceUpdateTrigger.node.addDependency(serviceDefinition);
 
-        // new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB", {
+        // const vpc = ec2.Vpc.fromLookup(this, "VPC-matt", { vpcId: props.vpcId });
+
+        // const repository = ecr.Repository.fromRepositoryName(
+        //     this,
+        //     "Repo-matt",
+        //     props.repositoryName
+        // );
+
+        // const securityGroup = ec2.SecurityGroup.fromLookup(
+        //     this,
+        //     "Security Group-matt",
+        //     props.securityGroupId
+        // );
+
+        // const cluster = ecs.Cluster.fromClusterAttributes(this, "Cluster-matt", {
+        //     clusterName: props.clusterName,
+        //     vpc: vpc,
+        //     securityGroups: [securityGroup],
+        // });
+
+        // const taskDefinition = new ecs.Ec2TaskDefinition(
+        //     this,
+        //     "TaskDefinition-matt",
+        //     {
+        //         networkMode: ecs.NetworkMode.NAT,
+        //     }
+        // );
+
+        // taskDefinition.addContainer("Container-matt", {
+        //     image: ecs.ContainerImage.fromEcrRepository(repository),
+        //     memoryLimitMiB: 4096,
+        //     cpu: 2048,
+        //     portMappings: [
+        //         {
+        //             containerPort: 80,
+        //             hostPort: 0,
+        //             protocol: ecs.Protocol.TCP,
+        //         },
+        //         {
+        //             containerPort: 443,
+        //             hostPort: 0,
+        //             protocol: ecs.Protocol.TCP,
+        //         },
+        //     ],
+        //     entryPoint: ["powershell", "-Command"],
+        //     command: ["C:\\ServiceMonitor.exe w3svc"],
+        //     // logging: ecs.LogDriver.awsLogs({
+        //     //     logGroup: new logs.LogGroup(this, "LogGroup", {
+        //     //         logGroupName: `${props.appName}-ecs`,
+        //     //     }),
+        //     //     streamPrefix: "ecs",
+        //     // }),
+        // });
+
+        // new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB-matt", {
         //     cluster,
-        //     serviceName: props.appName,
+        //     serviceName: `${props.appName}-matt`,
         //     desiredCount: 1,
         //     taskDefinition: taskDefinition,
         //     publicLoadBalancer: true,
+        //     healthCheckGracePeriod: cdk.Duration.seconds(300),
+        //     deploymentController: {
+        //         type: ecs.DeploymentControllerType.CODE_DEPLOY
+        //     }
         // });
     }
 }
