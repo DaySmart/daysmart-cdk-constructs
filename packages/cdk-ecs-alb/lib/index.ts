@@ -1,15 +1,12 @@
 import * as cdk from "@aws-cdk/core";
-import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
-import * as logs from "@aws-cdk/aws-logs";
-import * as elb from "@aws-cdk/aws-elasticloadbalancing";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as ssm from "@aws-cdk/aws-ssm";
 import * as iam from "@aws-cdk/aws-iam";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as customresource from "@aws-cdk/custom-resources";
+import * as logs from "@aws-cdk/aws-logs";
+import * as autoscaling from "@aws-cdk/aws-applicationautoscaling";
+import { TargetTrackingScalingPolicy } from "@aws-cdk/aws-applicationautoscaling";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -18,6 +15,8 @@ export interface CdkEcsAlbProps {
     securityGroupId: string;
     repositoryName: string;
     lbType: string;
+    stage: string;
+    tag?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -25,24 +24,14 @@ export class CdkEcsAlb extends cdk.Construct {
         super(scope, id);
 
         let loadBalancer: elbv2.ApplicationLoadBalancer | elbv2.NetworkLoadBalancer;
-        let productionHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-        let productionHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-        let testHttpsListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
-        let testHttpListener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
+        let listener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
 
-        // const parameter = ecs.Secret.fromSsmParameter(ssm.StringParameter.fromSecureStringParameterAttributes(this, "Parameter", {
-        //     version: 26,
-        //     parameterName: `${props.stage}-${props.appName}`
-        // }));
-
-        var taskRole = new iam.Role(this, "EcsMattTaskRole", {
+        var taskRole = new iam.Role(this, "EcsTaskRole", {
             assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
         });
 
         taskRole.addToPolicy(new iam.PolicyStatement({
             actions: [
-                "s3:GetObject",
-                "s3:GetBucketLocation",
                 "ssm:GetParameters",
                 "ssm:PutParameter",
                 "ssm:GetParameter",
@@ -65,7 +54,7 @@ export class CdkEcsAlb extends cdk.Construct {
 
         const securityGroup = ec2.SecurityGroup.fromLookup(
             this,
-            "Security Group",
+            "SecurityGroup",
             props.securityGroupId
         );
 
@@ -82,12 +71,12 @@ export class CdkEcsAlb extends cdk.Construct {
                 networkMode: ecs.NetworkMode.NAT,
                 taskRole: taskRole,
                 executionRole: taskRole,
-                family: `${props.appName}-matt-task-definition`
+                family: `${props.stage}-${props.appName}`
             }
         );
 
         taskDefinition.addContainer("Container", {
-            image: ecs.ContainerImage.fromEcrRepository(repository),
+            image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
             memoryLimitMiB: 4096,
             cpu: 2048,
             portMappings: [
@@ -99,33 +88,22 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-            // command: ["docker run -d --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env DSI_AWS_REGION --env-file ./docker_envars.txt 022393549274.dkr.ecr.us-east-1.amazonaws.com/posapi ; C:\\ServiceMonitor.exe w3svc"],
-            // secrets: {
-            //     "AWS_ACCESS_KEY_ID": parameter,
-            //     "AWS_SECRET_ACCESS_KEY": parameter
-            // },
-            // environmentFiles: [
-            //     ecs.EnvironmentFile.fromBucket(s3.Bucket.fromBucketName(this, "EnvVariableBucket", `envars-${props.appName}.${props.stage}.ecs`), `${props.stage}-${props.appName}-envars.env`)
-            // ],
-            // logging: ecs.LogDriver.awsLogs({
-            //     logGroup: new logs.LogGroup(this, "LogGroup", {
-            //         logGroupName: `${props.appName}-ecs`,
-            //     }),
-            //     streamPrefix: "ecs",
-            // }),
+            logging: ecs.LogDriver.awsLogs({
+                logGroup: new logs.LogGroup(this, "LogGroup", {
+                    logGroupName: `${props.appName}-ecs`,
+                }),
+                streamPrefix: "ecs",
+            }),
         });
 
         //Service Definition Call
-        const serviceDefinition = new ecs.Ec2Service(this, `${props.appName}-ServiceDefinition`, {
+        const serviceDefinition = new ecs.Ec2Service(this, `ServiceDefinition`, {
             taskDefinition: taskDefinition,
             cluster: cluster,
-            serviceName: `${props.appName}-service`,
+            serviceName: props.appName,
             desiredCount: 1,
             minHealthyPercent: 100,
             maxHealthyPercent: 200,
-            // circuitBreaker: {
-            //     rollback: true
-            // },
             deploymentController: {
                 type: ecs.DeploymentControllerType.CODE_DEPLOY
             },
@@ -135,27 +113,37 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             enableECSManagedTags: true,
             propagateTags: ecs.PropagatedTagSource.TASK_DEFINITION,
-            healthCheckGracePeriod: cdk.Duration.seconds(300)
+            healthCheckGracePeriod: cdk.Duration.seconds(60)
+        });
+
+        const scalingTarget = new autoscaling.ScalableTarget(this, 'ScalableTarget', {
+            maxCapacity: 3,
+            minCapacity: 1,
+            resourceId: `service/${props.clusterName}/${props.appName}`,
+            scalableDimension: "ecs:service:DesiredCount",
+            serviceNamespace: autoscaling.ServiceNamespace.ECS
+        });
+
+        new TargetTrackingScalingPolicy(this, 'ScalingPolicy', {
+            scalingTarget: scalingTarget,
+            targetValue: 50,
+            policyName: `${props.appName}-scaling-policy`,
+            predefinedMetric: autoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_CPU_UTILIZATION
         });
 
         switch (props.lbType) {
             case "ALB":
-                // securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
-                // securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
-                // securityGroup.addEgressRule(ec2.Peer.ipv4('10.128.0.0/16'), ec2.Port.tcp(80));
-                // securityGroup.addEgressRule(ec2.Peer.ipv4('10.0.0.0/8'), ec2.Port.allTcp());
-                loadBalancer = new elbv2.ApplicationLoadBalancer(this, `${props.appName}-ApplicationLoadBalancer`, {
+                loadBalancer = new elbv2.ApplicationLoadBalancer(this, `ApplicationLoadBalancer`, {
                     vpc: vpc,
-                    loadBalancerName: `alb-${props.appName}`,
+                    loadBalancerName: `${props.appName}-alb`,
                     internetFacing: true,
                     ipAddressType: elbv2.IpAddressType.IPV4,
                     securityGroup: securityGroup
                 });
 
-                const albTargetGroupBlue = new elbv2.ApplicationTargetGroup(this, `${props.appName}-ApplicationLoadBalancerTargetGroupBlue`, {
-                    targetGroupName: `alb-Target-Group-${props.appName}-1`,
+                const albTargetGroup1 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup1`, {
+                    targetGroupName: `${props.appName}-alb-Target-Group-1`,
                     targetType: elbv2.TargetType.INSTANCE,
-                    // port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
                     healthCheck: {
                         path: "/api/v2/Health/Check",
@@ -167,10 +155,9 @@ export class CdkEcsAlb extends cdk.Construct {
                     vpc: vpc
                 });
 
-                const albTargetGroupGreen = new elbv2.ApplicationTargetGroup(this, `${props.appName}-ApplicationLoadBalancerTargetGroupGreen`, {
-                    targetGroupName: `alb-Target-Group-${props.appName}-2`,
+                const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+                    targetGroupName: `${props.appName}-alb-Target-Group-2`,
                     targetType: elbv2.TargetType.INSTANCE,
-                    // port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
                     healthCheck: {
                         path: "/api/v2/Health/Check",
@@ -182,48 +169,22 @@ export class CdkEcsAlb extends cdk.Construct {
                     vpc: vpc
                 });
 
-                // testHttpsListener = loadBalancer.addListener(`${props.appName}-TestApplicationLoadBalancerHttpsListener`, {
-                //     port: 443,
-                //     protocol: elbv2.ApplicationProtocol.HTTPS,
-                //     sslPolicy: elbv2.SslPolicy.RECOMMENDED,
-                //     // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : undefined, //TODO: region information in these libraries?
-                // })
-                //     .addTargetGroups(`alb-Target-Group-${props.appName}`, {
-                //         targetGroups: [
-                //             albTargetGroupBlue
-                //         ]
-                //     });
-                // testHttpListener = loadBalancer.addListener(`${props.appName}-TestApplicationLoadBalancerHttpListener`, {
-                //     port: 80,
-                //     protocol: elbv2.ApplicationProtocol.HTTP,
-                //     sslPolicy: elbv2.SslPolicy.RECOMMENDED
-                // })
-                //     .addTargetGroups(`alb-Target-Group-${props.appName}`, {
-                //         targetGroups: [
-                //             albTargetGroupBlue
-                //         ]
-                //     });
-                // productionHttpsListener = loadBalancer.addListener(`${props.appName}-ApplicationLoadBalancerHttpsListener`, {
-                //     port: 443,
-                //     protocol: elbv2.ApplicationProtocol.HTTPS,
-                //     sslPolicy: elbv2.SslPolicy.RECOMMENDED,
-                //     // certificates: props.project === 'onlinebooking' ? cdk.Fn.importValue(`${props.stage}-OLB-CERTIFICATE-ARN`) : undefined, //TODO: region information in these libraries?
-                // })
-                //     .addTargetGroups(`alb-Target-Group-${props.appName}`, {
-                //         targetGroups: [
-                //             albTargetGroupBlue
-                //         ]
-                //     });
-                productionHttpListener = loadBalancer.addListener(`${props.appName}-ApplicationLoadBalancerHttpListener`, {
+                listener = loadBalancer.addListener(`ApplicationLoadBalancerHttpListener`, {
                     port: 80,
                     protocol: elbv2.ApplicationProtocol.HTTP,
-                })
-                    .addTargetGroups(`alb-Target-Group-${props.appName}`, {
+                }).addTargetGroups(`${props.appName}-alb-Target-Group`, {
                         targetGroups: [
-                            albTargetGroupBlue
+                            albTargetGroup1
                         ]
                     });
-                serviceDefinition.attachToApplicationTargetGroup(albTargetGroupBlue);
+
+                serviceDefinition.attachToApplicationTargetGroup(albTargetGroup1);
+
+                const loadBalancerOutput = new cdk.CfnOutput(this, "LoadBalancer", {
+                    value: loadBalancer.loadBalancerArn
+                });
+        
+                loadBalancerOutput.overrideLogicalId("LoadBalancer");
                 break;
             case "NLB":
                 // loadBalancer = new elbv2.NetworkLoadBalancer(this, `${props.appName}-NetworkLoadBalancer`, {
@@ -315,123 +276,10 @@ export class CdkEcsAlb extends cdk.Construct {
                 throw new Error("Load Balancer type not specified");
         }
 
-        // let ecsOnCreateServiceCall: customresource.AwsSdkCall = {
-        //     service: 'ECS',
-        //     action: 'updateService',
-        //     parameters: {
-        //         service: serviceDefinition.serviceName,
-        //         cluster: cluster.clusterName
-        //     },
-        //     physicalResourceId: customresource.PhysicalResourceId.of('onCreate-service-update-custom-resource')
-        // }
+        const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
+            value: serviceDefinition.serviceName
+        });
 
-        // let ecsUpdateServiceCall: customresource.AwsSdkCall = {
-        //     service: 'ECS',
-        //     action: 'updateService',
-        //     parameters: {
-        //         service: serviceDefinition.serviceName,
-        //         // capacityProviderStrategy: [
-        //         //     {
-        //         //         capacityProvider: 'STRING_VALUE', /* required */
-        //         //         base: 'NUMBER_VALUE',
-        //         //         weight: 'NUMBER_VALUE'
-        //         //     },
-        //         //     /* more items */
-        //         // ],
-        //         cluster: cluster.clusterName,
-        //         // deploymentConfiguration: {
-        //         //     deploymentCircuitBreaker: {
-        //         //         enable: false,
-        //         //         rollback: false
-        //         //     }
-        //         // },
-        //         forceNewDeployment: true,
-        //         // networkConfiguration: {
-        //         //     awsvpcConfiguration: {
-        //         //         subnets: [
-        //         //             "us-east-1a",
-        //         //             "us-east-1b",
-        //         //             "us-east-1c"
-        //         //         ]
-        //         //     }
-        //         // },
-        //     },
-        //     physicalResourceId: customresource.PhysicalResourceId.of('service-update-custom-resource')
-        // }
-
-        // const ecsServiceUpdateTrigger = new customresource.AwsCustomResource(this, `Matt-Service-Update-${props.appName}`, {
-        //     onCreate: ecsOnCreateServiceCall,
-        //     onUpdate: ecsUpdateServiceCall,
-        //     policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-        //     role: iam.Role.fromRoleArn(this, "EcsApplicationRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
-        // });
-
-        // ecsServiceUpdateTrigger.node.addDependency(serviceDefinition);
-
-        // const vpc = ec2.Vpc.fromLookup(this, "VPC-matt", { vpcId: props.vpcId });
-
-        // const repository = ecr.Repository.fromRepositoryName(
-        //     this,
-        //     "Repo-matt",
-        //     props.repositoryName
-        // );
-
-        // const securityGroup = ec2.SecurityGroup.fromLookup(
-        //     this,
-        //     "Security Group-matt",
-        //     props.securityGroupId
-        // );
-
-        // const cluster = ecs.Cluster.fromClusterAttributes(this, "Cluster-matt", {
-        //     clusterName: props.clusterName,
-        //     vpc: vpc,
-        //     securityGroups: [securityGroup],
-        // });
-
-        // const taskDefinition = new ecs.Ec2TaskDefinition(
-        //     this,
-        //     "TaskDefinition-matt",
-        //     {
-        //         networkMode: ecs.NetworkMode.NAT,
-        //     }
-        // );
-
-        // taskDefinition.addContainer("Container-matt", {
-        //     image: ecs.ContainerImage.fromEcrRepository(repository),
-        //     memoryLimitMiB: 4096,
-        //     cpu: 2048,
-        //     portMappings: [
-        //         {
-        //             containerPort: 80,
-        //             hostPort: 0,
-        //             protocol: ecs.Protocol.TCP,
-        //         },
-        //         {
-        //             containerPort: 443,
-        //             hostPort: 0,
-        //             protocol: ecs.Protocol.TCP,
-        //         },
-        //     ],
-        //     entryPoint: ["powershell", "-Command"],
-        //     command: ["C:\\ServiceMonitor.exe w3svc"],
-        //     // logging: ecs.LogDriver.awsLogs({
-        //     //     logGroup: new logs.LogGroup(this, "LogGroup", {
-        //     //         logGroupName: `${props.appName}-ecs`,
-        //     //     }),
-        //     //     streamPrefix: "ecs",
-        //     // }),
-        // });
-
-        // new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB-matt", {
-        //     cluster,
-        //     serviceName: `${props.appName}-matt`,
-        //     desiredCount: 1,
-        //     taskDefinition: taskDefinition,
-        //     publicLoadBalancer: true,
-        //     healthCheckGracePeriod: cdk.Duration.seconds(300),
-        //     deploymentController: {
-        //         type: ecs.DeploymentControllerType.CODE_DEPLOY
-        //     }
-        // });
+        ecsServiceOutput.overrideLogicalId("ServiceName");        
     }
 }
