@@ -12,6 +12,6 @@ components:
       vpcId: ${dev:vpc:vpcId}
       appName: posapi
       securityGroupId: sg-0819814219a19b69c
-      repositoryName: posapitest
+      repositoryName: posapi
       clusterName: dev-dsicollection
       lbType: "ALB"

@@ -99,6 +99,7 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
+            // command: ["docker run -d --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env DSI_AWS_REGION --env-file ./docker_envars.txt 022393549274.dkr.ecr.us-east-1.amazonaws.com/posapi ; C:\\ServiceMonitor.exe w3svc"],
             // secrets: {
             //     "AWS_ACCESS_KEY_ID": parameter,
             //     "AWS_SECRET_ACCESS_KEY": parameter

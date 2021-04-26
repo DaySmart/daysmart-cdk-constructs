@@ -40,6 +40,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 groupMetrics: [autoscaling.GroupMetrics.all()],
                 instanceMonitoring: autoscaling.Monitoring.DETAILED,
                 keyName: props.instanceKeyName,
+                
             }
         );
 
@@ -58,6 +59,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
             targetUtilizationPercent: 50,
+            
         });
 
         const clusterOutput = new cdk.CfnOutput(this, "ClusterName", {
