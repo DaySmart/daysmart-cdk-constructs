@@ -12,6 +12,7 @@ export interface CdkEcsAlbProps {
     vpcId: string;
     securityGroupId: string;
     repositoryName: string;
+    tag?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -47,7 +48,7 @@ export class CdkEcsAlb extends cdk.Construct {
         );
 
         taskDefinition.addContainer("Container", {
-            image: ecs.ContainerImage.fromEcrRepository(repository),
+            image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
             memoryLimitMiB: 4096,
             cpu: 2048,
             portMappings: [
@@ -56,29 +57,50 @@ export class CdkEcsAlb extends cdk.Construct {
                     hostPort: 0,
                     protocol: ecs.Protocol.TCP,
                 },
-                {
-                    containerPort: 443,
-                    hostPort: 0,
-                    protocol: ecs.Protocol.TCP,
-                },
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-            logging: ecs.LogDriver.awsLogs({
-                logGroup: new logs.LogGroup(this, "LogGroup", {
-                    logGroupName: `${props.appName}-ecs`,
-                }),
-                streamPrefix: "ecs",
-            }),
+            // logging: ecs.LogDriver.awsLogs({
+            //     logGroup: new logs.LogGroup(this, "LogGroup", {
+            //         logGroupName: `${props.appName}-ecs`,
+            //     }),
+            //     streamPrefix: "ecs",
+            // }),
         });
 
-        new ecspattern.ApplicationLoadBalancedEc2Service(this, "ALB", {
+        const multiTargetEC2Service = new ecspattern.ApplicationMultipleTargetGroupsEc2Service(this, "ApplicationLB MTG Service", {
             cluster,
-            serviceName: props.appName,
-            desiredCount: 1,
+            serviceName: `${props.appName}-patterntest`,
+            desiredCount: 2,
             taskDefinition: taskDefinition,
-            publicLoadBalancer: true,
-            healthCheckGracePeriod: Duration.seconds(300),
+            targetGroups: [
+                {
+                    containerPort: 80
+                },
+                {
+                    containerPort: 80
+                }
+            ]
         });
+
+        multiTargetEC2Service.targetGroup.configureHealthCheck({
+            path: "/api/v2/Health/Check",
+            healthyThresholdCount: 2,
+            unhealthyThresholdCount: 5,
+            interval: cdk.Duration.seconds(30),
+            timeout: cdk.Duration.seconds(10)     
+        });
+
+        const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
+            value: multiTargetEC2Service.service.serviceName
+        });
+
+        ecsServiceOutput.overrideLogicalId("ServiceName");
+
+        const loadBalancerOutput = new cdk.CfnOutput(this, "LoadBalancerARN", {
+            value: multiTargetEC2Service.loadBalancer.loadBalancerArn
+        });
+
+        loadBalancerOutput.overrideLogicalId("LoadBalancerARN");
     }
 }
