@@ -129,5 +129,11 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         loadBalancerOutput.overrideLogicalId("LoadBalancerARN");
+
+        const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
+            value: multiTargetEC2Service.targetGroup.targetGroupName
+        });
+
+        targetGroup.overrideLogicalId("TargetGroupName");
     }
 }
