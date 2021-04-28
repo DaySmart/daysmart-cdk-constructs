@@ -98,14 +98,16 @@ export class CdkEcsAlb extends cdk.Construct {
         const multiTargetEC2Service = new ecspattern.ApplicationMultipleTargetGroupsEc2Service(this, "ApplicationLB MTG Service", {
             cluster,
             serviceName: `${props.appName}-patterntest`,
-            desiredCount: 2,
+            desiredCount: 1,
             taskDefinition: taskDefinition,
             targetGroups: [
                 {
-                    containerPort: 80
+                    containerPort: 80,
+                    priority: 1
                 },
                 {
-                    containerPort: 80
+                    containerPort: 80,
+                    priority: 2,
                 }
             ]
         });
