@@ -1,10 +1,11 @@
 import * as cdk from "@aws-cdk/core";
-import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
+import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as iam from "@aws-cdk/aws-iam";
+import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as logs from "@aws-cdk/aws-logs";
-import { Duration } from "@aws-cdk/core";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -12,12 +13,35 @@ export interface CdkEcsAlbProps {
     vpcId: string;
     securityGroupId: string;
     repositoryName: string;
+    lbType: string;
+    stage: string;
     tag?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, props: CdkEcsAlbProps) {
         super(scope, id);
+
+        let loadBalancer: elbv2.ApplicationLoadBalancer | elbv2.NetworkLoadBalancer;
+        let listener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
+
+        var taskRole = new iam.Role(this, "EcsTaskRole", {
+            assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
+        });
+
+        taskRole.addToPolicy(new iam.PolicyStatement({
+            actions: [
+                "ssm:GetParameters",
+                "ssm:PutParameter",
+                "ssm:GetParameter",
+                "secretsmanager:GetSecretValue",
+                "kms:Decrypt"
+            ],
+            resources: [
+                "*"
+            ],
+            effect: iam.Effect.ALLOW
+        }))
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
@@ -29,7 +53,7 @@ export class CdkEcsAlb extends cdk.Construct {
 
         const securityGroup = ec2.SecurityGroup.fromLookup(
             this,
-            "Security Group",
+            "SecurityGroup",
             props.securityGroupId
         );
 
@@ -44,6 +68,9 @@ export class CdkEcsAlb extends cdk.Construct {
             "TaskDefinition",
             {
                 networkMode: ecs.NetworkMode.NAT,
+                taskRole: taskRole,
+                executionRole: taskRole,
+                family: `${props.stage}-${props.appName}`
             }
         );
 
