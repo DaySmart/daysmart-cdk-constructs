@@ -88,12 +88,12 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-            logging: ecs.LogDriver.awsLogs({
-                logGroup: new logs.LogGroup(this, "LogGroup", {
-                    logGroupName: `${props.appName}-ecs`,
-                }),
-                streamPrefix: "ecs",
-            }),
+            // logging: ecs.LogDriver.awsLogs({
+            //     logGroup: new logs.LogGroup(this, "LogGroup", {
+            //         logGroupName: `${props.appName}-ecs`,
+            //     }),
+            //     streamPrefix: "ecs",
+            // }),
         });
 
         //Service Definition Call
@@ -123,6 +123,8 @@ export class CdkEcsAlb extends cdk.Construct {
             scalableDimension: "ecs:service:DesiredCount",
             serviceNamespace: autoscaling.ServiceNamespace.ECS
         });
+
+        scalingTarget.node.addDependency(serviceDefinition)
 
         new TargetTrackingScalingPolicy(this, 'ScalingPolicy', {
             scalingTarget: scalingTarget,

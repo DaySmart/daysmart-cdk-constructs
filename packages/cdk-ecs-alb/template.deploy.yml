@@ -1,6 +1,6 @@
 env: dev
 components:
-  - name: ecs-posapi-matt
+  - name: ecs-posapi
     provider:
       name: cdk
       config:
@@ -14,4 +14,5 @@ components:
       securityGroupId: sg-0819814219a19b69c
       repositoryName: posapi
       clusterName: dev-dsicollection
-      lbType: "ALB"
+      stage: dev
+      lbType: ALB
