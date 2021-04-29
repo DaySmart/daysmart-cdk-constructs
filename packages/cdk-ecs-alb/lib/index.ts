@@ -123,7 +123,16 @@ export class CdkEcsAlb extends cdk.Construct {
             healthyThresholdCount: 2,
             unhealthyThresholdCount: 5,
             interval: cdk.Duration.seconds(30),
-            timeout: cdk.Duration.seconds(10)     
+            timeout: cdk.Duration.seconds(10)
+        });
+
+        const scalableTarget = applicationLoadBalancedEC2Service.service.autoScaleTaskCount({
+            minCapacity: 1,
+            maxCapacity: 4,
+        });
+
+        scalableTarget.scaleOnCpuUtilization('CpuScaling', {
+            targetUtilizationPercent: 50,
         });
 
         const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
