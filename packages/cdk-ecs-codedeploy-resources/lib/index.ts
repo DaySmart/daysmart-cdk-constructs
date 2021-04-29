@@ -10,7 +10,7 @@ export interface CdkEcsCodedeployResourcesProps {
   clusterName: string;
   serviceName: string;
   appName: string;
-  lbArn: string;
+  listenerArn: string;
   targetGroupName: string;
 }
 
@@ -23,11 +23,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
-    let time: string = Date.UTC.toString()
-
-    const listener = elbv2.ApplicationListener.fromLookup(this, `${props.stage}-${props.appName}-Listener`, {
-      loadBalancerArn: props.lbArn
-    });
+    let time: string = Date.UTC.toString();
 
     const bucket = new s3.Bucket(this, 'Bucket', {
       bucketName: `deploy-${props.appName}.${props.stage}.ecs`,
@@ -135,7 +131,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
             {
               prodTrafficRoute: {
                 listenerArns: [
-                  listener.listenerArn
+                  props.listenerArn
                 ]
               },
               targetGroups: [
@@ -191,7 +187,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
             {
               prodTrafficRoute: {
                 listenerArns: [
-                  listener.listenerArn
+                  props.listenerArn
                 ]
               },
               targetGroups: [
