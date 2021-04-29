@@ -13,7 +13,6 @@ export interface CdkEcsAlbProps {
     vpcId: string;
     securityGroupId: string;
     repositoryName: string;
-    lbType: string;
     stage: string;
     tag?: string;
 }
@@ -95,6 +94,20 @@ export class CdkEcsAlb extends cdk.Construct {
             // }),
         });
 
+        const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+            targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
+            targetType: elbv2.TargetType.INSTANCE,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/api/v2/Health/Check",
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 5,
+                interval: cdk.Duration.seconds(30),
+                timeout: cdk.Duration.seconds(10)
+            },
+            vpc: vpc
+        });
+
         const multiTargetEC2Service = new ecspattern.ApplicationMultipleTargetGroupsEc2Service(this, "ApplicationLB MTG Service", {
             cluster,
             serviceName: `${props.appName}-patterntest`,
@@ -103,12 +116,7 @@ export class CdkEcsAlb extends cdk.Construct {
             targetGroups: [
                 {
                     containerPort: 80,
-                    priority: 1
                 },
-                {
-                    containerPort: 80,
-                    priority: 2,
-                }
             ]
         });
 
