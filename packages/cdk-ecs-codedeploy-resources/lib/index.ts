@@ -10,6 +10,7 @@ export interface CdkEcsCodedeployResourcesProps {
   appName: string;
   lbType: string;
   lbArn: string;
+  targetGroupName: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -104,10 +105,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: (props.lbType == "ALB") ? `alb-Target-Group-${props.appName}-1` : `nlb-Target-Group-${props.appName}-1`
+                  name: `${props.targetGroupName}`
                 },
                 {
-                  name: (props.lbType == "ALB") ? `alb-Target-Group-${props.appName}-2` : `nlb-Target-Group-${props.appName}-2`
+                  name: `${props.stage}-${props.appName}-TargetGroup2`
                 }
               ]
             }
@@ -160,10 +161,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: (props.lbType == "ALB") ? `alb-Target-Group-${props.appName}-1` : `nlb-Target-Group-${props.appName}-1`
+                  name: `${props.targetGroupName}`
                 },
                 {
-                  name: (props.lbType == "ALB") ? `alb-Target-Group-${props.appName}-2` : `nlb-Target-Group-${props.appName}-2`
+                  name: `${props.stage}-${props.appName}-TargetGroup2`
                 }
               ]
             }
