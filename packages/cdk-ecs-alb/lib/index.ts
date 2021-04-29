@@ -141,11 +141,11 @@ export class CdkEcsAlb extends cdk.Construct {
 
         ecsServiceOutput.overrideLogicalId("ServiceName");
 
-        const loadBalancerOutput = new cdk.CfnOutput(this, "LoadBalancerARN", {
-            value: applicationLoadBalancedEC2Service.loadBalancer.loadBalancerArn
+        const listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
+            value: applicationLoadBalancedEC2Service.listener.listenerArn
         });
 
-        loadBalancerOutput.overrideLogicalId("LoadBalancerARN");
+        listenerOutput.overrideLogicalId("ListenerARN");
 
         const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
             value: applicationLoadBalancedEC2Service.targetGroup.targetGroupName
