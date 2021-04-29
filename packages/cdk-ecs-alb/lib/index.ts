@@ -5,7 +5,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
-import * as logs from "@aws-cdk/aws-logs";
+// import * as logs from "@aws-cdk/aws-logs";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -108,19 +108,17 @@ export class CdkEcsAlb extends cdk.Construct {
             vpc: vpc
         });
 
-        const multiTargetEC2Service = new ecspattern.ApplicationMultipleTargetGroupsEc2Service(this, "ApplicationLB MTG Service", {
+        const applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
             cluster,
             serviceName: `${props.appName}-patterntest`,
             desiredCount: 1,
             taskDefinition: taskDefinition,
-            targetGroups: [
-                {
-                    containerPort: 80,
-                },
-            ]
+            deploymentController: {
+                type: ecs.DeploymentControllerType.CODE_DEPLOY
+            }
         });
 
-        multiTargetEC2Service.targetGroup.configureHealthCheck({
+        applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
             path: "/api/v2/Health/Check",
             healthyThresholdCount: 2,
             unhealthyThresholdCount: 5,
@@ -129,19 +127,19 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
-            value: multiTargetEC2Service.service.serviceName
+            value: applicationLoadBalancedEC2Service.service.serviceName
         });
 
         ecsServiceOutput.overrideLogicalId("ServiceName");
 
         const loadBalancerOutput = new cdk.CfnOutput(this, "LoadBalancerARN", {
-            value: multiTargetEC2Service.loadBalancer.loadBalancerArn
+            value: applicationLoadBalancedEC2Service.loadBalancer.loadBalancerArn
         });
 
         loadBalancerOutput.overrideLogicalId("LoadBalancerARN");
 
         const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
-            value: multiTargetEC2Service.targetGroup.targetGroupName
+            value: applicationLoadBalancedEC2Service.targetGroup.targetGroupName
         });
 
         targetGroup.overrideLogicalId("TargetGroupName");
