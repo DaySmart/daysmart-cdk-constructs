@@ -2,13 +2,14 @@ import * as cdk from "@aws-cdk/core";
 import * as customresource from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as s3 from "@aws-cdk/aws-s3";
+import * as cloudfront from "@aws-cdk/aws-cloudfront";
 
 export interface CdkEcsCodedeployResourcesProps {
   stage: string;
   clusterName: string;
   serviceName: string;
   appName: string;
-  lbType: string;
   lbArn: string;
   targetGroupName: string;
 }
@@ -22,11 +23,45 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
-    let time: string = Date.UTC.toString() 
+    let time: string = Date.UTC.toString()
 
     const listener = elbv2.ApplicationListener.fromLookup(this, `${props.stage}-${props.appName}-Listener`, {
       loadBalancerArn: props.lbArn
     });
+
+    const bucket = new s3.Bucket(this, 'Bucket', {
+      bucketName: `deploy-${props.appName}.${props.stage}.ecs`,
+      publicReadAccess: true,
+      versioned: true,
+    });
+
+    const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAcessIdentity', {
+      comment: `OriginAccessIdentity for ${bucket.bucketName}.`
+    });
+
+    const bucketPolicy = new s3.BucketPolicy(this, 'BucketPolicy', {
+      bucket: bucket
+    });
+
+    bucketPolicy.document.addStatements(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        principals: [originAccessIdentity.grantPrincipal],
+        actions: ['s3:GetObject'],
+        resources: [bucket.bucketArn + "/*"],
+      })
+    );
+
+    let output = new cdk.CfnOutput(this, "AppspecBucket", {
+      value: bucket.bucketName
+    });
+
+    let output2 = new cdk.CfnOutput(this, "OriginAccessIdentity", {
+      value: originAccessIdentity.originAccessIdentityName
+    });
+
+    output.overrideLogicalId("AppspecBucket");
+    output2.overrideLogicalId("OriginAccessIdentity");
 
     let codedeployCreateApplicationCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
@@ -191,6 +226,16 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
 
     codeDeployDeploymentGroup.node.addDependency(codeDeployApplication);
 
+    let codedeployListDeploymentsCall: customresource.AwsSdkCall = {
+      service: 'CodeDeploy',
+      action: 'listDeployments',
+      parameters: {
+        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+        deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
+      },
+      physicalResourceId: customresource.PhysicalResourceId.of(time)
+    }
+
     let codedeployCreateDeploymentCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
       action: 'createDeployment',
@@ -208,7 +253,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         revision: {
           revisionType: "S3",
           s3Location: {
-            bucket: `deploy-${props.appName}.${props.stage}.ecs`,
+            bucket: bucket.bucketName,
             bundleType: "YAML",
             key: 'appspec.yml'
           }
@@ -218,7 +263,8 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     }
 
     const blueGreenDeployment = new customresource.AwsCustomResource(this, `BlueGreenDeployment`, {
-      onUpdate: codedeployCreateDeploymentCall,
+      onCreate: codedeployListDeploymentsCall, //this is the onCreate hook in order to not trigger a deployment upon resource creation
+      onUpdate: codedeployCreateDeploymentCall, //only trigger a deployment upon stack updates
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
       role: iamRole
     })
