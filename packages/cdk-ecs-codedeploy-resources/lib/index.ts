@@ -1,7 +1,6 @@
 import * as cdk from "@aws-cdk/core";
 import * as customresource from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
 
@@ -12,6 +11,7 @@ export interface CdkEcsCodedeployResourcesProps {
   appName: string;
   listenerArn: string;
   targetGroupName: string;
+  commitHash: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -22,8 +22,6 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     const iamRole = iam.Role.fromRoleArn(this, "EcsBlueGreenDeploymentResourcesRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
-
-    let time: string = Date.UTC.toString();
 
     const bucket = new s3.Bucket(this, 'Bucket', {
       bucketName: `deploy-${props.appName}.${props.stage}.ecs`,
@@ -229,7 +227,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
         deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
       },
-      physicalResourceId: customresource.PhysicalResourceId.of(time)
+      physicalResourceId: customresource.PhysicalResourceId.of(`${props.stage}-${props.appName}-deployment-${props.commitHash}`)
     }
 
     let codedeployCreateDeploymentCall: customresource.AwsSdkCall = {
@@ -255,11 +253,11 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           }
         },
       },
-      physicalResourceId: customresource.PhysicalResourceId.of(time)
+      physicalResourceId: customresource.PhysicalResourceId.of(`${props.stage}-${props.appName}-deployment-${props.commitHash}`)
     }
 
     const blueGreenDeployment = new customresource.AwsCustomResource(this, `BlueGreenDeployment`, {
-      onCreate: codedeployListDeploymentsCall, //this is the onCreate hook in order to not trigger a deployment upon resource creation
+      onCreate: codedeployListDeploymentsCall, //this is the onCreate hook in order to not trigger a deployment during initial stack creation
       onUpdate: codedeployCreateDeploymentCall, //only trigger a deployment upon stack updates
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
       role: iamRole
