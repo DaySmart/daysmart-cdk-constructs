@@ -5,7 +5,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
-// import * as logs from "@aws-cdk/aws-logs";
+import * as logs from "@aws-cdk/aws-logs";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -37,7 +37,7 @@ export class CdkEcsAlb extends cdk.Construct {
                 "kms:Decrypt"
             ],
             resources: [
-                "*"
+                `arn:aws:ssm:us-east-1:${cdk.Stack.of(this).account}:parameter/${props.stage}-${props.appName}`
             ],
             effect: iam.Effect.ALLOW
         }))
@@ -86,12 +86,13 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-            // logging: ecs.LogDriver.awsLogs({
-            //     logGroup: new logs.LogGroup(this, "LogGroup", {
-            //         logGroupName: `${props.appName}-ecs`,
-            //     }),
-            //     streamPrefix: "ecs",
-            // }),
+            logging: ecs.LogDriver.awsLogs({
+                logGroup: new logs.LogGroup(this, "LogGroup", {
+                    logGroupName: `${props.stage}-${props.appName}-ecs`,
+                    retention: logs.RetentionDays.INFINITE
+                }),
+                streamPrefix: "ecs",
+            }),
         });
 
         const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
@@ -110,7 +111,7 @@ export class CdkEcsAlb extends cdk.Construct {
 
         const applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
             cluster,
-            serviceName: `${props.appName}-patterntest`,
+            serviceName: `${props.stage}-${props.appName}`,
             desiredCount: 1,
             taskDefinition: taskDefinition,
             deploymentController: {
