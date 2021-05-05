@@ -19,7 +19,27 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
     super(scope, id);
 
-    const iamRole = iam.Role.fromRoleArn(this, "EcsBlueGreenDeploymentResourcesRole", "arn:aws:iam::022393549274:role/AWSCustomResourceRoleFullAccess")
+    const customResourceIamRole = new iam.Role(this, "CustomResourceRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSLambda_FullAccess")
+      ]
+    });
+
+    const codeDeployServiceRole = new iam.Role(this, "CodeDeployServiceRole", {
+      assumedBy: new iam.ServicePrincipal("codedeploy.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("IAMFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSLambda_FullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployRoleForECS"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCloudFormationFullAccess"),
+      ]
+    });
+
+    const appPrefix = `${props.stage}-${props.appName}`
+    const applicationName = `${appPrefix}-CodeDeployApplication`
+    const deploymentGroupName = `${appPrefix}-CodeDeployDeploymentGroup`
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
@@ -61,7 +81,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
       service: 'CodeDeploy',
       action: 'createApplication',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+        applicationName: applicationName,
         computePlatform: "ECS"
       },
       physicalResourceId: customresource.PhysicalResourceId.of('deployment-application-custom-resource')
@@ -71,7 +91,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
       service: 'CodeDeploy',
       action: 'updateApplication',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`
+        applicationName: applicationName
       },
       physicalResourceId: customresource.PhysicalResourceId.of('deployment-application-update-custom-resource')
     }
@@ -83,20 +103,20 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         service: 'CodeDeploy',
         action: 'deleteApplication',
         parameters: {
-          applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+          applicationName: applicationName,
         }
       },
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: iamRole
+      role: customResourceIamRole
     });
 
     let codedeployCreateDeploymentGroupCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
       action: 'createDeploymentGroup',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
-        deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
-        serviceRoleArn: "arn:aws:iam::022393549274:role/CodeDeployServiceRoleECS",
+        applicationName: applicationName,
+        deploymentGroupName: deploymentGroupName,
+        serviceRoleArn: codeDeployServiceRole.roleArn,
         deploymentConfigName: "CodeDeployDefault.ECSAllAtOnce",
         autoRollbackConfiguration: {
           enabled: true,
@@ -137,7 +157,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
                   name: `${props.targetGroupName}`
                 },
                 {
-                  name: `${props.stage}-${props.appName}-TargetGroup2`
+                  name: `${appPrefix}-TargetGroup2`
                 }
               ]
             }
@@ -151,8 +171,8 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
       service: 'CodeDeploy',
       action: 'updateDeploymentGroup',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
-        currentDeploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
+        applicationName: applicationName,
+        currentDeploymentGroupName: deploymentGroupName,
         deploymentConfigName: "CodeDeployDefault.ECSAllAtOnce",
         autoRollbackConfiguration: {
           enabled: true,
@@ -193,7 +213,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
                   name: `${props.targetGroupName}`
                 },
                 {
-                  name: `${props.stage}-${props.appName}-TargetGroup2`
+                  name: `${appPrefix}-TargetGroup2`
                 }
               ]
             }
@@ -210,12 +230,12 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         service: 'CodeDeploy',
         action: 'deleteDeploymentGroup',
         parameters: {
-          applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
-          deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`
+          applicationName: applicationName,
+          deploymentGroupName: deploymentGroupName
         }
       },
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: iamRole
+      role: customResourceIamRole
     })
 
     codeDeployDeploymentGroup.node.addDependency(codeDeployApplication);
@@ -224,17 +244,17 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
       service: 'CodeDeploy',
       action: 'listDeployments',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
-        deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
+        applicationName: applicationName,
+        deploymentGroupName: deploymentGroupName,
       },
-      physicalResourceId: customresource.PhysicalResourceId.of(`${props.stage}-${props.appName}-deployment-${props.commitHash}`)
+      physicalResourceId: customresource.PhysicalResourceId.of(`${appPrefix}-deployment-${props.commitHash}`)
     }
 
     let codedeployCreateDeploymentCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
       action: 'createDeployment',
       parameters: {
-        applicationName: `${props.stage}-${props.appName}-CodeDeployApplication`,
+        applicationName: applicationName,
         autoRollbackConfiguration: {
           enabled: true,
           events: [
@@ -242,8 +262,8 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
             "DEPLOYMENT_STOP_ON_REQUEST"
           ]
         },
-        deploymentGroupName: `${props.stage}-${props.appName}-CodeDeployDeploymentGroup`,
-        description: `Blue/Green ECS Deployment Created for ${props.stage}-${props.appName}`,
+        deploymentGroupName: deploymentGroupName,
+        description: `Blue/Green ECS Deployment Created for ${appPrefix}`,
         revision: {
           revisionType: "S3",
           s3Location: {
@@ -253,14 +273,14 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           }
         },
       },
-      physicalResourceId: customresource.PhysicalResourceId.of(`${props.stage}-${props.appName}-deployment-${props.commitHash}`)
+      physicalResourceId: customresource.PhysicalResourceId.of(`${appPrefix}-deployment-${props.commitHash}`)
     }
 
     const blueGreenDeployment = new customresource.AwsCustomResource(this, `BlueGreenDeployment`, {
       onCreate: codedeployListDeploymentsCall, //this is the onCreate hook in order to not trigger a deployment during initial stack creation
       onUpdate: codedeployCreateDeploymentCall, //only trigger a deployment upon stack updates
       policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: iamRole
+      role: customResourceIamRole
     })
 
     blueGreenDeployment.node.addDependency(codeDeployDeploymentGroup);
