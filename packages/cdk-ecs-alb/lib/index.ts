@@ -14,6 +14,7 @@ export interface CdkEcsAlbProps {
     securityGroupId: string;
     repositoryName: string;
     stage: string;
+    healthCheckPath: string;
     tag?: string;
 }
 
@@ -100,7 +101,7 @@ export class CdkEcsAlb extends cdk.Construct {
             targetType: elbv2.TargetType.INSTANCE,
             protocol: elbv2.ApplicationProtocol.HTTP,
             healthCheck: {
-                path: "/api/v2/Health/Check",
+                path: props.healthCheckPath,
                 healthyThresholdCount: 2,
                 unhealthyThresholdCount: 5,
                 interval: cdk.Duration.seconds(30),
@@ -120,7 +121,7 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
-            path: "/api/v2/Health/Check",
+            path: props.healthCheckPath,
             healthyThresholdCount: 2,
             unhealthyThresholdCount: 5,
             interval: cdk.Duration.seconds(30),
