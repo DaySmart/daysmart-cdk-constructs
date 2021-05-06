@@ -19,27 +19,17 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
     super(scope, id);
 
-    const customResourceIamRole = new iam.Role(this, "CustomResourceRole", {
-      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSLambda_FullAccess")
-      ]
-    });
-
     const codeDeployServiceRole = new iam.Role(this, "CodeDeployServiceRole", {
       assumedBy: new iam.ServicePrincipal("codedeploy.amazonaws.com"),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("IAMFullAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSLambda_FullAccess"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployRoleForECS"),
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCloudFormationFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployRoleForECS")
       ]
     });
 
     const appPrefix = `${props.stage}-${props.appName}`
     const applicationName = `${appPrefix}-CodeDeployApplication`
     const deploymentGroupName = `${appPrefix}-CodeDeployDeploymentGroup`
+    const deploymentConfig: string = "CodeDeployDefault.ECSAllAtOnce"
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
@@ -106,8 +96,17 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           applicationName: applicationName,
         }
       },
-      policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: customResourceIamRole
+      policy: customresource.AwsCustomResourcePolicy.fromStatements([
+        new iam.PolicyStatement({
+          actions: [
+            "codedeploy:CreateApplication",
+            "codedeploy:UpdateApplication",
+            "codedeploy:DeleteApplication"
+          ],
+          resources: [`arn:aws:codedeploy:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:application:${applicationName}`],
+          effect: iam.Effect.ALLOW
+        })
+      ])
     });
 
     let codedeployCreateDeploymentGroupCall: customresource.AwsSdkCall = {
@@ -117,7 +116,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         applicationName: applicationName,
         deploymentGroupName: deploymentGroupName,
         serviceRoleArn: codeDeployServiceRole.roleArn,
-        deploymentConfigName: "CodeDeployDefault.ECSAllAtOnce",
+        deploymentConfigName: deploymentConfig,
         autoRollbackConfiguration: {
           enabled: true,
           events: [
@@ -173,7 +172,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
       parameters: {
         applicationName: applicationName,
         currentDeploymentGroupName: deploymentGroupName,
-        deploymentConfigName: "CodeDeployDefault.ECSAllAtOnce",
+        deploymentConfigName: deploymentConfig,
         autoRollbackConfiguration: {
           enabled: true,
           events: [
@@ -234,8 +233,22 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           deploymentGroupName: deploymentGroupName
         }
       },
-      policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: customResourceIamRole
+      policy: customresource.AwsCustomResourcePolicy.fromStatements([
+        new iam.PolicyStatement({
+          actions: [
+            "codedeploy:CreateDeploymentGroup",
+            "codedeploy:UpdateDeploymentGroup",
+            "codedeploy:DeleteDeploymentGroup"
+          ],
+          resources: [`arn:aws:codedeploy:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:deploymentgroup:${applicationName}/${deploymentGroupName}`],
+          effect: iam.Effect.ALLOW
+        }),
+        new iam.PolicyStatement({
+          actions: ["iam:PassRole"],
+          resources: ["*"],
+          effect: iam.Effect.ALLOW
+        })
+      ])
     })
 
     codeDeployDeploymentGroup.node.addDependency(codeDeployApplication);
@@ -279,8 +292,35 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     const blueGreenDeployment = new customresource.AwsCustomResource(this, `BlueGreenDeployment`, {
       onCreate: codedeployListDeploymentsCall, //this is the onCreate hook in order to not trigger a deployment during initial stack creation
       onUpdate: codedeployCreateDeploymentCall, //only trigger a deployment upon stack updates
-      policy: customresource.AwsCustomResourcePolicy.fromSdkCalls({ resources: customresource.AwsCustomResourcePolicy.ANY_RESOURCE }),
-      role: customResourceIamRole
+      policy: customresource.AwsCustomResourcePolicy.fromStatements([
+        new iam.PolicyStatement({
+          actions: [
+            "codedeploy:*",
+          ],
+          resources: [
+            `arn:aws:codedeploy:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:application:${applicationName}`
+          ],
+          effect: iam.Effect.ALLOW
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            "codedeploy:*",
+          ],
+          resources: [
+            `arn:aws:codedeploy:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:deploymentgroup:${applicationName}/${deploymentGroupName}`
+          ],
+          effect: iam.Effect.ALLOW
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            "codedeploy:*",
+          ],
+          resources: [
+            `arn:aws:codedeploy:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:deploymentconfig:${deploymentConfig}`
+          ],
+          effect: iam.Effect.ALLOW
+        })
+      ])
     })
 
     blueGreenDeployment.node.addDependency(codeDeployDeploymentGroup);
