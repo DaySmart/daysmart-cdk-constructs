@@ -66,6 +66,12 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         clusterOutput.overrideLogicalId("ClusterName");
 
+        const securityGroupOutput = new cdk.CfnOutput(this, "SecurityGroupId", {
+            value: securityGroup.securityGroupId,
+        });
+
+        securityGroupOutput.overrideLogicalId("SecurityGroupId");
+
         // Need execution stuff, waiting for new release
         // const cfnCluster = cluster.node.defaultChild as ecs.CfnCluster;
     }
