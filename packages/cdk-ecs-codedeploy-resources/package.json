@@ -17,11 +17,13 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/core": "^1.91.0",
     "@aws-cdk/aws-cloudfront": "^1.91.0",
     "@aws-cdk/aws-iam": "^1.91.0",
     "@aws-cdk/aws-s3": "^1.91.0",
-    "@aws-cdk/custom-resources": "^1.91.0"
+    "@aws-cdk/aws-s3-deployment": "^1.91.0",
+    "@aws-cdk/core": "^1.91.0",
+    "@aws-cdk/custom-resources": "^1.91.0",
+    "js-yaml": "^4.1.0"
   },
   "publishConfig": {
     "access": "public"

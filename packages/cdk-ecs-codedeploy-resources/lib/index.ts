@@ -3,6 +3,9 @@ import * as customresource from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+const fs = require('fs');
+const yaml = require('js-yaml');
 
 export interface CdkEcsCodedeployResourcesProps {
   stage: string;
@@ -31,41 +34,38 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     const deploymentGroupName = `${appPrefix}-CodeDeployDeploymentGroup`
     const deploymentConfig: string = "CodeDeployDefault.ECSAllAtOnce"
 
+    let data = {
+      version: 0.0,
+      Resources: [
+        {
+          TargetService: {
+            Type: "AWS::ECS::Service",
+            Properties: {
+              TaskDefinition: `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
+              LoadBalancerInfo: {
+                ContainerName: "Container",
+                ContainerPort: 80
+              }
+            }
+          }
+        }
+      ]
+    };
+
+    let yamlStr = yaml.dump(data);
+    fs.writeFileSync(__dirname + `/../assets/${appPrefix}-appspec.yml`, yamlStr);
+
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
-    const bucket = new s3.Bucket(this, 'Bucket', {
-      bucketName: `deploy-${props.appName}.${props.stage}.ecs`,
-      publicReadAccess: true,
-      versioned: true,
+    const bucket = s3.Bucket.fromBucketName(this, "Bucket", "deploy-template.dsicollection.ecs")
+
+    new s3deploy.BucketDeployment(this, "S3 Yaml Upload", {
+      sources: [
+        s3deploy.Source.asset(__dirname + '/../assets')
+      ],
+      destinationBucket: bucket,
+      destinationKeyPrefix: `${props.stage}`
     });
-
-    const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAcessIdentity', {
-      comment: `OriginAccessIdentity for ${bucket.bucketName}.`
-    });
-
-    const bucketPolicy = new s3.BucketPolicy(this, 'BucketPolicy', {
-      bucket: bucket
-    });
-
-    bucketPolicy.document.addStatements(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        principals: [originAccessIdentity.grantPrincipal],
-        actions: ['s3:GetObject'],
-        resources: [bucket.bucketArn + "/*"],
-      })
-    );
-
-    let output = new cdk.CfnOutput(this, "AppspecBucket", {
-      value: bucket.bucketName
-    });
-
-    let output2 = new cdk.CfnOutput(this, "OriginAccessIdentity", {
-      value: originAccessIdentity.originAccessIdentityName
-    });
-
-    output.overrideLogicalId("AppspecBucket");
-    output2.overrideLogicalId("OriginAccessIdentity");
 
     let codedeployCreateApplicationCall: customresource.AwsSdkCall = {
       service: 'CodeDeploy',
@@ -282,7 +282,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           s3Location: {
             bucket: bucket.bucketName,
             bundleType: "YAML",
-            key: 'appspec.yml'
+            key: `${props.stage}/${appPrefix}-appspec.yml`
           }
         },
       },
