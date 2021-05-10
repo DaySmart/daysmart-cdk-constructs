@@ -1,8 +1,8 @@
 {
-  "name": "cdk-ecs-codedeploy-resources",
-  "version": "0.1.0",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "name": "@daysmart/cdk-ecs-codedeploy-resources",
+  "version": "0.1.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -22,5 +22,8 @@
     "@aws-cdk/aws-iam": "^1.91.0",
     "@aws-cdk/aws-s3": "^1.91.0",
     "@aws-cdk/custom-resources": "^1.91.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

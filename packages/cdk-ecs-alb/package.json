@@ -1,8 +1,8 @@
 {
-    "name": "cdk-ecs-alb",
+    "name": "@daysmart/cdk-ecs-alb",
     "version": "0.1.0",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
         "watch": "tsc -w",
@@ -25,5 +25,8 @@
         "@aws-cdk/aws-iam": "^1.95.1",
         "@aws-cdk/aws-logs": "^1.95.1",
         "@aws-cdk/core": "^1.95.1"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
