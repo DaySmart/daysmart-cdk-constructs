@@ -327,5 +327,6 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     })
 
     blueGreenDeployment.node.addDependency(codeDeployDeploymentGroup);
+    blueGreenDeployment.node.addDependency(bucketDeployment);
   }
 }
