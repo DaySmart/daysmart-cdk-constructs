@@ -15,6 +15,7 @@ export interface CdkEcsCodedeployResourcesProps {
   listenerArn: string;
   targetGroupName: string;
   commitHash: string;
+  taskDefinitionVersion?: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -41,7 +42,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           TargetService: {
             Type: "AWS::ECS::Service",
             Properties: {
-              TaskDefinition: `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
+              TaskDefinition: (props.taskDefinitionVersion) ? `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}:${props.taskDefinitionVersion}` : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
               LoadBalancerInfo: {
                 ContainerName: "Container",
                 ContainerPort: 80
@@ -59,12 +60,14 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
 
     const bucket = s3.Bucket.fromBucketName(this, "Bucket", "deploy-template.dsicollection.ecs")
 
-    new s3deploy.BucketDeployment(this, "S3 Yaml Upload", {
+    const bucketDeployment = new s3deploy.BucketDeployment(this, "S3 Yaml Upload", {
       sources: [
         s3deploy.Source.asset(__dirname + '/../assets')
       ],
       destinationBucket: bucket,
-      destinationKeyPrefix: `${props.stage}`
+      destinationKeyPrefix: `${props.stage}`,
+      prune: false,
+      metadata: { commitHash: `${props.commitHash}` }, // user-defined metadata
     });
 
     let codedeployCreateApplicationCall: customresource.AwsSdkCall = {
