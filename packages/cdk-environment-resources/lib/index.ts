@@ -2,6 +2,9 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as autoscaling from "@aws-cdk/aws-autoscaling";
+import * as iam from "@aws-cdk/aws-iam";
+import * as s3 from "@aws-cdk/aws-s3";
+import * as cloudfront from "@aws-cdk/aws-cloudfront";
 
 export interface CdkEnvironmentResourcesProps {
     vpcId: string;
@@ -19,6 +22,40 @@ export class CdkEnvironmentResources extends cdk.Construct {
         super(scope, id);
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
+
+        const bucket = new s3.Bucket(this, 'Bucket', {
+            bucketName: `deploy-dsicollection.${props.stage}.ecs`,
+            publicReadAccess: true,
+            versioned: true,
+        });
+
+        const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAcessIdentity', {
+            comment: `OriginAccessIdentity for ${bucket.bucketName}.`
+        });
+
+        const bucketPolicy = new s3.BucketPolicy(this, 'BucketPolicy', {
+            bucket: bucket
+        });
+
+        bucketPolicy.document.addStatements(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                principals: [originAccessIdentity.grantPrincipal],
+                actions: ['s3:GetObject'],
+                resources: [bucket.bucketArn + "/*"],
+            })
+        );
+
+        let output = new cdk.CfnOutput(this, "AppspecBucket", {
+            value: bucket.bucketName
+        });
+
+        let output2 = new cdk.CfnOutput(this, "OriginAccessIdentity", {
+            value: originAccessIdentity.originAccessIdentityName
+        });
+
+        output.overrideLogicalId("AppspecBucket");
+        output2.overrideLogicalId("OriginAccessIdentity");
 
         const cluster = new ecs.Cluster(this, "Cluster", {
             clusterName: `${props.stage}-${props.project}`,

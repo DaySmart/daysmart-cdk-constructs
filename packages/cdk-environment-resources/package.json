@@ -1,6 +1,6 @@
 {
     "name": "@daysmart/cdk-environment-resources",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -18,8 +18,11 @@
     },
     "dependencies": {
         "@aws-cdk/aws-autoscaling": "^1.94.1",
+        "@aws-cdk/aws-cloudfront": "^1.94.1",
         "@aws-cdk/aws-ec2": "^1.94.1",
         "@aws-cdk/aws-ecs": "^1.94.1",
+        "@aws-cdk/aws-iam": "^1.94.1",
+        "@aws-cdk/aws-s3": "^1.94.1",
         "@aws-cdk/core": "^1.94.1"
     }
 }
