@@ -15,6 +15,7 @@ export interface CdkEcsCodedeployResourcesProps {
   listenerArn: string;
   targetGroupName: string;
   commitHash: string;
+  deployBucket: string;
   taskDefinitionVersion?: string;
 }
 
@@ -58,7 +59,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
 
     var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
-    const bucket = s3.Bucket.fromBucketName(this, "Bucket", "deploy-template.dsicollection.ecs")
+    const bucket = s3.Bucket.fromBucketName(this, "Bucket", props.deployBucket)
 
     const bucketDeployment = new s3deploy.BucketDeployment(this, "S3 Yaml Upload", {
       sources: [
@@ -283,7 +284,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
         revision: {
           revisionType: "S3",
           s3Location: {
-            bucket: bucket.bucketName,
+            bucket: props.deployBucket,
             bundleType: "YAML",
             key: `${props.stage}/${appPrefix}-appspec.yml`
           }
