@@ -1,8 +1,8 @@
 {
-  "name": "cdk-ecs-codedeploy-resources",
-  "version": "0.1.0",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "name": "@daysmart/cdk-ecs-codedeploy-resources",
+  "version": "0.1.5",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -17,10 +17,15 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/core": "^1.91.0",
     "@aws-cdk/aws-cloudfront": "^1.91.0",
     "@aws-cdk/aws-iam": "^1.91.0",
     "@aws-cdk/aws-s3": "^1.91.0",
-    "@aws-cdk/custom-resources": "^1.91.0"
+    "@aws-cdk/aws-s3-deployment": "^1.91.0",
+    "@aws-cdk/core": "^1.91.0",
+    "@aws-cdk/custom-resources": "^1.91.0",
+    "js-yaml": "^4.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
