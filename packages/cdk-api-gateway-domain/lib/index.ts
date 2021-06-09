@@ -22,6 +22,8 @@ export class CdkApiGatewayDomain extends cdk.Construct {
     const api = apigw.RestApi.fromRestApiId(this, "Rest API", `${props.restApiId}`);
 
     let customDomain: apigw.DomainName;
+    let usagePlan: apigw.CfnUsagePlan;
+    let cloudformationBasePathMapping: apigw.CfnBasePathMapping;
 
     if (props.dynamicEnv) {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
@@ -30,6 +32,23 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
       });
+
+      usagePlan = new apigw.CfnUsagePlan(this, "UsagePlan", {
+        usagePlanName: `${props.dynamicEnv}-${props.project}-usagePlan`,
+        apiStages: [
+          {
+            apiId: props.restApiId,
+            stage: props.dynamicEnv
+          }
+        ]
+      });
+
+      cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
+        basePath: `${props.basePath}`,
+        domainName: customDomain.domainName,
+        restApiId: `${props.restApiId}`,
+        stage: `${props.dynamicEnv}`
+      });
     } else {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
         domainName: (props.baseEnv == "prod") ? `api.${props.project}.${props.companyDomainName}` : `api.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
@@ -37,14 +56,24 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
       });
-    }
 
-    const cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
-      basePath: `${props.basePath}`,
-      domainName: customDomain.domainName,
-      restApiId: `${props.restApiId}`,
-      stage: `${props.baseEnv}` 
-    });
+      usagePlan = new apigw.CfnUsagePlan(this, "UsagePlan", {
+        usagePlanName: `${props.baseEnv}-${props.project}-usagePlan`,
+        apiStages: [
+          {
+            apiId: props.restApiId,
+            stage: props.baseEnv
+          }
+        ]
+      });
+
+      cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
+        basePath: `${props.basePath}`,
+        domainName: customDomain.domainName,
+        restApiId: `${props.restApiId}`,
+        stage: `${props.baseEnv}`
+      });
+    }
 
     const cloudformationRoute53Change = new route53.CfnRecordSet(this, "CloudformationAliasRecordRoute53", {
       aliasTarget: {
