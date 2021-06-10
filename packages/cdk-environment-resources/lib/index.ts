@@ -4,7 +4,9 @@ import * as ecs from "@aws-cdk/aws-ecs";
 import * as autoscaling from "@aws-cdk/aws-autoscaling";
 import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as customresource from "@aws-cdk/custom-resources";
+// import path = require("path");
 
 export interface CdkEnvironmentResourcesProps {
     vpcId: string;
@@ -22,6 +24,17 @@ export class CdkEnvironmentResources extends cdk.Construct {
         super(scope, id);
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
+
+        const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
+            vpc: vpc,
+            securityGroupName: `${props.stage}-${props.project}-sg`,
+            description: `Security group for ${props.stage}-${props.project} ecs container instances for dynamic port mapping.`,
+        });
+
+        securityGroup.addIngressRule(
+            ec2.Peer.ipv4("10.0.0.0/8"),
+            ec2.Port.allTcp()
+        );
 
         const bucket = new s3.Bucket(this, 'Bucket', {
             bucketName: `deploy-dsicollection.${props.stage}.ecs`,
@@ -41,39 +54,95 @@ export class CdkEnvironmentResources extends cdk.Construct {
             containerInsights: true,
         });
 
-        const autoScalingGroup = cluster.addCapacity(
-            "DefaultAutoScalingGroupCapacity",
+        const goldenContainerInstanceAmiProvider = new customresource.Provider(
+            this,
+            "GoldenContainerInstanceAmiProvider",
             {
-                autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
-                instanceType: new ec2.InstanceType("m5.xlarge"),
-                minCapacity: 1,
-                desiredCapacity: 2,
-                maxCapacity: 3,
-                machineImage: ecs.EcsOptimizedImage.windows(
-                    ecs.WindowsOptimizedVersion.SERVER_2019
-                ),
-                groupMetrics: [autoscaling.GroupMetrics.all()],
-                instanceMonitoring: autoscaling.Monitoring.DETAILED,
-                keyName: props.instanceKeyName,
+                onEventHandler: new lambda.Function(this, "GoldenContainerInstanceAmiLookupFunction", {
+                    handler: "golden_container_instance_ami_lookup.handler",
+                    runtime: lambda.Runtime.PYTHON_3_8,
+                    code: lambda.Code.fromBucket(s3.Bucket.fromBucketName(this, "LambdaHandlerBucket", `daysmart-assets-${cdk.Stack.of(this).region}`), "common/golden_container_instance_ami_lookup.py"),
+                    timeout: cdk.Duration.seconds(30),
+                    initialPolicy: [
+                        new iam.PolicyStatement({
+                            actions: ["ec2:DescribeImages"],
+                            resources: ["*"],
+                        }),
+                    ],
+                }),
             }
         );
 
-        const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
-            vpc: vpc,
-            securityGroupName: `${props.stage}-${props.project}-sg`,
-            description: `Security group for ${props.stage}-${props.project} ecs container instances for dynamic port mapping.`,
-        });
+        // const goldenContainerInstanceAmiProvider = new customresource.Provider(
+        //     this,
+        //     "GoldenContainerInstanceAmiProvider",
+        //     {
+        //         onEventHandler: new lambda.Function(this, "GoldenContainerInstanceAmiLookupFunction", {
+        //             handler: "golden_container_instance_ami_lookup.handler",
+        //             runtime: lambda.Runtime.PYTHON_3_8,
+        //             code: lambda.Code.fromAsset(
+        //                 __dirname + '/../assets'
+        //             ),
+        //             timeout: cdk.Duration.seconds(30),
+        //             initialPolicy: [
+        //                 new iam.PolicyStatement({
+        //                     actions: ["ec2:DescribeImages"],
+        //                     resources: ["*"],
+        //                 }),
+        //             ],
+        //         }),
+        //     }
+        // );
 
-        securityGroup.addIngressRule(
-            ec2.Peer.ipv4("10.0.0.0/8"),
-            ec2.Port.allTcp()
+        const goldenContainerInstanceAmiResource = new cdk.CustomResource(
+            this,
+            "GoldenAmiResource",
+            {
+                serviceToken: goldenContainerInstanceAmiProvider.onEventHandler.functionArn,
+                resourceType: "Custom::DsGoldenContainerInstanceAmi",
+                properties: {
+                    timestamp: new Date()
+                }
+            }
         );
 
-        autoScalingGroup.addSecurityGroup(securityGroup);
+        goldenContainerInstanceAmiResource.node.addDependency(goldenContainerInstanceAmiProvider);
 
-        autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
+        const goldenAmiImageId = goldenContainerInstanceAmiResource.getAttString("ImageId");
+        const goldenAmiImageName = goldenContainerInstanceAmiResource.getAttString("name");
+
+        const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
+            autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
+            instanceType: new ec2.InstanceType("m5.xlarge"),
+            vpc: vpc,
+            machineImage: ec2.MachineImage.lookup({
+                name: goldenAmiImageName,
+                filters: {
+                    "image-id": [`${goldenAmiImageId}`]
+                },
+                windows: true
+            }),
+            securityGroup: securityGroup,
+            minCapacity: 1,
+            desiredCapacity: 2,
+            maxCapacity: 3,
+            keyName: props.instanceKeyName,
+            instanceMonitoring: autoscaling.Monitoring.DETAILED,
+            groupMetrics: [autoscaling.GroupMetrics.all()]
+        });
+
+        const targetTrackingScalingPolicy = autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
             targetUtilizationPercent: 50,
         });
+
+        autoScalingGroup.node.addDependency(goldenContainerInstanceAmiResource);
+
+        const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
+            capacityProviderName: `${props.stage}-${props.project}-asg-capacity-provider`,
+            autoScalingGroup: autoScalingGroup,
+        })
+
+        cluster.addAsgCapacityProvider(defaultAsgCapacityProvider);
 
         const clusterOutput = new cdk.CfnOutput(this, "ClusterName", {
             value: cluster.clusterName,
