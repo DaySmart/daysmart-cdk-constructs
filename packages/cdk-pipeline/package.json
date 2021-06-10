@@ -1,0 +1,34 @@
+{
+  "name": "@daysmart/cdk-pipeline",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.108.0",
+    "@types/jest": "^26.0.23",
+    "@types/node": "15.12.2",
+    "jest": "^27.0.4",
+    "ts-jest": "^27.0.3",
+    "aws-cdk": "1.108.0",
+    "ts-node": "^10.0.0",
+    "typescript": "~4.3.2"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-codebuild": "1.108.0",
+    "@aws-cdk/aws-codepipeline": "1.108.0",
+    "@aws-cdk/aws-codepipeline-actions": "1.108.0",
+    "@aws-cdk/aws-iam": "1.108.0",
+    "@aws-cdk/aws-s3": "1.108.0",
+    "@aws-cdk/core": "1.108.0",
+    "source-map-support": "^0.5.19"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
