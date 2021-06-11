@@ -2,17 +2,14 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as autoscaling from "@aws-cdk/aws-autoscaling";
-import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as customresource from "@aws-cdk/custom-resources";
-// import path = require("path");
 
 export interface CdkEnvironmentResourcesProps {
     vpcId: string;
     stage: string;
     project: string;
     instanceKeyName?: string;
+    amiName: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -40,6 +37,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
             bucketName: `deploy-dsicollection.${props.stage}.ecs`,
             publicReadAccess: true,
             versioned: true,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            autoDeleteObjects: true
         });
 
         let output = new cdk.CfnOutput(this, "AppspecBucket", {
@@ -48,78 +47,14 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         output.overrideLogicalId("AppspecBucket");
 
-        const cluster = new ecs.Cluster(this, "Cluster", {
-            clusterName: `${props.stage}-${props.project}`,
-            vpc: vpc,
-            containerInsights: true,
-        });
-
-        const goldenContainerInstanceAmiProvider = new customresource.Provider(
-            this,
-            "GoldenContainerInstanceAmiProvider",
-            {
-                onEventHandler: new lambda.Function(this, "GoldenContainerInstanceAmiLookupFunction", {
-                    handler: "golden_container_instance_ami_lookup.handler",
-                    runtime: lambda.Runtime.PYTHON_3_8,
-                    code: lambda.Code.fromBucket(s3.Bucket.fromBucketName(this, "LambdaHandlerBucket", `daysmart-assets-${cdk.Stack.of(this).region}`), "common/golden_container_instance_ami_lookup.py"),
-                    timeout: cdk.Duration.seconds(30),
-                    initialPolicy: [
-                        new iam.PolicyStatement({
-                            actions: ["ec2:DescribeImages"],
-                            resources: ["*"],
-                        }),
-                    ],
-                }),
-            }
-        );
-
-        // const goldenContainerInstanceAmiProvider = new customresource.Provider(
-        //     this,
-        //     "GoldenContainerInstanceAmiProvider",
-        //     {
-        //         onEventHandler: new lambda.Function(this, "GoldenContainerInstanceAmiLookupFunction", {
-        //             handler: "golden_container_instance_ami_lookup.handler",
-        //             runtime: lambda.Runtime.PYTHON_3_8,
-        //             code: lambda.Code.fromAsset(
-        //                 __dirname + '/../assets'
-        //             ),
-        //             timeout: cdk.Duration.seconds(30),
-        //             initialPolicy: [
-        //                 new iam.PolicyStatement({
-        //                     actions: ["ec2:DescribeImages"],
-        //                     resources: ["*"],
-        //                 }),
-        //             ],
-        //         }),
-        //     }
-        // );
-
-        const goldenContainerInstanceAmiResource = new cdk.CustomResource(
-            this,
-            "GoldenAmiResource",
-            {
-                serviceToken: goldenContainerInstanceAmiProvider.onEventHandler.functionArn,
-                resourceType: "Custom::DsGoldenContainerInstanceAmi",
-                properties: {
-                    timestamp: new Date()
-                }
-            }
-        );
-
-        goldenContainerInstanceAmiResource.node.addDependency(goldenContainerInstanceAmiProvider);
-
-        const goldenAmiImageId = goldenContainerInstanceAmiResource.getAttString("ImageId");
-        const goldenAmiImageName = goldenContainerInstanceAmiResource.getAttString("name");
-
         const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
             instanceType: new ec2.InstanceType("m5.xlarge"),
+            newInstancesProtectedFromScaleIn: false,
+            maxInstanceLifetime: cdk.Duration.days(120),
             vpc: vpc,
             machineImage: ec2.MachineImage.lookup({
-                name: goldenAmiImageName,
-                filters: {
-                    "image-id": [`${goldenAmiImageId}`]
-                },
+                name: `${props.amiName}*`,
                 windows: true
             }),
             securityGroup: securityGroup,
@@ -135,12 +70,19 @@ export class CdkEnvironmentResources extends cdk.Construct {
             targetUtilizationPercent: 50,
         });
 
-        autoScalingGroup.node.addDependency(goldenContainerInstanceAmiResource);
-
         const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
             capacityProviderName: `${props.stage}-${props.project}-asg-capacity-provider`,
             autoScalingGroup: autoScalingGroup,
+            enableManagedTerminationProtection: false,
+            targetCapacityPercent: 100,
+            enableManagedScaling: false
         })
+
+        const cluster = new ecs.Cluster(this, "Cluster", {
+            clusterName: `${props.stage}-${props.project}`,
+            vpc: vpc,
+            containerInsights: true
+        });
 
         cluster.addAsgCapacityProvider(defaultAsgCapacityProvider);
 
