@@ -11,7 +11,6 @@ export interface CdkEnvironmentResourcesProps {
     project: string;
     instanceKeyName?: string;
     amiName: string;
-    kmsKeyId?: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -24,19 +23,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
-        const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
-            vpc: vpc,
-            securityGroupName: `${props.stage}-${props.project}-sg`,
-            description: `Security group for ${props.stage}-${props.project} ecs container instances for dynamic port mapping.`,
-        });
-
-        securityGroup.addIngressRule(
-            ec2.Peer.ipv4("10.0.0.0/8"),
-            ec2.Port.allTcp()
-        );
-
         const bucket = new s3.Bucket(this, 'Bucket', {
-            bucketName: `deploy-dsicollection.${props.stage}.ecs`,
+            bucketName: `deploy-${props.project}.${props.stage}.ecs`,
             publicReadAccess: true,
             versioned: true,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -52,132 +40,21 @@ export class CdkEnvironmentResources extends cdk.Construct {
         const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
             instanceType: new ec2.InstanceType("m5.xlarge"),
+            newInstancesProtectedFromScaleIn: false,
             role: new iam.Role(this, `${props.stage}-${props.project}-IAMRole`, {
                 assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
                 managedPolicies: [
                     iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
-                    iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonInspectorReadOnlyAccess'),
-                    iam.ManagedPolicy.fromManagedPolicyName(this, 'AWSClient', 'AWSClient'),
+                    iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonInspectorReadOnlyAccess')
                 ],
-                path: '/',
-                inlinePolicies: {
-                    "BasicPolicy": new iam.PolicyDocument({
-                        statements: [
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "s3:ListAllMyBuckets"
-                                ],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: ["s3:*"],
-                                resources: [
-                                    `arn:aws:s3:::daysmart-assets-${cdk.Stack.of(this).region}`,
-                                    `arn:aws:s3:::daysmart-assets-${cdk.Stack.of(this).region}/*`
-                                ]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: ["s3:*"],
-                                resources: [
-                                    `arn:aws:s3:::daysmart-code-${cdk.Stack.of(this).region}`,
-                                    `arn:aws:s3:::daysmart-code-${cdk.Stack.of(this).region}/*`
-                                ]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: ["cloudwatch:*"],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "ssm:PutParameter",
-                                    "ssm:GetParameter"
-                                ],
-                                resources: [
-                                    `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/*`
-                                ]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "sns:Publish"
-                                ],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: ["swf:*"],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "ec2:DescribeTags",
-                                    "ec2:CreateTags"
-                                ],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "kms:Encrypt",
-                                    "kms:Decrypt",
-                                    "kms:ReEncrypt*",
-                                    "kms:GenerateDataKey*",
-                                    "kms:DescribeKey"
-                                ],
-                                resources: [
-                                    (props.kmsKeyId) ? `arn:aws:kms:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:key/${props.kmsKeyId}` : `arn:aws:kms:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:key/*`
-                                ]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "ecs:DeregisterContainerInstance",
-                                    "ecs:RegisterContainerInstance",
-                                    "ecs:Submit*"
-                                ],
-                                resources: [`arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:cluster/${props.stage}-${props.project}`]
-                            }),
-                            new iam.PolicyStatement({
-                                conditions: {
-                                    "ArnEquals": {
-                                        "ecs:cluster": `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:cluster/${props.stage}-${props.project}`
-                                    }
-                                },
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "ecs:Poll",
-                                    "ecs:StartTelemetrySession"
-                                ],
-                                resources: ["*"]
-                            }),
-                            new iam.PolicyStatement({
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "ecs:DiscoverPollEndpoint",
-                                    "ecr:GetAuthorizationToken",
-                                    "logs:CreateLogStream",
-                                    "logs:PutLogEvents"
-                                ],
-                                resources: ["*"]
-                            }),
-                        ]
-                    })
-                }
+                path: '/'
             }),
-            newInstancesProtectedFromScaleIn: false,
             maxInstanceLifetime: cdk.Duration.days(120),
             vpc: vpc,
             machineImage: ec2.MachineImage.lookup({
                 name: `${props.amiName}*`,
                 windows: true
             }),
-            securityGroup: securityGroup,
             minCapacity: 1,
             desiredCapacity: 2,
             maxCapacity: 3,
@@ -186,6 +63,10 @@ export class CdkEnvironmentResources extends cdk.Construct {
             groupMetrics: [autoscaling.GroupMetrics.all()]
         });
 
+        cdk.Tags.of(autoScalingGroup).add("EC2Group", "ecs-container-instance", {
+            applyToLaunchedInstances: true
+        });
+        
         const targetTrackingScalingPolicy = autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
             targetUtilizationPercent: 50,
         });
@@ -213,8 +94,10 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         clusterOutput.overrideLogicalId("ClusterName");
 
+        const securityGroups = autoScalingGroup.connections.securityGroups
+
         const securityGroupOutput = new cdk.CfnOutput(this, "SecurityGroupId", {
-            value: securityGroup.securityGroupId,
+            value: securityGroups[0].securityGroupId,
         });
 
         securityGroupOutput.overrideLogicalId("SecurityGroupId");
