@@ -25,24 +25,6 @@ export class CdkEcsAlb extends cdk.Construct {
         let loadBalancer: elbv2.ApplicationLoadBalancer | elbv2.NetworkLoadBalancer;
         let listener: elbv2.ApplicationListener | elbv2.NetworkListener | void;
 
-        var taskRole = new iam.Role(this, "EcsTaskRole", {
-            assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
-        });
-
-        taskRole.addToPolicy(new iam.PolicyStatement({
-            actions: [
-                "ssm:GetParameters",
-                "ssm:PutParameter",
-                "ssm:GetParameter",
-                "secretsmanager:GetSecretValue",
-                "kms:Decrypt"
-            ],
-            resources: [
-                `arn:aws:ssm:us-east-1:${cdk.Stack.of(this).account}:parameter/${props.stage}-${props.appName}`
-            ],
-            effect: iam.Effect.ALLOW
-        }))
-
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
         const repository = ecr.Repository.fromRepositoryName(
@@ -61,6 +43,34 @@ export class CdkEcsAlb extends cdk.Construct {
             clusterName: props.clusterName,
             vpc: vpc,
             securityGroups: [securityGroup],
+        });
+
+        var taskRole = new iam.Role(this, "EcsTaskRole", {
+            assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+            managedPolicies: [
+                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
+                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonInspectorReadOnlyAccess')
+            ],
+            path: '/',
+            inlinePolicies: {
+                "BasicPolicy": new iam.PolicyDocument({
+                    statements: [
+                        new iam.PolicyStatement({
+                            actions: [
+                                "ssm:GetParameters",
+                                "ssm:PutParameter",
+                                "ssm:GetParameter",
+                                "secretsmanager:GetSecretValue",
+                                "kms:Decrypt"
+                            ],
+                            resources: [
+                                `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/${props.stage}-${props.appName}`
+                            ],
+                            effect: iam.Effect.ALLOW
+                        })
+                    ]
+                })
+            }
         });
 
         const taskDefinition = new ecs.Ec2TaskDefinition(
