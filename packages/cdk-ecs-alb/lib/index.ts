@@ -16,6 +16,7 @@ export interface CdkEcsAlbProps {
     stage: string;
     healthCheckPath: string;
     tag?: string;
+    taskRoleArn: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -45,33 +46,7 @@ export class CdkEcsAlb extends cdk.Construct {
             securityGroups: [securityGroup],
         });
 
-        var taskRole = new iam.Role(this, "EcsTaskRole", {
-            assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
-            managedPolicies: [
-                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
-                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonInspectorReadOnlyAccess')
-            ],
-            path: '/',
-            inlinePolicies: {
-                "BasicPolicy": new iam.PolicyDocument({
-                    statements: [
-                        new iam.PolicyStatement({
-                            actions: [
-                                "ssm:GetParameters",
-                                "ssm:PutParameter",
-                                "ssm:GetParameter",
-                                "secretsmanager:GetSecretValue",
-                                "kms:Decrypt"
-                            ],
-                            resources: [
-                                `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/${props.stage}-${props.appName}`
-                            ],
-                            effect: iam.Effect.ALLOW
-                        })
-                    ]
-                })
-            }
-        });
+        var taskRole = iam.Role.fromRoleArn(this, "TaskRole", props.taskRoleArn)
 
         const taskDefinition = new ecs.Ec2TaskDefinition(
             this,

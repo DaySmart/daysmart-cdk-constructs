@@ -11,6 +11,8 @@ export interface CdkEnvironmentResourcesProps {
     project: string;
     instanceKeyName?: string;
     amiName: string;
+    securityGroupId: string;
+    instanceProfileArn: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -41,14 +43,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
             instanceType: new ec2.InstanceType("m5.xlarge"),
             newInstancesProtectedFromScaleIn: false,
-            role: new iam.Role(this, `${props.stage}-${props.project}-IAMRole`, {
-                assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
-                managedPolicies: [
-                    iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
-                    iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonInspectorReadOnlyAccess')
-                ],
-                path: '/'
-            }),
+            role: iam.Role.fromRoleArn(this, "InstanceProfileRole", props.instanceProfileArn),
             maxInstanceLifetime: cdk.Duration.days(120),
             vpc: vpc,
             machineImage: ec2.MachineImage.lookup({
@@ -58,6 +53,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
             minCapacity: 1,
             desiredCapacity: 2,
             maxCapacity: 3,
+            securityGroup: ec2.SecurityGroup.fromSecurityGroupId(this, "SecurityGroup", props.securityGroupId),
             keyName: props.instanceKeyName,
             instanceMonitoring: autoscaling.Monitoring.DETAILED,
             groupMetrics: [autoscaling.GroupMetrics.all()]
@@ -93,14 +89,6 @@ export class CdkEnvironmentResources extends cdk.Construct {
         });
 
         clusterOutput.overrideLogicalId("ClusterName");
-
-        const securityGroups = autoScalingGroup.connections.securityGroups
-
-        const securityGroupOutput = new cdk.CfnOutput(this, "SecurityGroupId", {
-            value: securityGroups[0].securityGroupId,
-        });
-
-        securityGroupOutput.overrideLogicalId("SecurityGroupId");
 
         // Need execution stuff, waiting for new release
         // const cfnCluster = cluster.node.defaultChild as ecs.CfnCluster;
