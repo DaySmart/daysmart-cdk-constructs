@@ -87,9 +87,13 @@ def handler(event, context):
             s3_deploy(s3_source_zips, s3_dest)
 
         if distribution_id:
-            cloudfront_invalidate(distribution_id, distribution_paths)
+            try:
+                cloudfront_invalidate(distribution_id, distribution_paths)
+            except Exception as e:
+                logger.exception(e)
+            finally:
+                cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
 
-        cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
     except KeyError as e:
         cfn_error("invalid request. Missing key %s" % str(e))
     except Exception as e:
