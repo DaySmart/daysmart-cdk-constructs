@@ -13,6 +13,7 @@ export interface CdkS3DeploymentProps {
   distributionDomain: string;
   sourceDir?: string;
   distributionPath?: string;
+  environment: string;
 }
 
 export class CdkS3Deployment extends cdk.Construct {
@@ -52,7 +53,8 @@ export class CdkS3Deployment extends cdk.Construct {
       effect: iam.Effect.ALLOW,
       actions: [
         'cloudfront:GetInvalidation',
-        'cloudfront:CreateInvalidation'
+        'cloudfront:CreateInvalidation',
+        'lambda:InvokeFunction'
       ],
       resources: ['*']
     }));
@@ -66,7 +68,8 @@ export class CdkS3Deployment extends cdk.Construct {
         DestinationBucketName: bucket.bucketName,
         DestinationBucketKeyPrefix: destinationPrefix,
         DistributionId: distribution.distributionId,
-        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*']
+        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
+        Environment: props.environment
       }
     });
   }
