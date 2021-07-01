@@ -14,6 +14,7 @@ export interface CdkS3DeploymentProps {
   sourceDir?: string;
   distributionPath?: string;
   environment: string;
+  snsTopicArn: string;
 }
 
 export class CdkS3Deployment extends cdk.Construct {
@@ -53,10 +54,17 @@ export class CdkS3Deployment extends cdk.Construct {
       effect: iam.Effect.ALLOW,
       actions: [
         'cloudfront:GetInvalidation',
-        'cloudfront:CreateInvalidation',
-        'lambda:InvokeFunction'
+        'cloudfront:CreateInvalidation'
       ],
       resources: ['*']
+    }));
+
+    handler.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'sns:Publish'
+      ],
+      resources: [`${props.snsTopicArn}`]
     }));
 
     new cdk.CustomResource(this, 'CustomResource', {
@@ -69,7 +77,8 @@ export class CdkS3Deployment extends cdk.Construct {
         DestinationBucketKeyPrefix: destinationPrefix,
         DistributionId: distribution.distributionId,
         DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
-        Environment: props.environment
+        Environment: props.environment,
+        SnsTopicArn: props.snsTopicArn
       }
     });
   }

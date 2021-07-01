@@ -21,6 +21,7 @@ cloudfront = boto3.client('cloudfront')
 CFN_SUCCESS = "SUCCESS"
 CFN_FAILED = "FAILED"
 
+
 def handler(event, context):
 
     def cfn_error(message=None):
@@ -45,6 +46,7 @@ def handler(event, context):
             dest_bucket_prefix = props.get('DestinationBucketKeyPrefix', '')
             distribution_id = props.get('DistributionId', '')
             environment = props.get('Environment', '')
+            sns_topic_arn = props.get('SnsTopicArn', '')
 
             default_distribution_path = dest_bucket_prefix
             if not default_distribution_path.endswith("/"):
@@ -96,9 +98,11 @@ def handler(event, context):
                 cloudfront_invalidate(distribution_id, distribution_paths)
             except Exception as e:
                 logger.exception(e)
-                invalidation_failed(distribution_id, environment)
+                invalidation_failed(
+                    distribution_id, environment, sns_topic_arn)
             finally:
-                cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
+                cfn_send(event, context, CFN_SUCCESS,
+                         physicalResourceId=physical_id)
 
     except KeyError as e:
         cfn_error("invalid request. Missing key %s" % str(e))
@@ -108,6 +112,8 @@ def handler(event, context):
 
 # ---------------------------------------------------------------------------------------------------
 # populate all files from s3_source_zips to a destination bucket
+
+
 def s3_deploy(s3_source_zips, s3_dest):
     # create a temporary working directory
     workdir = tempfile.mkdtemp()
@@ -139,6 +145,8 @@ def s3_deploy(s3_source_zips, s3_dest):
 
 # ---------------------------------------------------------------------------------------------------
 # invalidate files in the CloudFront distribution edge caches
+
+
 def cloudfront_invalidate(distribution_id, distribution_paths):
     invalidation_resp = cloudfront.create_invalidation(
         DistributionId=distribution_id,
@@ -156,6 +164,8 @@ def cloudfront_invalidate(distribution_id, distribution_paths):
 
 # ---------------------------------------------------------------------------------------------------
 # executes an "aws" cli command
+
+
 def aws_command(*args):
     aws = "/opt/awscli/aws"  # from AwsCliLayer
     logger.info("| aws %s" % ' '.join(args))
@@ -163,6 +173,8 @@ def aws_command(*args):
 
 # ---------------------------------------------------------------------------------------------------
 # sends a response to cloudformation
+
+
 def cfn_send(event, context, responseStatus, responseData={}, physicalResourceId=None, noEcho=False, reason=None):
 
     responseUrl = event['ResponseURL']
@@ -196,9 +208,10 @@ def cfn_send(event, context, responseStatus, responseData={}, physicalResourceId
         logger.error("| unable to send response to CloudFormation")
         logger.exception(e)
 
-def invalidation_failed(distribution_id, environment):
-    lambda_client = boto3.client('lambda')
-    lambda_payload = json.dumps({
+
+def invalidation_failed(distribution_id, environment, sns_topic_arn):
+    sns_client = boto3.client('sns')
+    sns_message = json.dumps({
         "blocks": [
             {
                 "type": "section",
@@ -214,8 +227,10 @@ def invalidation_failed(distribution_id, environment):
                 }
             }
         ],
-        "environment": "%s" % environment
+        "environment": environment
     })
-    lambda_client.invoke(FunctionName='serverless-slack-chatops-dev-sendSlack', 
-                     InvocationType='Event',
-                     Payload=lambda_payload)
+    sns_client.publish(
+        TopicArn=sns_topic_arn,
+        Message=sns_message,
+        Subject="Failed CloudFront Invalidation!"
+    )
