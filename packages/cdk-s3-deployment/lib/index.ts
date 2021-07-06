@@ -13,6 +13,8 @@ export interface CdkS3DeploymentProps {
   distributionDomain: string;
   sourceDir?: string;
   distributionPath?: string;
+  environment: string;
+  snsTopicArn: string;
 }
 
 export class CdkS3Deployment extends cdk.Construct {
@@ -57,6 +59,14 @@ export class CdkS3Deployment extends cdk.Construct {
       resources: ['*']
     }));
 
+    handler.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'sns:Publish'
+      ],
+      resources: [`${props.snsTopicArn}`]
+    }));
+
     new cdk.CustomResource(this, 'CustomResource', {
       serviceToken: handler.functionArn,
       resourceType: 'Custom::BucketDeployment',
@@ -66,7 +76,9 @@ export class CdkS3Deployment extends cdk.Construct {
         DestinationBucketName: bucket.bucketName,
         DestinationBucketKeyPrefix: destinationPrefix,
         DistributionId: distribution.distributionId,
-        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*']
+        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
+        Environment: props.environment,
+        SnsTopicArn: props.snsTopicArn
       }
     });
   }
