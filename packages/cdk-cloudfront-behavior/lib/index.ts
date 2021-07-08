@@ -135,7 +135,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
       throw Error("Required Origin Parameter Not Specified.")
     }
 
-    this.distribution = new base.CdkBaseCfAcmR53(this, "Cf-Acm-R53", {
+    const baseResources = new base.CdkBaseCfAcmR53(this, "Cf-Acm-R53", {
       project: props.project,
       stage: props.stage,
       domain1: props.domain1,
@@ -148,7 +148,9 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
       domain8: (props.domain8) ? props.domain8 : undefined,
       defaultBehaviorOptions: defaultBehaviorOptions,
       loggingBucketName: (props.loggingBucketName) ? props.loggingBucketName : undefined
-    }).distribution;
+    });
+
+    this.distribution = baseResources.distribution;
 
     var output = new cdk.CfnOutput(this, "CloudfrontDistribution", {
       value: this.distribution.distributionId
