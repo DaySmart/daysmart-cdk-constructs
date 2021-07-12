@@ -1,4 +1,5 @@
 import * as cdk from "@aws-cdk/core";
+import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
@@ -17,6 +18,7 @@ export interface CdkEcsAlbProps {
     healthCheckPath: string;
     tag?: string;
     taskRoleArn: string;
+    certificateArn: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -103,6 +105,17 @@ export class CdkEcsAlb extends cdk.Construct {
             deploymentController: {
                 type: ecs.DeploymentControllerType.CODE_DEPLOY
             }
+        });
+
+        const httpsListener = applicationLoadBalancedEC2Service.loadBalancer.addListener("HttpsListener", {
+            protocol: elbv2.ApplicationProtocol.HTTPS,
+            port: 443,
+            certificates: [
+                elbv2.ListenerCertificate.fromArn(props.certificateArn)
+            ],
+            defaultTargetGroups: [
+                applicationLoadBalancedEC2Service.targetGroup
+            ]
         });
 
         applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
