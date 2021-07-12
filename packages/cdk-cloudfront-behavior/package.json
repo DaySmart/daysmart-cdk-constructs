@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-cloudfront-behavior",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -23,5 +23,8 @@
     "@aws-cdk/aws-iam": "^1.93.0",
     "@aws-cdk/aws-s3": "^1.93.0",
     "@daysmart/cdk-base-cf-acm-r53": "^0.1.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

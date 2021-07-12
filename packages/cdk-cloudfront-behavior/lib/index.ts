@@ -123,7 +123,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
             cloudfront.OriginSslPolicy.TLS_V1_1,
             cloudfront.OriginSslPolicy.TLS_V1_2
           ],
-          readTimeout: cdk.Duration.seconds(180),
+          readTimeout: cdk.Duration.seconds(60),
           originPath: `${props.defaultHttpOriginPath}`
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
@@ -151,17 +151,6 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     });
 
     this.distribution = baseResources.distribution;
-
-    var output = new cdk.CfnOutput(this, "CloudfrontDistribution", {
-      value: this.distribution.distributionId
-    });
-
-    var output2 = new cdk.CfnOutput(this, "DistributionDomainName", {
-      value: this.distribution.distributionDomainName
-    })
-
-    output.overrideLogicalId("CloudfrontDistribution");
-    output2.overrideLogicalId("DistributionDomainName");
   }
 
   addS3OriginBehavior(props: CdkCloudfrontAddS3OriginProps): void {
@@ -208,7 +197,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
       );
 
       const cachePolicy = new cloudfront.CachePolicy(this, `${origin.name}-S3OriginCachePolicy`, {
-        cachePolicyName: `${props.stage}-${props.project}-${origin.name}-s3-cloudfront-cache-policy`,
+        cachePolicyName: `${props.stage}-${props.project}-${origin.name.split(".").join("-")}-s3-cloudfront-cache-policy`,
         comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} ${origin.name} S3 Origin`,
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
         cookieBehavior: cloudfront.CacheCookieBehavior.all(),
@@ -259,7 +248,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
 
     httpOrigins.forEach(origin => {
       const cachePolicy = new cloudfront.CachePolicy(this, `${origin.name}-HttpOriginCachePolicy`, {
-        cachePolicyName: `${props.stage}-${props.project}-${origin.name}-http-cloudfront-cache-policy`,
+        cachePolicyName: `${props.stage}-${props.project}-${origin.name.split(".").join("-")}-http-cloudfront-cache-policy`,
         comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} ${origin.name} Http Origin`,
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
         cookieBehavior: cloudfront.CacheCookieBehavior.all(),
@@ -275,7 +264,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
           cloudfront.OriginSslPolicy.TLS_V1_1,
           cloudfront.OriginSslPolicy.TLS_V1_2
         ],
-        readTimeout: cdk.Duration.seconds(180),
+        readTimeout: cdk.Duration.seconds(60),
         originPath: `${origin.path}`
       }),
         {
