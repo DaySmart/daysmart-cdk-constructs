@@ -25,6 +25,7 @@
         "@aws-cdk/aws-elasticloadbalancingv2": "^1.95.1",
         "@aws-cdk/aws-iam": "^1.95.1",
         "@aws-cdk/aws-logs": "^1.95.1",
+        "@aws-cdk/aws-route53": "^1.95.1",
         "@aws-cdk/core": "^1.95.1"
     },
     "publishConfig": {

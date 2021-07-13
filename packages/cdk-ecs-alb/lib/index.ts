@@ -7,6 +7,7 @@ import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as logs from "@aws-cdk/aws-logs";
+import * as route53 from "@aws-cdk/aws-route53";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -19,6 +20,8 @@ export interface CdkEcsAlbProps {
     tag?: string;
     taskRoleArn: string;
     certificateArn: string;
+    serviceDnsRecord: string;
+    hostedZoneDomainName: string
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -97,6 +100,12 @@ export class CdkEcsAlb extends cdk.Construct {
             vpc: vpc
         });
 
+        const httpsCertificate = acm.Certificate.fromCertificateArn(this, "HttpsCertificate", props.certificateArn);
+        const domainHostedZone = route53.HostedZone.fromLookup(this, `${props.hostedZoneDomainName} HostedZone`, {
+            domainName: props.hostedZoneDomainName,
+            privateZone: false
+        });
+
         const applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
             cluster,
             serviceName: `${props.stage}-${props.appName}`,
@@ -104,19 +113,26 @@ export class CdkEcsAlb extends cdk.Construct {
             taskDefinition: taskDefinition,
             deploymentController: {
                 type: ecs.DeploymentControllerType.CODE_DEPLOY
-            }
+            },
+            certificate: httpsCertificate,
+            protocol: elbv2.ApplicationProtocol.HTTPS,
+            domainName: props.serviceDnsRecord,
+            domainZone: domainHostedZone,
+            recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
+            redirectHTTP: true,
+            loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
 
-        const httpsListener = applicationLoadBalancedEC2Service.loadBalancer.addListener("HttpsListener", {
-            protocol: elbv2.ApplicationProtocol.HTTPS,
-            port: 443,
-            certificates: [
-                elbv2.ListenerCertificate.fromArn(props.certificateArn)
-            ],
-            defaultTargetGroups: [
-                applicationLoadBalancedEC2Service.targetGroup
-            ]
-        });
+        // const httpsListener = applicationLoadBalancedEC2Service.loadBalancer.addListener("HttpsListener", {
+        //     protocol: elbv2.ApplicationProtocol.HTTPS,
+        //     port: 443,
+        //     certificates: [
+        //         elbv2.ListenerCertificate.fromArn(props.certificateArn)
+        //     ],
+        //     defaultTargetGroups: [
+        //         applicationLoadBalancedEC2Service.targetGroup
+        //     ]
+        // });
 
         applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
             path: props.healthCheckPath,
