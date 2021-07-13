@@ -123,17 +123,6 @@ export class CdkEcsAlb extends cdk.Construct {
             loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
 
-        // const httpsListener = applicationLoadBalancedEC2Service.loadBalancer.addListener("HttpsListener", {
-        //     protocol: elbv2.ApplicationProtocol.HTTPS,
-        //     port: 443,
-        //     certificates: [
-        //         elbv2.ListenerCertificate.fromArn(props.certificateArn)
-        //     ],
-        //     defaultTargetGroups: [
-        //         applicationLoadBalancedEC2Service.targetGroup
-        //     ]
-        // });
-
         applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
             path: props.healthCheckPath,
             healthyThresholdCount: 2,
