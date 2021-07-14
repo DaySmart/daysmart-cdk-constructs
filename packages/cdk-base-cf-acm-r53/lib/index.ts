@@ -103,6 +103,14 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
         recordName: `${props.stage}-${props.project}.${companyDomainName}`
       });
+
+      if (props.stage == "prod") {
+        new route53.ARecord(this, `${props.project}.${companyDomainName}-RecordSet`, {
+          zone: companyHostedZone,
+          target: route53.RecordTarget.fromAlias(cloudfrontTarget),
+          recordName: `${props.project}.${companyDomainName}`
+        });
+      }
     });
 
 
@@ -130,8 +138,14 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
         `${props.stage}.${props.project}.${companyDomainName}`,
         `${props.stage}-${props.project}.${companyDomainName}`
       );
+
+      if (props.stage == "prod") {
+        aliases.push(
+          `${props.project}.${companyDomainName}`
+        );
+      }
     });
-    
+
     return aliases;
   }
 }
