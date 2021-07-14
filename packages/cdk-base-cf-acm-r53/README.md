@@ -1,17 +1,4 @@
-# Welcome to your CDK TypeScript Construct Library project!
-
-You should explore the contents of this project. It demonstrates a CDK Construct Library that includes a construct (`CdkBaseCfAcmR53`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
-
-The construct defines an interface (`CdkBaseCfAcmR53Props`) to configure the visibility timeout of the queue.
-
-## Useful commands
-
-- `npm run build` compile typescript to js
-- `npm run watch` watch for changes and compile
-- `npm run test` perform the jest unit tests
-
-# Welcome to the Open Source Construct for an Api Gateway Custom Domain!
+# Welcome to the Open Source Construct for creating Route53 Alias, ACM Certificate, and CloudFront Distribution Base Resources!
 
 This CDK Construct Library includes a simple construct (`CdkBaseCfAcmR53`)
 which is meant to be instantiated by the (`CdkCloudfrontBehavior`) construct.  (`CdkBaseCfAcmR53`) creates a certificate manager certificate with the stage, project, and domains[] provided; it also creates Route53 aliases for each provided domain following the formats below:
