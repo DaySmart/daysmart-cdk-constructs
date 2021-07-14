@@ -50,7 +50,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     if (props.defaultBehaviorOrigin == "s3" && props.defaultS3OriginBucketName && props.defaultS3OriginPath && props.defaultOriginAccessIdentity) {
       const codeBucket = s3.Bucket.fromBucketName(this, "DefaultOriginBucket", props.defaultS3OriginBucketName);
 
-      const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${props.defaultS3OriginBucketName.split(".").join("-")}-DefaultOriginAcessIdentity`, props.defaultOriginAccessIdentity);
+      const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${props.defaultS3OriginBucketName.split(".").join("-")}-DefaultOriginAccessIdentity`, props.defaultOriginAccessIdentity);
 
       const cachePolicy = new cloudfront.CachePolicy(this, "DefaultS3OriginCachePolicy", {
         cachePolicyName: `${props.stage}-${props.project}-${props.defaultS3OriginBucketName.split(".").join("-")}-default-s3-cloudfront-cache-policy`,
@@ -125,7 +125,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     s3Origins.forEach(origin => {
       const codeBucket = s3.Bucket.fromBucketName(this, `${origin.bucketName.split(".").join("-")}-OriginBucket`, origin.bucketName);
 
-      const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${origin.bucketName.split(".").join("-")}-OriginAcessIdentity`, origin.originAccessIdentity);
+      const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${origin.bucketName.split(".").join("-")}-OriginAccessIdentity`, origin.originAccessIdentity);
 
       const cachePolicy = new cloudfront.CachePolicy(this, `${origin.bucketName.split(".").join("-")}-S3OriginCachePolicy`, {
         cachePolicyName: `${props.stage}-${props.project}-${origin.bucketName.split(".").join("-")}-s3-cloudfront-cache-policy`,
