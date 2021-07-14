@@ -1,13 +1,15 @@
 # Welcome to the Open Source Construct for creating Route53 Alias, ACM Certificate, and CloudFront Distribution Base Resources!
 
 This CDK Construct Library includes a simple construct (`CdkBaseCfAcmR53`)
-which is meant to be instantiated by the (`CdkCloudfrontBehavior`) construct.  (`CdkBaseCfAcmR53`) creates a certificate manager certificate with the stage, project, and domains[] provided; it also creates Route53 aliases for each provided domain following the formats below:
+which is meant to be instantiated by the (`CdkCloudfrontBehavior`) construct. (`CdkBaseCfAcmR53`) creates a certificate manager certificate with the stage, project, and domains[] provided; it also creates Route53 aliases for each provided domain following the formats below:
 
 ```
 ${stage}.${project}.${companyDomainName}
 ${stage}-${project}.${companyDomainName}
 ```
+
 (and for stage == "prod")
+
 ```
 ${project}.${companyDomainName}
 ```

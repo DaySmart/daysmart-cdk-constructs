@@ -7,10 +7,8 @@ import * as s3 from "@aws-cdk/aws-s3";
 export interface CdkCloudfrontBehaviorProps {
   defaultBehaviorOrigin: "http" | "s3"/* | "load-balancer"*/;
   defaultS3OriginBucketName?: string;
-  defaultS3OriginPath?: string;
   defaultOriginAccessIdentity?: string;
   defaultHttpOriginName?: string;
-  defaultHttpOriginPath?: string;
   project: string;
   stage: string;
   loggingBucketName?: string;
@@ -47,7 +45,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     super(scope, id);
     let defaultBehaviorOptions: cloudfront.BehaviorOptions
 
-    if (props.defaultBehaviorOrigin == "s3" && props.defaultS3OriginBucketName && props.defaultS3OriginPath && props.defaultOriginAccessIdentity) {
+    if (props.defaultBehaviorOrigin == "s3" && props.defaultS3OriginBucketName && props.defaultOriginAccessIdentity) {
       const codeBucket = s3.Bucket.fromBucketName(this, "DefaultOriginBucket", props.defaultS3OriginBucketName);
 
       const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${props.defaultS3OriginBucketName.split(".").join("-")}-DefaultOriginAccessIdentity`, props.defaultOriginAccessIdentity);
@@ -64,7 +62,6 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
 
       defaultBehaviorOptions = {
         origin: new origins.S3Origin(codeBucket, {
-          originPath: props.defaultS3OriginPath,
           originAccessIdentity: originAccessIdentity
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
@@ -78,7 +75,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     //   }
     //   // NOT YET IMPLEMENTED
     // } 
-    else if (props.defaultBehaviorOrigin == "http" && props.defaultHttpOriginName && props.defaultHttpOriginPath) {
+    else if (props.defaultBehaviorOrigin == "http" && props.defaultHttpOriginName) {
       const cachePolicy = new cloudfront.CachePolicy(this, "DefaultHttpOriginCachePolicy", {
         cachePolicyName: `${props.stage}-${props.project}-${props.defaultHttpOriginName.split(".").join("-")}-default-http-cloudfront-cache-policy`,
         comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} Default Http Origin`,
