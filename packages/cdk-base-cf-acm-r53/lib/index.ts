@@ -3,7 +3,6 @@ import * as route53 from "@aws-cdk/aws-route53";
 import * as targets from "@aws-cdk/aws-route53-targets";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
 import * as acm from "@aws-cdk/aws-certificatemanager";
-import * as origins from "@aws-cdk/aws-cloudfront-origins";
 import * as s3 from "@aws-cdk/aws-s3";
 
 export interface CdkBaseCfAcmR53Props {
@@ -11,14 +10,7 @@ export interface CdkBaseCfAcmR53Props {
   project: string;
   stage: string;
   loggingBucketName?: string;
-  domain1: string;
-  domain2?: string;
-  domain3?: string;
-  domain4?: string;
-  domain5?: string;
-  domain6?: string;
-  domain7?: string;
-  domain8?: string;
+  domains: string[];
 }
 
 export interface Zones {
@@ -33,31 +25,7 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
 
     let subjectAlternativeNames: Array<string> = [];
     let multiZones: Zones = {};
-    let companyDomainNames: Array<string> = [];
-
-    companyDomainNames.push(props.domain1)
-
-    if(props.domain2){
-      companyDomainNames.push(props.domain2)
-    }
-    if(props.domain3){
-      companyDomainNames.push(props.domain3)
-    }
-    if(props.domain4){
-      companyDomainNames.push(props.domain4)
-    }
-    if(props.domain5){
-      companyDomainNames.push(props.domain5)
-    }
-    if(props.domain6){
-      companyDomainNames.push(props.domain6)
-    }
-    if(props.domain7){
-      companyDomainNames.push(props.domain7)
-    }
-    if(props.domain8){
-      companyDomainNames.push(props.domain8)
-    }
+    const companyDomainNames = props.domains;
 
     companyDomainNames.forEach(companyDomainName => {
       var companyHostedZone = route53.HostedZone.fromLookup(this, `${companyDomainName} HostedZone`, {
