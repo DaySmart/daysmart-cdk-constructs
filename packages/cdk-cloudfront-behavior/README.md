@@ -12,6 +12,8 @@ The construct defines an interface (`CdkCloudfrontBehaviorProps`) with the follo
 - stage: string => The project environment (ex. dev)
 - domains: string[] => An array of domain names for this project environment (ex. ['google.com', 'bing.com', 'apple.com'])
 - (optional) loggingBucketName: string => The name of an existing s3 bucket for receiving logs. (ex. logbucket1)
+- s3OriginCachePolicyId: string => The id of an existing CloudFront cache policy applicable for all s3 origins on the distribution. (ex. fndu46585032kjf403-00e5-4fea-af78-463829574dnnse5869)
+- httpOriginCachePolicyId: string => The id of an existing CloudFront cache policy applicable for all http origins on the distribution. (ex. fndu46585032kjf403-00e5-4fea-af78-463829574dnnse5869)
 
 ---
 
