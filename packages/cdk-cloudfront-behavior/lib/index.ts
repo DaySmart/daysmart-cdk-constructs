@@ -9,6 +9,8 @@ export interface CdkCloudfrontBehaviorProps {
   defaultS3OriginBucketName?: string;
   defaultOriginAccessIdentity?: string;
   defaultHttpOriginName?: string;
+  s3OriginCachePolicyId: string;
+  httpOriginCachePolicyId: string;
   project: string;
   stage: string;
   loggingBucketName?: string;
@@ -39,26 +41,20 @@ export interface HttpOrigin {
 }
 
 export class CdkCloudfrontBehavior extends cdk.Construct {
+  readonly s3OriginCachePolicy: cloudfront.ICachePolicy;
+  readonly httpOriginCachePolicy: cloudfront.ICachePolicy;
   public distribution: cloudfront.Distribution;
 
   constructor(scope: cdk.Construct, id: string, props: CdkCloudfrontBehaviorProps) {
     super(scope, id);
     let defaultBehaviorOptions: cloudfront.BehaviorOptions
+    this.s3OriginCachePolicy = cloudfront.CachePolicy.fromCachePolicyId(this, "S3OriginCachePolicy", props.s3OriginCachePolicyId);
+    this.httpOriginCachePolicy = cloudfront.CachePolicy.fromCachePolicyId(this, "HttpOriginCachePolicy", props.httpOriginCachePolicyId);
 
     if (props.defaultBehaviorOrigin == "s3" && props.defaultS3OriginBucketName && props.defaultOriginAccessIdentity) {
       const codeBucket = s3.Bucket.fromBucketName(this, "DefaultOriginBucket", props.defaultS3OriginBucketName);
 
       const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${props.defaultS3OriginBucketName.split(".").join("-")}-DefaultOriginAccessIdentity`, props.defaultOriginAccessIdentity);
-
-      const cachePolicy = new cloudfront.CachePolicy(this, "DefaultS3OriginCachePolicy", {
-        cachePolicyName: `${props.stage}-${props.project}-${props.defaultS3OriginBucketName.split(".").join("-")}-default-s3-cloudfront-cache-policy`,
-        comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} Default S3 Origin`,
-        queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-        cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-        headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-          "Referer"
-        )
-      });
 
       defaultBehaviorOptions = {
         origin: new origins.S3Origin(codeBucket, {
@@ -66,7 +62,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: cachePolicy
+        cachePolicy: this.s3OriginCachePolicy
       }
     }
     // else if(props.defaultBehaviorOrigin == "load-balancer"){
@@ -76,17 +72,6 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     //   // NOT YET IMPLEMENTED
     // } 
     else if (props.defaultBehaviorOrigin == "http" && props.defaultHttpOriginName) {
-      const cachePolicy = new cloudfront.CachePolicy(this, "DefaultHttpOriginCachePolicy", {
-        cachePolicyName: `${props.stage}-${props.project}-${props.defaultHttpOriginName.split(".").join("-")}-default-http-cloudfront-cache-policy`,
-        comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} Default Http Origin`,
-        queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-        cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-        headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-          "Host",
-          "Referer"
-        )
-      });
-
       defaultBehaviorOptions = {
         origin: new origins.HttpOrigin(props.defaultHttpOriginName, {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
@@ -98,7 +83,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: cachePolicy
+        cachePolicy: this.httpOriginCachePolicy
       }
     }
     else {
@@ -124,23 +109,13 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
 
       const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${origin.bucketName.split(".").join("-")}-OriginAccessIdentity`, origin.originAccessIdentity);
 
-      const cachePolicy = new cloudfront.CachePolicy(this, `${origin.bucketName.split(".").join("-")}-S3OriginCachePolicy`, {
-        cachePolicyName: `${props.stage}-${props.project}-${origin.bucketName.split(".").join("-")}-s3-cloudfront-cache-policy`,
-        comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} ${origin.bucketName} S3 Origin`,
-        queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-        cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-        headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-          "Referer"
-        )
-      });
-
       this.distribution.addBehavior(origin.path, new origins.S3Origin(codeBucket, {
         originAccessIdentity: originAccessIdentity
       }),
         {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: cachePolicy
+          cachePolicy: this.s3OriginCachePolicy
         }
       );
     });
@@ -150,17 +125,6 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     const httpOrigins = props.origins;
 
     httpOrigins.forEach(origin => {
-      const cachePolicy = new cloudfront.CachePolicy(this, `${origin.host}-HttpOriginCachePolicy`, {
-        cachePolicyName: `${props.stage}-${props.project}-${origin.host.split(".").join("-")}-http-cloudfront-cache-policy`,
-        comment: `Cloudfront Cache Policy for ${props.stage} ${props.project} ${origin.host} Http Origin`,
-        queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-        cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-        headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-          "Host",
-          "Referer"
-        )
-      });
-
       this.distribution.addBehavior(origin.path, new origins.HttpOrigin(origin.host, {
         protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
         originSslProtocols: [
@@ -172,7 +136,7 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: cachePolicy
+          cachePolicy: this.httpOriginCachePolicy
         }
       );
     });
