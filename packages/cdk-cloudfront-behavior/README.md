@@ -9,7 +9,10 @@ The construct defines an interface (`CdkCloudfrontBehaviorProps`) with the follo
 - (required only if defaultBehaviorOrigin == "s3") defaultOriginAccessIdentity: string => The origin access identity for a default s3 origin (ex. EGIMNVDRYJKK243HJNV)
 - (required only if defaultBehaviorOrigin == "http") defaultHttpOriginName: string => The dns record for a default http origin (ex. test.google.com)
 - project: string => The project name (ex. onlineconverter)
-- stage: string => The project environment (ex. dev)
+- baseEnv: string => The project environment (ex. dev)
+- componentName: string => The component/service the url is for in a project (ex. ui)
+- (required only if a dynamic env) dynamicEnv: string => A dynamic environment for this project. (ex. dev-test)
+- (optional) certificateArn: string => The arn of an existing acm certificate; one will be created in the construct if not provided
 - domains: string[] => An array of domain names for this project environment (ex. ['google.com', 'bing.com', 'apple.com'])
 - (optional) loggingBucketName: string => The name of an existing s3 bucket for receiving logs. (ex. logbucket1)
 - s3OriginCachePolicyId: string => The id of an existing CloudFront cache policy applicable for all s3 origins on the distribution. (ex. fndu46585032kjf403-00e5-4fea-af78-463829574dnnse5869)
@@ -20,7 +23,7 @@ The construct defines an interface (`CdkCloudfrontBehaviorProps`) with the follo
 The `addS3OriginBehavior` method has the following required properties in order to call it:
 
 - project: string => The project name (ex. onlineconverter)
-- stage: string => The project environment (ex. dev)
+- baseEnv: string => The project environment (ex. dev)
 - origins: S3Origin[] => An array of S3Origin objects, with an S3Origin defined as:
 
 ```
@@ -36,7 +39,7 @@ The `addS3OriginBehavior` method has the following required properties in order 
 The `addHttpOriginBehavior` method has the following required properties in order to call it:
 
 - project: string => The project name (ex. onlineconverter)
-- stage: string => The project environment (ex. dev)
+- baseEnv: string => The project environment (ex. dev)
 - origins: HttpOrigin[] => An array of HttpOrigin objects, with a HttpOrigin defined as:
 
 ```

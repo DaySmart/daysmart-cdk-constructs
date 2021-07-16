@@ -12,20 +12,23 @@ export interface CdkCloudfrontBehaviorProps {
   s3OriginCachePolicyId: string;
   httpOriginCachePolicyId: string;
   project: string;
-  stage: string;
+  baseEnv: string;
+  dynamicEnv?: string;
+  certificateArn?: string;
+  componentName: string;
   loggingBucketName?: string;
   domains: string[];
 }
 
 export interface CdkCloudfrontAddS3OriginProps {
   project: string;
-  stage: string;
+  baseEnv: string;
   origins: S3Origin[];
 }
 
 export interface CdkCloudfrontAddHttpOriginProps {
   project: string;
-  stage: string;
+  baseEnv: string;
   origins: HttpOrigin[];
 }
 
@@ -92,8 +95,11 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
 
     const baseResources = new base.CdkBaseCfAcmR53(this, "Cf-Acm-R53", {
       project: props.project,
-      stage: props.stage,
+      baseEnv: props.baseEnv,
+      dynamicEnv: (props.dynamicEnv) ? props.dynamicEnv : undefined,
+      certificateArn: (props.certificateArn) ? props.certificateArn : undefined,
       domains: props.domains,
+      componentName: props.componentName,
       defaultBehaviorOptions: defaultBehaviorOptions,
       loggingBucketName: (props.loggingBucketName) ? props.loggingBucketName : undefined
     });

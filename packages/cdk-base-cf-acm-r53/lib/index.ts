@@ -8,7 +8,10 @@ import * as s3 from "@aws-cdk/aws-s3";
 export interface CdkBaseCfAcmR53Props {
   defaultBehaviorOptions: cloudfront.BehaviorOptions;
   project: string;
-  stage: string;
+  baseEnv: string;
+  componentName: string;
+  dynamicEnv?: string;
+  certificateArn?: string;
   loggingBucketName?: string;
   domains: string[];
 }
@@ -23,50 +26,60 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkBaseCfAcmR53Props) {
     super(scope, id);
 
-    let subjectAlternativeNames: Array<string> = [];
+    let subjectAlternativeNames: string[] = [];
     let multiZones: Zones = {};
+    let certificate: acm.ICertificate;
     const companyDomainNames = props.domains;
+    let logFilePrefix: string | undefined = undefined;
 
-    companyDomainNames.forEach(companyDomainName => {
-      var companyHostedZone = route53.HostedZone.fromLookup(this, `${companyDomainName} HostedZone`, {
-        domainName: companyDomainName,
-        privateZone: false
+    if (props.certificateArn) {
+      certificate = acm.Certificate.fromCertificateArn(this, "Certificate", props.certificateArn);
+    } else {
+      companyDomainNames.forEach(companyDomainName => {
+        var companyHostedZone = route53.HostedZone.fromLookup(this, `${companyDomainName} HostedZone`, {
+          domainName: companyDomainName,
+          privateZone: false
+        });
+
+        subjectAlternativeNames.push(
+          `${props.baseEnv}.${props.project}.${companyDomainName}`,
+          `*.${props.baseEnv}.${props.project}.${companyDomainName}`,
+          `*.${companyDomainName}`
+        );
+
+        if (props.baseEnv === 'prod') {
+          subjectAlternativeNames.push(
+            `${props.project}.${companyDomainName}`,
+            `*.${props.project}.${companyDomainName}`
+          );
+        }
+
+        multiZones[companyDomainName] = companyHostedZone
       });
 
-      subjectAlternativeNames.push(
-        `${props.stage}.${props.project}.${companyDomainName}`,
-        `*.${props.stage}.${props.project}.${companyDomainName}`,
-        `*.${companyDomainName}`
-      );
+      var certificateValidation = acm.CertificateValidation.fromDnsMultiZone(multiZones);
 
-      if (props.stage === 'prod') {
-        subjectAlternativeNames.push(
-          `${props.project}.${companyDomainName}`,
-          `*.${props.project}.${companyDomainName}`
-        );
-      }
+      certificate = new acm.Certificate(this, 'Certificate', {
+        domainName: subjectAlternativeNames[0],
+        subjectAlternativeNames: subjectAlternativeNames.slice(1),
+        validation: certificateValidation
+      });
+    }
 
-      multiZones[companyDomainName] = companyHostedZone
-    });
-
-    var certificateValidation = acm.CertificateValidation.fromDnsMultiZone(multiZones);
-
-    var certificate = new acm.Certificate(this, 'Certificate', {
-      domainName: subjectAlternativeNames[0],
-      subjectAlternativeNames: subjectAlternativeNames.slice(1),
-      validation: certificateValidation
-    });
+    if (props.loggingBucketName) {
+      logFilePrefix = (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}` : `${props.baseEnv}-${props.project}`
+    }
 
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: props.defaultBehaviorOptions,
       certificate: certificate,
       domainNames: this.getAliases(props, companyDomainNames),
       defaultRootObject: "index.html",
-      comment: `${props.stage} ${props.project}`,
+      comment: (props.dynamicEnv) ? `${props.dynamicEnv} ${props.project}` : `${props.baseEnv} ${props.project}`,
       enableLogging: (props.loggingBucketName) ? true : false,
       logBucket: (props.loggingBucketName) ? s3.Bucket.fromBucketName(this, "CloudfrontLoggingBucket", props.loggingBucketName) : undefined,
       logIncludesCookies: (props.loggingBucketName) ? true : false,
-      logFilePrefix: (props.loggingBucketName) ? `${props.stage}-${props.project}` : undefined,
+      logFilePrefix: logFilePrefix,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
       errorResponses: [
@@ -93,18 +106,18 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
         domainName: companyDomainName,
         privateZone: false
       });
-      new route53.ARecord(this, `${props.stage}.${props.project}.${companyDomainName}-RecordSet`, {
+      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}-RecordSet` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}-RecordSet`, {
         zone: companyHostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `${props.stage}.${props.project}.${companyDomainName}`
+        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`
       });
-      new route53.ARecord(this, `${props.stage}-${props.project}.${companyDomainName}-RecordSet`, {
+      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}-RecordSet` : `${props.baseEnv}-${props.project}.${companyDomainName}-RecordSet`, {
         zone: companyHostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: `${props.stage}-${props.project}.${companyDomainName}`
+        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
       });
 
-      if (props.stage == "prod") {
+      if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
         new route53.ARecord(this, `${props.project}.${companyDomainName}-RecordSet`, {
           zone: companyHostedZone,
           target: route53.RecordTarget.fromAlias(cloudfrontTarget),
@@ -113,33 +126,32 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
       }
     });
 
-
-    var output = new cdk.CfnOutput(this, "CertificateArn", {
+    var certificateArn = new cdk.CfnOutput(this, "CertificateArn", {
       value: certificate.certificateArn
     });
 
-    var output2 = new cdk.CfnOutput(this, "CloudfrontDistribution", {
+    var distributionId = new cdk.CfnOutput(this, "CloudfrontDistribution", {
       value: this.distribution.distributionId
     });
 
-    var output3 = new cdk.CfnOutput(this, "DistributionDomainName", {
+    var distributionDomainName = new cdk.CfnOutput(this, "DistributionDomainName", {
       value: this.distribution.distributionDomainName
     })
 
-    output.overrideLogicalId("CertificateArn");
-    output2.overrideLogicalId("CloudfrontDistribution");
-    output3.overrideLogicalId("DistributionDomainName");
+    certificateArn.overrideLogicalId("CertificateArn");
+    distributionId.overrideLogicalId("CloudfrontDistribution");
+    distributionDomainName.overrideLogicalId("DistributionDomainName");
   }
 
-  getAliases(props: CdkBaseCfAcmR53Props, companyDomainNames: Array<string>): Array<string> {
-    let aliases: Array<string> = [];
+  getAliases(props: CdkBaseCfAcmR53Props, companyDomainNames: string[]): string[] {
+    let aliases: string[] = [];
     companyDomainNames.forEach(companyDomainName => {
       aliases.push(
-        `${props.stage}.${props.project}.${companyDomainName}`,
-        `${props.stage}-${props.project}.${companyDomainName}`
+        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
+        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
       );
 
-      if (props.stage == "prod") {
+      if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
         aliases.push(
           `${props.project}.${companyDomainName}`
         );
