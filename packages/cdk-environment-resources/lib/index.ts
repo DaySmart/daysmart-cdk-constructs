@@ -13,6 +13,7 @@ export interface CdkEnvironmentResourcesProps {
     amiName: string;
     securityGroupId: string;
     instanceProfileArn: string;
+    userData?: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -50,7 +51,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 name: `${props.amiName}*`,
                 windows: true
             }),
-            minCapacity: 1,
+            minCapacity: 2,
             desiredCapacity: 2,
             maxCapacity: 3,
             securityGroup: ec2.SecurityGroup.fromSecurityGroupId(this, "SecurityGroup", props.securityGroupId),
@@ -59,10 +60,14 @@ export class CdkEnvironmentResources extends cdk.Construct {
             groupMetrics: [autoscaling.GroupMetrics.all()]
         });
 
+        if(props.userData){
+            autoScalingGroup.addUserData(props.userData);
+        }
+
         cdk.Tags.of(autoScalingGroup).add("EC2Group", "ecs-container-instance", {
             applyToLaunchedInstances: true
         });
-        
+
         const targetTrackingScalingPolicy = autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
             targetUtilizationPercent: 50,
         });
