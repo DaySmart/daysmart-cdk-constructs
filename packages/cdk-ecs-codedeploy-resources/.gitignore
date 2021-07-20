@@ -8,5 +8,5 @@ node_modules
 cdk.out
 
 #Frank
-template.deploy.yml
+template.*.yml
 .deployer

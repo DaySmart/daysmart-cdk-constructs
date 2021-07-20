@@ -9,4 +9,4 @@ cdk.out
 
 #Frank
 .deployer
-template.deploy.yml
+template.*.yml
