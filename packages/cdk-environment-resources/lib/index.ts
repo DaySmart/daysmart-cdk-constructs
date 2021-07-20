@@ -42,7 +42,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
-            instanceType: new ec2.InstanceType("m5.xlarge"),
+            instanceType: new ec2.InstanceType("m5.large"),
             newInstancesProtectedFromScaleIn: false,
             role: iam.Role.fromRoleArn(this, "InstanceProfileRole", props.instanceProfileArn),
             maxInstanceLifetime: cdk.Duration.days(120),
