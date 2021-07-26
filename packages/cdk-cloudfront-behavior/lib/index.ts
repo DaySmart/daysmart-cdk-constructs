@@ -17,6 +17,7 @@ export interface CdkCloudfrontBehaviorProps {
   certificateArn?: string;
   componentName: string;
   loggingBucketName?: string;
+  errorResponses?: cloudfront.ErrorResponse[]
   domains: string[];
 }
 
@@ -101,7 +102,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
       domains: props.domains,
       componentName: props.componentName,
       defaultBehaviorOptions: defaultBehaviorOptions,
-      loggingBucketName: (props.loggingBucketName) ? props.loggingBucketName : undefined
+      loggingBucketName: (props.loggingBucketName) ? props.loggingBucketName : undefined,
+      errorResponses: (props.errorResponses) ? props.errorResponses : undefined
     });
 
     this.distribution = baseResources.distribution;
