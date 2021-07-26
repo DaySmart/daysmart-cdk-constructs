@@ -87,14 +87,8 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
           httpStatus: 404,
           responseHttpStatus: 200,
           ttl: cdk.Duration.minutes(1),
-          responsePagePath: "/index.html"
-        },
-        {
-          httpStatus: 403,
-          responseHttpStatus: 200,
-          ttl: cdk.Duration.minutes(1),
-          responsePagePath: "/index.html"
-        },
+          responsePagePath: "/beta/index.html"
+        }
       ],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016
     });
