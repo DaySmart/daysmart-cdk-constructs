@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && copy lib\\lambda\\handler.py dist\\lambda",
+    "build": "tsc && cp -R lib/lambda dist",
     "watch": "tsc -w",
     "test": "jest"
   },
