@@ -103,7 +103,6 @@ def handler(event, context):
             if (len(failed_invalidation_list) > 0):
                 invalidation_failed(environment,
                                     sns_topic_arn, failed_invalidation_list)
-                logger.info("Failed Invalidation Method Completed")
 
         cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
     except KeyError as e:
@@ -150,33 +149,19 @@ def s3_deploy(s3_source_zips, s3_dest):
 
 
 def cloudfront_invalidate(distribution_paths, dest_bucket_domain_name):
-    more_distributions = True
     invalidate_distribution_list = []
     failed_invalidation_list = []
     aws_distribution_list = []
-    cf_list_response = {}
-    while (more_distributions == True):
-        if (len(aws_distribution_list) == 0):
-            cf_list_response = cloudfront.list_distributions()
-            aws_distribution_list = cf_list_response['DistributionList']['Items']
-        elif(cf_list_response['NextMarker']):
-            cf_list_response = cloudfront.list_distributions(
-                Marker=cf_list_response['DistributionList']['NextMarker']
-            )
-            aws_distribution_list = aws_distribution_list.extend(
-                cf_list_response['DistributionList']['Items'])
-        else:
-            more_distributions = False
+    cf_list_response = cloudfront.list_distributions()
+    aws_distribution_list.extend(cf_list_response['DistributionList']['Items'])
+    if(cf_list_response['DistributionList']['IsTruncated']):
+        aws_distribution_list.extend(paginate_distributions(cf_list_response['DistributionList']['NextMarker']))
 
-    logger.info("List Call Response => %s" % cf_list_response)
-    aws_distribution_list = cf_list_response['DistributionList']['Items']
     logger.info("Distributions => %s" % aws_distribution_list)
     for distribution in aws_distribution_list:
         origin_list = distribution['Origins']['Items']
         for origin in origin_list:
             if (origin['DomainName'] and origin['DomainName'] == dest_bucket_domain_name):
-                logger.info("Distribution with Proper Origin => %s" %
-                            distribution['Id'])
                 invalidate_distribution_list.append(distribution['Id'])
 
     logger.info("List of Distribution Ids to be Invalidated => %s" %
@@ -184,28 +169,41 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_domain_name):
 
     for distribution_id in invalidate_distribution_list:
         try:
-            # invalidation_resp = cloudfront.create_invalidation(
-            #     DistributionId=distribution_id,
-            #     InvalidationBatch={
-            #         'Paths': {
-            #             'Quantity': len(distribution_paths),
-            #             'Items': distribution_paths
-            #         },
-            #         'CallerReference': str(uuid4()),
-            #     })
-            # # by default, will wait up to 10 minutes
-            # cloudfront.get_waiter('invalidation_completed').wait(
-            #     DistributionId=distribution_id,
-            #     Id=invalidation_resp['Invalidation']['Id'])
-            raise Exception
+            invalidation_resp = cloudfront.create_invalidation(
+                DistributionId=distribution_id,
+                InvalidationBatch={
+                    'Paths': {
+                        'Quantity': len(distribution_paths),
+                        'Items': distribution_paths
+                    },
+                    'CallerReference': str(uuid4()),
+                })
+            # by default, will wait up to 10 minutes
+            cloudfront.get_waiter('invalidation_completed').wait(
+                DistributionId=distribution_id,
+                Id=invalidation_resp['Invalidation']['Id'])
         except Exception as e:
             failed_invalidation_list.append(distribution_id)
             pass
 
-    logger.info("failed invalidation list => %s" % failed_invalidation_list)
-
     return failed_invalidation_list
-    # return ["E2RRM2Q2EYZ6PM", "E1NNAQWW3I6376"]
+
+# ---------------------------------------------------------------------------------------------------
+# recursive method for paginating aws cf distribution list
+
+
+def paginate_distributions(marker=None):
+    aws_distribution_list = []
+    if(marker is None):
+            return None
+    else:
+        cf_list_response = cloudfront.list_distributions(
+            Marker=marker
+        )
+        aws_distribution_list.extend(cf_list_response['DistributionList']['Items'])
+        if(cf_list_response['DistributionList']['IsTruncated']):
+            aws_distribution_list.extend(paginate_distributions(cf_list_response['DistributionList']['NextMarker']))
+        return aws_distribution_list
 
 # ---------------------------------------------------------------------------------------------------
 # executes an "aws" cli command
@@ -268,8 +266,6 @@ def invalidation_failed(environment, sns_topic_arn, failed_invalidation_list):
         }
     ]
 
-    logger.info("Failed Ids Message Block => %s" % failed_ids_message_blocks)
-
     for id in failed_invalidation_list:
         failed_ids_message_blocks.append(
             {
@@ -280,9 +276,6 @@ def invalidation_failed(environment, sns_topic_arn, failed_invalidation_list):
                 }
             }
         )
-
-    logger.info("Failed Ids Blocks (Buttons) => %s" %
-                failed_ids_message_blocks)
 
     sns_client = boto3.client('sns')
     sns_json = {
