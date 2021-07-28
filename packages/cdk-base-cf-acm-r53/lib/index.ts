@@ -7,6 +7,7 @@ import * as s3 from "@aws-cdk/aws-s3";
 
 export interface CdkBaseCfAcmR53Props {
   defaultBehaviorOptions: cloudfront.BehaviorOptions;
+  errorResponses?: cloudfront.ErrorResponse[]
   project: string;
   baseEnv: string;
   componentName: string;
@@ -82,20 +83,7 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
       logFilePrefix: logFilePrefix,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
-      errorResponses: [
-        {
-          httpStatus: 404,
-          responseHttpStatus: 200,
-          ttl: cdk.Duration.minutes(1),
-          responsePagePath: "/index.html"
-        },
-        {
-          httpStatus: 403,
-          responseHttpStatus: 200,
-          ttl: cdk.Duration.minutes(1),
-          responsePagePath: "/index.html"
-        },
-      ],
+      errorResponses: (props.errorResponses) ? props.errorResponses : undefined,
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016
     });
 
