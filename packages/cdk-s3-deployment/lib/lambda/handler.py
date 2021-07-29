@@ -44,6 +44,8 @@ def handler(event, context):
             source_object_keys = props['SourceObjectKeys']
             dest_bucket_name = props['DestinationBucketName']
             dest_bucket_prefix = props.get('DestinationBucketKeyPrefix', '')
+            dest_bucket_domain_name = props.get(
+                'DestinationBucketDomainName', '')
             distribution_id = props.get('DistributionId', '')
             environment = props.get('Environment', '')
             sns_topic_arn = props.get('SnsTopicArn', '')
@@ -94,16 +96,15 @@ def handler(event, context):
             s3_deploy(s3_source_zips, s3_dest)
 
         if distribution_id:
-            try:
-                cloudfront_invalidate(distribution_id, distribution_paths)
-            except Exception as e:
-                logger.exception(e)
-                invalidation_failed(
-                    distribution_id, environment, sns_topic_arn)
-            finally:
-                cfn_send(event, context, CFN_SUCCESS,
-                         physicalResourceId=physical_id)
+            failed_invalidation_list = cloudfront_invalidate(
+                distribution_paths, dest_bucket_domain_name)
+            logger.info("failed invalidation list => %s" %
+                        failed_invalidation_list)
+            if (len(failed_invalidation_list) > 0):
+                invalidation_failed(environment,
+                                    sns_topic_arn, failed_invalidation_list)
 
+        cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
     except KeyError as e:
         cfn_error("invalid request. Missing key %s" % str(e))
     except Exception as e:
@@ -147,20 +148,62 @@ def s3_deploy(s3_source_zips, s3_dest):
 # invalidate files in the CloudFront distribution edge caches
 
 
-def cloudfront_invalidate(distribution_id, distribution_paths):
-    invalidation_resp = cloudfront.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            'Paths': {
-                'Quantity': len(distribution_paths),
-                'Items': distribution_paths
-            },
-            'CallerReference': str(uuid4()),
-        })
-    # by default, will wait up to 10 minutes
-    cloudfront.get_waiter('invalidation_completed').wait(
-        DistributionId=distribution_id,
-        Id=invalidation_resp['Invalidation']['Id'])
+def cloudfront_invalidate(distribution_paths, dest_bucket_domain_name):
+    invalidate_distribution_list = []
+    failed_invalidation_list = []
+    aws_distribution_list = []
+    cf_list_response = cloudfront.list_distributions()
+    aws_distribution_list.extend(cf_list_response['DistributionList']['Items'])
+    if(cf_list_response['DistributionList']['IsTruncated']):
+        aws_distribution_list.extend(paginate_distributions(cf_list_response['DistributionList']['NextMarker']))
+
+    logger.info("Distributions => %s" % aws_distribution_list)
+    for distribution in aws_distribution_list:
+        origin_list = distribution['Origins']['Items']
+        for origin in origin_list:
+            if (origin['DomainName'] and origin['DomainName'] == dest_bucket_domain_name):
+                invalidate_distribution_list.append(distribution['Id'])
+
+    logger.info("List of Distribution Ids to be Invalidated => %s" %
+                invalidate_distribution_list)
+
+    for distribution_id in invalidate_distribution_list:
+        try:
+            invalidation_resp = cloudfront.create_invalidation(
+                DistributionId=distribution_id,
+                InvalidationBatch={
+                    'Paths': {
+                        'Quantity': len(distribution_paths),
+                        'Items': distribution_paths
+                    },
+                    'CallerReference': str(uuid4()),
+                })
+            # by default, will wait up to 10 minutes
+            cloudfront.get_waiter('invalidation_completed').wait(
+                DistributionId=distribution_id,
+                Id=invalidation_resp['Invalidation']['Id'])
+        except Exception as e:
+            failed_invalidation_list.append(distribution_id)
+            pass
+
+    return failed_invalidation_list
+
+# ---------------------------------------------------------------------------------------------------
+# recursive method for paginating aws cf distribution list
+
+
+def paginate_distributions(marker=None):
+    aws_distribution_list = []
+    if(marker is None):
+            return None
+    else:
+        cf_list_response = cloudfront.list_distributions(
+            Marker=marker
+        )
+        aws_distribution_list.extend(cf_list_response['DistributionList']['Items'])
+        if(cf_list_response['DistributionList']['IsTruncated']):
+            aws_distribution_list.extend(paginate_distributions(cf_list_response['DistributionList']['NextMarker']))
+        return aws_distribution_list
 
 # ---------------------------------------------------------------------------------------------------
 # executes an "aws" cli command
@@ -209,28 +252,40 @@ def cfn_send(event, context, responseStatus, responseData={}, physicalResourceId
         logger.exception(e)
 
 
-def invalidation_failed(distribution_id, environment, sns_topic_arn):
-    sns_client = boto3.client('sns')
-    sns_message = json.dumps({
-        "blocks": [
-            {
-                "type": "section",
-                "content": {
-                    "text": "CloudFront Invalidation for %s failed! (%s)" % (distribution_id, environment)
-                }
-            },
+def invalidation_failed(environment, sns_topic_arn, failed_invalidation_list):
+    failed_ids_text = ""
+    for id in failed_invalidation_list:
+        failed_ids_text = failed_ids_text + id + ", "
+
+    failed_ids_message_blocks = [
+        {
+            "type": "section",
+            "content": {
+                    "text": "CloudFront Invalidations failed for: %s (%s)" % (failed_ids_text, environment)
+            }
+        }
+    ]
+
+    for id in failed_invalidation_list:
+        failed_ids_message_blocks.append(
             {
                 "type": "action",
                 "content": {
-                    "text": "AWS Console %s" % distribution_id,
-                    "url": "https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:%s" % distribution_id
+                        "text": "AWS Console %s" % id,
+                        "url": "https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:%s" % id
                 }
             }
-        ],
+        )
+
+    sns_client = boto3.client('sns')
+    sns_json = {
+        "blocks": failed_ids_message_blocks,
         "environment": environment
-    })
+    }
+    sns_message = json.dumps(sns_json)
+    logger.info("Sns Message => %s" % sns_message)
     sns_client.publish(
         TopicArn=sns_topic_arn,
         Message=sns_message,
-        Subject="Failed CloudFront Invalidation!"
+        Subject="Failed CloudFront Invalidations!"
     )

@@ -9,6 +9,7 @@ import { AwsCliLayer } from '@aws-cdk/lambda-layer-awscli';
 
 export interface CdkS3DeploymentProps {
   bucketName: string;
+  bucketDomainName: string;
   distributionId: string;
   distributionDomain: string;
   sourceDir?: string;
@@ -54,7 +55,8 @@ export class CdkS3Deployment extends cdk.Construct {
       effect: iam.Effect.ALLOW,
       actions: [
         'cloudfront:GetInvalidation',
-        'cloudfront:CreateInvalidation'
+        'cloudfront:CreateInvalidation',
+        'cloudfront:ListDistributions'
       ],
       resources: ['*']
     }));
@@ -75,6 +77,7 @@ export class CdkS3Deployment extends cdk.Construct {
         SourceObjectKeys: sources.map(source => source.zipObjectKey),
         DestinationBucketName: bucket.bucketName,
         DestinationBucketKeyPrefix: destinationPrefix,
+        DestinationBucketDomainName: props.bucketDomainName,
         DistributionId: distribution.distributionId,
         DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
         Environment: props.environment,
