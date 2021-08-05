@@ -44,8 +44,6 @@ def handler(event, context):
             source_object_keys = props['SourceObjectKeys']
             dest_bucket_name = props['DestinationBucketName']
             dest_bucket_prefix = props.get('DestinationBucketKeyPrefix', '')
-            dest_bucket_domain_name = props.get(
-                'DestinationBucketDomainName', '')
             distribution_id = props.get('DistributionId', '')
             environment = props.get('Environment', '')
             sns_topic_arn = props.get('SnsTopicArn', '')
@@ -97,7 +95,7 @@ def handler(event, context):
 
         if distribution_id:
             failed_invalidation_list = cloudfront_invalidate(
-                distribution_paths, dest_bucket_domain_name)
+                distribution_paths, dest_bucket_name)
             logger.info("failed invalidation list => %s" %
                         failed_invalidation_list)
             if (len(failed_invalidation_list) > 0):
@@ -148,7 +146,7 @@ def s3_deploy(s3_source_zips, s3_dest):
 # invalidate files in the CloudFront distribution edge caches
 
 
-def cloudfront_invalidate(distribution_paths, dest_bucket_domain_name):
+def cloudfront_invalidate(distribution_paths, dest_bucket_name):
     invalidate_distribution_list = []
     failed_invalidation_list = []
     aws_distribution_list = []
@@ -161,7 +159,7 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_domain_name):
     for distribution in aws_distribution_list:
         origin_list = distribution['Origins']['Items']
         for origin in origin_list:
-            if (origin['DomainName'] and origin['DomainName'] == dest_bucket_domain_name):
+            if (origin['DomainName'] and origin['DomainName'].find(dest_bucket_name) != -1):
                 invalidate_distribution_list.append(distribution['Id'])
 
     logger.info("List of Distribution Ids to be Invalidated => %s" %
