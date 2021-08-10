@@ -11,6 +11,8 @@ export interface CdkCloudfrontBehaviorProps {
   defaultHttpOriginName?: string;
   s3OriginCachePolicyId: string;
   httpOriginCachePolicyId: string;
+  s3OriginRequestPolicyId: string;
+  httpOriginRequestPolicyId: string;
   project: string;
   baseEnv: string;
   dynamicEnv?: string;
@@ -47,6 +49,8 @@ export interface HttpOrigin {
 export class CdkCloudfrontBehavior extends cdk.Construct {
   readonly s3OriginCachePolicy: cloudfront.ICachePolicy;
   readonly httpOriginCachePolicy: cloudfront.ICachePolicy;
+  readonly s3OriginRequestPolicy: cloudfront.IOriginRequestPolicy;
+  readonly httpOriginRequestPolicy: cloudfront.IOriginRequestPolicy;
   public distribution: cloudfront.Distribution;
 
   constructor(scope: cdk.Construct, id: string, props: CdkCloudfrontBehaviorProps) {
@@ -54,6 +58,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
     let defaultBehaviorOptions: cloudfront.BehaviorOptions
     this.s3OriginCachePolicy = cloudfront.CachePolicy.fromCachePolicyId(this, "S3OriginCachePolicy", props.s3OriginCachePolicyId);
     this.httpOriginCachePolicy = cloudfront.CachePolicy.fromCachePolicyId(this, "HttpOriginCachePolicy", props.httpOriginCachePolicyId);
+    this.s3OriginRequestPolicy = cloudfront.OriginRequestPolicy.fromOriginRequestPolicyId(this, "S3OriginRequestPolicy", props.s3OriginRequestPolicyId);
+    this.httpOriginRequestPolicy = cloudfront.OriginRequestPolicy.fromOriginRequestPolicyId(this, "HttpOriginRequestPolicy", props.httpOriginRequestPolicyId);
 
     if (props.defaultBehaviorOrigin == "s3" && props.defaultS3OriginBucketName && props.defaultOriginAccessIdentity) {
       const codeBucket = s3.Bucket.fromBucketName(this, "DefaultOriginBucket", props.defaultS3OriginBucketName);
@@ -66,7 +72,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: this.s3OriginCachePolicy
+        cachePolicy: this.s3OriginCachePolicy,
+        originRequestPolicy: this.s3OriginRequestPolicy
       }
     }
     // else if(props.defaultBehaviorOrigin == "load-balancer"){
@@ -87,7 +94,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: this.httpOriginCachePolicy
+        cachePolicy: this.httpOriginCachePolicy,
+        originRequestPolicy: this.httpOriginRequestPolicy
       }
     }
     else {
@@ -123,7 +131,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: this.s3OriginCachePolicy
+          cachePolicy: this.s3OriginCachePolicy,
+          originRequestPolicy: this.s3OriginRequestPolicy
         }
       );
     });
@@ -144,7 +153,8 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
         {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: this.httpOriginCachePolicy
+          cachePolicy: this.httpOriginCachePolicy,
+          originRequestPolicy: this.httpOriginRequestPolicy
         }
       );
     });
