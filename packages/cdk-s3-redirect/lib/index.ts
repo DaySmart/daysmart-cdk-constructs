@@ -86,9 +86,7 @@ export class CdkS3Redirect extends cdk.Construct {
 			defaultBehavior: defaultBehaviorOptions,
 			certificate: certificate,
 			domainNames: [props.cname],
-			comment: props.dynamicEnv
-				? `${props.dynamicEnv} ${props.project} redirect`
-				: `${props.baseEnv} ${props.project} redirect`,
+			comment: `redirect ${props.oldEndpoint} to ${props.newEndpoint}`,
 			enableLogging: props.loggingBucketName ? true : false,
 			logBucket: props.loggingBucketName
 				? s3.Bucket.fromBucketName(
