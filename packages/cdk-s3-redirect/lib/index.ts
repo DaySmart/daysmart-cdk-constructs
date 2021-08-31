@@ -20,6 +20,8 @@ export interface CdkS3RedirectProps {
 }
 
 export class CdkS3Redirect extends cdk.Construct {
+	public distribution: cloudfront.Distribution;
+
 	constructor(scope: cdk.Construct, id: string, props: CdkS3RedirectProps) {
 		super(scope, id);
 
@@ -105,5 +107,6 @@ export class CdkS3Redirect extends cdk.Construct {
 			minimumProtocolVersion:
 				cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
 		});
+		this.distribution = distribution;
 	}
 }
