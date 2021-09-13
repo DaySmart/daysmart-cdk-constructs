@@ -11,7 +11,7 @@ export interface CdkApiGatewayDomainProps {
   dynamicEnv?: string;
   certificateArn: string;
   restApiId: string;
-  basePath: string;
+  basePath?: string;
 }
 
 export class CdkApiGatewayDomain extends cdk.Construct {
@@ -44,7 +44,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
       });
 
       cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
-        basePath: `${props.basePath}`,
+        basePath: props.basePath,
         domainName: customDomain.domainName,
         restApiId: `${props.restApiId}`,
         stage: `${props.dynamicEnv}`
@@ -68,7 +68,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
       });
 
       cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
-        basePath: `${props.basePath}`,
+        basePath: props.basePath,
         domainName: customDomain.domainName,
         restApiId: `${props.restApiId}`,
         stage: `${props.baseEnv}`
