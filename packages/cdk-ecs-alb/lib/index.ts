@@ -49,6 +49,8 @@ export class CdkEcsAlb extends cdk.Construct {
             securityGroups: [securityGroup],
         });
 
+        //---------------------------------------------------------------------------------------------------
+        //Temporary task definition created.  This will eventually be overrided so it can be ignored. 
         const taskDefinition = new ecs.Ec2TaskDefinition(
             this,
             "TaskDefinition",
@@ -72,6 +74,7 @@ export class CdkEcsAlb extends cdk.Construct {
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
         });
+        //---------------------------------------------------------------------------------------------------
 
         const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
             targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
