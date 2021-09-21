@@ -10,6 +10,8 @@ export interface CdkEcsTaskDefinitionProps {
   stage: string;
   tag?: string;
   taskRoleArn: string;
+  memoryUnits: string;
+  cpuUnits: string;
 }
 
 export class CdkEcsTaskDefinition extends cdk.Construct {
@@ -32,8 +34,8 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
 
     taskDefinition.addContainer("Container", {
       image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
-      memoryLimitMiB: 2048,
-      cpu: 512,
+      memoryLimitMiB: parseInt(props.memoryUnits),
+      cpu: parseInt(props.cpuUnits),
       portMappings: [
         {
           containerPort: 80,
