@@ -11,7 +11,9 @@ This will be the Route 53 record that can be flipped between deployments in diff
  * `npm run test`    perform the jest unit tests
 
 ### Constructs
-`ApiGatewayDomainMultiRegion`
+`ApiGatewayDomainMultiRegion` - This creates an API Gateway custom domain
+that can be deployed in multiple regions.
+
 
 Parmas:
 ```
@@ -26,7 +28,9 @@ basePath?: string; // Custom domain base path (optional)
 endpointType?: apigw.EndpointType; // Custom domain endpoint type (Defaults to REGIONAL)
 ```
 
-`ApiGatewayDomainRoute53Alias`
+`ApiGatewayDomainRoute53Alias` - This provides a Route 53 alias record set to
+point to the API Gateway custom domain in the region you would like traffic
+to point to.
 
 Params:
 ```

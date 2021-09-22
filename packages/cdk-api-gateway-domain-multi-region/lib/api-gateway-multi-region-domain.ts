@@ -36,7 +36,7 @@ export class ApiGatewayDomainMultiRegion extends cdk.Construct {
       domainName: aliasTarget,
       certificate: acm.Certificate.fromCertificateArn(this, "Certificate", `${props.certificateArn}`),
       endpointType: props.endpointType || apigw.EndpointType.REGIONAL,
-      securityPolicy: apigw.SecurityPolicy.TLS_1_0,
+      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
     });
 
     customDomain.addBasePathMapping(api, {
