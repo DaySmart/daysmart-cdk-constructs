@@ -1,6 +1,6 @@
 {
     "name": "@daysmart/cdk-ecs-alb",
-    "version": "0.1.6",
+    "version": "0.1.8",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -23,8 +23,6 @@
         "@aws-cdk/aws-ecs": "^1.95.1",
         "@aws-cdk/aws-ecs-patterns": "^1.95.1",
         "@aws-cdk/aws-elasticloadbalancingv2": "^1.95.1",
-        "@aws-cdk/aws-iam": "^1.95.1",
-        "@aws-cdk/aws-logs": "^1.95.1",
         "@aws-cdk/aws-route53": "^1.95.1",
         "@aws-cdk/core": "^1.95.1"
     },

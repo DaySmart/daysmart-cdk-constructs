@@ -4,9 +4,7 @@ import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as iam from "@aws-cdk/aws-iam";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
-import * as logs from "@aws-cdk/aws-logs";
 import * as route53 from "@aws-cdk/aws-route53";
 
 export interface CdkEcsAlbProps {
@@ -14,11 +12,11 @@ export interface CdkEcsAlbProps {
     appName: string;
     vpcId: string;
     securityGroupId: string;
-    repositoryName: string;
+    taskDefinitionArn: string;
     stage: string;
     healthCheckPath: string;
+    repositoryName: string;
     tag?: string;
-    taskRoleArn: string;
     certificateArn: string;
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string
@@ -51,16 +49,14 @@ export class CdkEcsAlb extends cdk.Construct {
             securityGroups: [securityGroup],
         });
 
-        var taskRole = iam.Role.fromRoleArn(this, "TaskRole", props.taskRoleArn)
-
+        //---------------------------------------------------------------------------------------------------
+        //Temporary task definition created.  This will eventually be overrided so it can be ignored. 
         const taskDefinition = new ecs.Ec2TaskDefinition(
             this,
             "TaskDefinition",
             {
                 networkMode: ecs.NetworkMode.NAT,
-                taskRole: taskRole,
-                executionRole: taskRole,
-                family: `${props.stage}-${props.appName}`
+                family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
             }
         );
 
@@ -77,14 +73,8 @@ export class CdkEcsAlb extends cdk.Construct {
             ],
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-            logging: ecs.LogDriver.awsLogs({
-                logGroup: new logs.LogGroup(this, "LogGroup", {
-                    logGroupName: `${props.stage}-${props.appName}-ecs`,
-                    retention: logs.RetentionDays.INFINITE
-                }),
-                streamPrefix: "ecs",
-            }),
         });
+        //---------------------------------------------------------------------------------------------------
 
         const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
             targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
@@ -188,6 +178,10 @@ export class CdkEcsAlb extends cdk.Construct {
         scalableTarget.scaleOnCpuUtilization('CpuScaling', {
             targetUtilizationPercent: 50,
         });
+
+        const cfnService = applicationLoadBalancedEC2Service.service.node.defaultChild as ecs.CfnService;
+
+        cfnService.addPropertyOverride('TaskDefinition', props.taskDefinitionArn);
 
         const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
             value: applicationLoadBalancedEC2Service.service.serviceName
