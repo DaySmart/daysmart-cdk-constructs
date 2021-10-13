@@ -25,6 +25,10 @@ export class CdkPipeline extends cdk.Construct {
 
   public pipeline: codepipeline.Pipeline;
   public buildProject: codebuild.PipelineProject;
+  public buildAction: codepipeline_actions.CodeBuildAction;
+  public buildOutput: codepipeline.Artifact;
+  public sourceAction: codepipeline_actions.CodeStarConnectionsSourceAction;
+  public sourceArtifact: codepipeline.Artifact;
 
   constructor(scope: cdk.Construct, id: string, props: CdkPipelineProps) {
     super(scope, id);
@@ -35,14 +39,14 @@ export class CdkPipeline extends cdk.Construct {
       artifactBucket: props.artifactBucket,
     });
 
-    const sourceArtifact = new codepipeline.Artifact();
+    this.sourceArtifact = new codepipeline.Artifact();
 
-    const sourceAction = new codepipeline_actions.CodeStarConnectionsSourceAction({
+    this.sourceAction = new codepipeline_actions.CodeStarConnectionsSourceAction({
       actionName: 'Source',
       owner: props.repoOwner,
       repo: props.repoName,
       connectionArn: props.codeStartConnectionArn,
-      output: sourceArtifact,
+      output: this.sourceArtifact,
       triggerOnPush: true,
       codeBuildCloneOutput: true,
       branch: props.branch
@@ -50,7 +54,7 @@ export class CdkPipeline extends cdk.Construct {
 
     this.pipeline.addStage({
       stageName: 'Source',
-      actions: [sourceAction]
+      actions: [this.sourceAction]
     });
 
     this.buildProject = new codebuild.PipelineProject(this, 'CodeBuildProject', {
@@ -61,17 +65,17 @@ export class CdkPipeline extends cdk.Construct {
       }
     });
 
-    const buildOutput = new codepipeline.Artifact();
-    const buildAction = new codepipeline_actions.CodeBuildAction({
+    this.buildOutput = new codepipeline.Artifact();
+    this.buildAction = new codepipeline_actions.CodeBuildAction({
       actionName: 'Build',
       project: this.buildProject,
-      input: sourceArtifact,
-      outputs: [buildOutput],
+      input: this.sourceArtifact,
+      outputs: [this.buildOutput],
     });
 
     this.pipeline.addStage({
       stageName: 'Build',
-      actions: [buildAction]
+      actions: [this.buildAction]
     });
 
     let publishList: Array<{account: AWSTestAccount, service: string}> = [];
@@ -86,8 +90,8 @@ export class CdkPipeline extends cdk.Construct {
       actions: publishList.map(publishConfig => new codepipeline_actions.S3DeployAction({
         actionName: `Copy-Artifact_${publishConfig.account.name}-${publishConfig.service}`,
         bucket: publishConfig.account.codeBucket,
-        input: buildOutput,
-        objectKey: `${publishConfig.service}/${buildAction.variable('GIT_TAG')}-${buildAction.variable('BUILD_DATE')}-${buildAction.variable('GIT_SHORT_HASH')}.zip`,
+        input: this.buildOutput,
+        objectKey: `${publishConfig.service}/${this.buildAction.variable('GIT_TAG')}-${this.buildAction.variable('BUILD_DATE')}-${this.buildAction.variable('GIT_SHORT_HASH')}.zip`,
         extract: false,
         role: publishConfig.account.crossAccountRole
       }))
