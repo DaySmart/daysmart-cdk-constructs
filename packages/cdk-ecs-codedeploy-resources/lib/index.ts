@@ -57,8 +57,6 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     let yamlStr = yaml.dump(data);
     fs.writeFileSync(__dirname + `/../assets/${appPrefix}-appspec.yml`, yamlStr);
 
-    var terminateBlueInstancesAction: string = props.stage.includes('prod') ? "KEEP_ALIVE" : "TERMINATE"; 
-
     var terminationTimeout: number = props.stage.includes('prod') ? 30 : 0;
 
     const bucket = s3.Bucket.fromBucketName(this, "Bucket", props.deployBucket)
@@ -135,7 +133,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
             actionOnTimeout: "CONTINUE_DEPLOYMENT"
           },
           terminateBlueInstancesOnDeploymentSuccess: {
-            action: terminateBlueInstancesAction,
+            action: "TERMINATE",
             terminationWaitTimeInMinutes: terminationTimeout
           }
         },
@@ -191,7 +189,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
             actionOnTimeout: "CONTINUE_DEPLOYMENT"
           },
           terminateBlueInstancesOnDeploymentSuccess: {
-            action: terminateBlueInstancesAction,
+            action: "TERMINATE",
             terminationWaitTimeInMinutes: terminationTimeout
           }
         },
