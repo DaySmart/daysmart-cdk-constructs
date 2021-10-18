@@ -57,7 +57,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
     let yamlStr = yaml.dump(data);
     fs.writeFileSync(__dirname + `/../assets/${appPrefix}-appspec.yml`, yamlStr);
 
-    var terminationTimeout: number = props.stage.includes('prod') ? 30 : 0;
+    var terminationTimeout: number = props.stage.includes('prod') ? 120 : 0;
 
     const bucket = s3.Bucket.fromBucketName(this, "Bucket", props.deployBucket)
 
