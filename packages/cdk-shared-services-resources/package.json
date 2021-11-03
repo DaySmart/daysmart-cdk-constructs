@@ -1,0 +1,33 @@
+{
+  "name": "@daysmart/cdk-shared-services-resources",
+  "version": "0.1.2",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.129.0",
+    "@aws-cdk/assertions": "^1.129.0",
+    "@types/jest": "^26.0.10",
+    "@types/node": "10.17.27",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "typescript": "~3.9.7"
+  },
+  "peerDependencies": {
+    "@aws-cdk/core": "1.129.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-codebuild": "^1.129.0",
+    "@aws-cdk/aws-iam": "^1.129.0",
+    "@aws-cdk/aws-kms": "^1.129.0",
+    "@aws-cdk/aws-s3": "^1.129.0",
+    "@aws-cdk/core": "1.129.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
