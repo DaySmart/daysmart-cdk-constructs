@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/DaySmart/daysmart-cdk-constructs#readme",
   "devDependencies": {
-    "lerna": "^3.22.1"
+    "lerna": "^3.22.1",
+    "typedoc": "^0.22.7"
+  },
+  "dependencies": {
+    "typescript": "^4.4.4"
   }
 }

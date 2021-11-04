@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Static Website CDN template 1`] = `
+Object {
+  "Mappings": Object {
+    "AWSCloudFrontPartitionHostedZoneIdMap": Object {
+      "aws": Object {
+        "zoneId": "Z2FDTNDATAQYW2",
+      },
+      "aws-cn": Object {
+        "zoneId": "Z3RFFRIM2A3IF5",
+      },
+    },
+  },
+  "Resources": Object {
+    "WebsiteCDNAlias0ECFCB318": Object {
+      "Properties": Object {
+        "AliasTarget": Object {
+          "DNSName": Object {
+            "Fn::GetAtt": Array [
+              "WebsiteCDNDistribution87C8E1D8",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": Object {
+            "Fn::FindInMap": Array [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              Object {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "example.domain.com.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "WebsiteCDNDistribution87C8E1D8": Object {
+      "Properties": Object {
+        "DistributionConfig": Object {
+          "Aliases": Array [
+            "example.domain.com",
+          ],
+          "CustomErrorResponses": Array [
+            Object {
+              "ErrorCode": 403,
+              "ResponseCode": 200,
+              "ResponsePagePath": "/index.html",
+            },
+          ],
+          "DefaultCacheBehavior": Object {
+            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "Compress": true,
+            "TargetOriginId": "stackWebsiteCDNDistributionOrigin1BCB5126C",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "/index.html",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Logging": Object {
+            "Bucket": Object {
+              "Fn::GetAtt": Array [
+                "WebsiteCDNDistributionLoggingBucketA7CD51F4",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
+          "Origins": Array [
+            Object {
+              "DomainName": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "my-bucket.s3.us-east-1.",
+                    Object {
+                      "Ref": "AWS::URLSuffix",
+                    },
+                  ],
+                ],
+              },
+              "Id": "stackWebsiteCDNDistributionOrigin1BCB5126C",
+              "S3OriginConfig": Object {
+                "OriginAccessIdentity": "origin-access-identity/cloudfront/oai-123",
+              },
+            },
+          ],
+          "ViewerCertificate": Object {
+            "AcmCertificateArn": "arn:aws:acm:us-east-1:123456:certificate/blah",
+            "MinimumProtocolVersion": "TLSv1.2_2019",
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "WebsiteCDNDistributionLoggingBucketA7CD51F4": Object {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+}
+`;
