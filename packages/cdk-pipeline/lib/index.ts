@@ -13,6 +13,7 @@ export interface CdkPipelineProps {
   codeStartConnectionArn: string;
   services?: Array<string>;
   testAccounts: Array<AWSTestAccount>;
+  secondarySourceAction?: codepipeline.IAction;
 }
 
 export interface AWSTestAccount {
@@ -54,7 +55,7 @@ export class CdkPipeline extends cdk.Construct {
 
     this.pipeline.addStage({
       stageName: 'Source',
-      actions: [this.sourceAction]
+      actions: props.secondarySourceAction ? [this.sourceAction, props.secondarySourceAction] : [this.sourceAction]
     });
 
     this.buildProject = new codebuild.PipelineProject(this, 'CodeBuildProject', {
