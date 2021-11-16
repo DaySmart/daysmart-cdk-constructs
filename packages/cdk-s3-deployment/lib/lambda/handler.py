@@ -186,6 +186,12 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_name):
 
     return failed_invalidation_list
 
+
+
+async def invalidation_wait(distribution_id, distribution_paths):
+    
+
+
 # ---------------------------------------------------------------------------------------------------
 # recursive method for paginating aws cf distribution list
 
