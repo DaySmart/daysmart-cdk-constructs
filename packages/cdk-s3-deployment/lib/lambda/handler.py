@@ -167,7 +167,17 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_name):
 
     for distribution_id in invalidate_distribution_list:
         try:
-            invalidation_resp = cloudfront.create_invalidation(
+            await invalidation_wait(distribution_id, distribution_paths)
+        except Exception as e:
+            failed_invalidation_list.append(distribution_id)
+            pass
+
+    return failed_invalidation_list
+
+
+
+async def invalidation_wait(distribution_id, distribution_paths):
+    invalidation_resp = cloudfront.create_invalidation(
                 DistributionId=distribution_id,
                 InvalidationBatch={
                     'Paths': {
@@ -180,15 +190,6 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_name):
             cloudfront.get_waiter('invalidation_completed').wait(
                 DistributionId=distribution_id,
                 Id=invalidation_resp['Invalidation']['Id'])
-        except Exception as e:
-            failed_invalidation_list.append(distribution_id)
-            pass
-
-    return failed_invalidation_list
-
-
-
-async def invalidation_wait(distribution_id, distribution_paths):
     
 
 
