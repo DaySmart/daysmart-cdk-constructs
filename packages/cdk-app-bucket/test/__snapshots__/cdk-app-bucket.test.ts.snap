@@ -2,50 +2,36 @@
 
 exports[`AppBucket 1`] = `
 Object {
-  "Resources": Object {
-    "AppBucketBucketPolicyEB9AC237": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "AppBucketFED55033",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Principal": Object {
-                "CanonicalUser": Object {
-                  "Fn::GetAtt": Array [
-                    "AppBucketOriginAcessIdentityEAF14A7F",
-                    "S3CanonicalUserId",
-                  ],
-                },
-              },
-              "Resource": Object {
-                "Fn::Join": Array [
-                  "",
-                  Array [
-                    Object {
-                      "Fn::GetAtt": Array [
-                        "AppBucketFED55033",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
+  "Outputs": Object {
+    "AppBucket": Object {
+      "Value": Object {
+        "Ref": "AppBucketFED55033",
       },
-      "Type": "AWS::S3::BucketPolicy",
     },
+    "OriginAccessIdentity": Object {
+      "Value": Object {
+        "Ref": "AppBucketOriginAcessIdentityEAF14A7F",
+      },
+    },
+  },
+  "Resources": Object {
     "AppBucketFED55033": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "BucketName": "test-test2-website-bucket",
+        "BucketName": "test3-test2.test.test4",
+        "OwnershipControls": Object {
+          "Rules": Array [
+            Object {
+              "ObjectOwnership": "BucketOwnerPreferred",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": Object {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
         "VersioningConfiguration": Object {
           "Status": "Enabled",
         },
@@ -80,23 +66,89 @@ Object {
         "PolicyDocument": Object {
           "Statement": Array [
             Object {
-              "Action": "s3:GetObject",
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
-              "Principal": "*",
-              "Resource": Object {
-                "Fn::Join": Array [
-                  "",
-                  Array [
-                    Object {
-                      "Fn::GetAtt": Array [
-                        "AppBucketFED55033",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+              "Principal": Object {
+                "CanonicalUser": Object {
+                  "Fn::GetAtt": Array [
+                    "AppBucketOriginAcessIdentityEAF14A7F",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "AppBucketFED55033",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "AppBucketFED55033",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::1234567:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "AppBucketFED55033",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "AppBucketFED55033",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",

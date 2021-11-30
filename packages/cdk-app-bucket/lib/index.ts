@@ -8,6 +8,7 @@ export interface AppBucketProps {
     appName: string;
     dynamicEnvName: string;
     projectName: string;
+    sharedServicesAccountId?: string;
 }
 export class AppBucket extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, props: AppBucketProps) {
@@ -15,26 +16,20 @@ export class AppBucket extends cdk.Construct {
 
         const bucket = new s3.Bucket(this, 'Bucket', {
             bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
-            publicReadAccess: true,
             versioned: true,
+            objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
         });
 
         const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAcessIdentity', {
             comment: `OriginAccessIdentity for ${bucket.bucketName}.`
         });
 
-        const bucketPolicy = new s3.BucketPolicy(this, 'BucketPolicy', {
-            bucket: bucket
-        });
+        bucket.grantRead(originAccessIdentity)
 
-        bucketPolicy.document.addStatements(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                principals: [originAccessIdentity.grantPrincipal],
-                actions: ['s3:GetObject'],
-                resources: [bucket.bucketArn + "/*"],
-            })
-        );
+        if(props.sharedServicesAccountId) {
+            bucket.grantReadWrite(new iam.AccountPrincipal(props.sharedServicesAccountId));
+        }
 
         let output = new cdk.CfnOutput(this, "AppBucket", {
             value: bucket.bucketName
