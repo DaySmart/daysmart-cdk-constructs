@@ -14,6 +14,8 @@ export interface CdkEnvironmentResourcesProps {
     securityGroupId: string;
     instanceProfileArn: string;
     userData?: string;
+    capacity: number[];
+
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -51,9 +53,9 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 name: `${props.amiName}*`,
                 windows: true
             }),
-            minCapacity: 2,
-            desiredCapacity: 2,
-            maxCapacity: 3,
+            minCapacity: props.capacity[0],
+            desiredCapacity: props.capacity[1],
+            maxCapacity: props.capacity[2],
             securityGroup: ec2.SecurityGroup.fromSecurityGroupId(this, "SecurityGroup", props.securityGroupId),
             keyName: props.instanceKeyName,
             instanceMonitoring: autoscaling.Monitoring.DETAILED,
