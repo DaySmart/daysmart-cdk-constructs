@@ -20,7 +20,8 @@ export interface CdkEcsAlbProps {
     certificateArn: string;
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string;
-    taskCapacity: number[];
+    minTaskCapacity: number;
+    maxTaskCapacity: number;
 
 }
 
@@ -173,8 +174,8 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         const scalableTarget = applicationLoadBalancedEC2Service.service.autoScaleTaskCount({
-            minCapacity: props.taskCapacity[0],
-            maxCapacity: props.taskCapacity[1],
+            minCapacity: props.minTaskCapacity,
+            maxCapacity: props.maxTaskCapacity,
         });
 
         scalableTarget.scaleOnCpuUtilization('CpuScaling', {
