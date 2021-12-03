@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="229.872" height="200" viewBox="0 0 229.872 200">
+  <g id="Group_3148" data-name="Group 3148" transform="translate(5426.766 -553.579)">
+    <g id="outline-textsms-24px" transform="translate(-5426.766 553.579)">
+      <path id="Path_284" data-name="Path 284" d="M0,0H200V200H0Z" fill="none"/>
+      <path id="Path_285" data-name="Path 285" d="M152.241,2H18.693A16.743,16.743,0,0,0,2,18.693V168.934l33.387-33.387H152.241a16.743,16.743,0,0,0,16.693-16.693V18.693A16.743,16.743,0,0,0,152.241,2Zm0,116.854H35.387L18.693,135.547V18.693H152.241ZM43.734,60.427H60.427V77.12H43.734Zm33.387,0H93.814V77.12H77.12Zm33.387,0H127.2V77.12H110.507Z" transform="translate(14.533 14.533)" fill="#656565"/>
+    </g>
+    <g id="Group_3147" data-name="Group 3147" transform="translate(-105.091 -6.183)">
+      <g id="Ellipse_166" data-name="Ellipse 166" transform="translate(-5201 650)" fill="#fff" stroke="#fff" stroke-miterlimit="10" stroke-width="15">
+        <ellipse cx="51.484" cy="51.484" rx="51.484" ry="51.484" stroke="none"/>
+        <ellipse cx="51.484" cy="51.484" rx="43.984" ry="43.984" fill="none"/>
+      </g>
+    </g>
+    <g id="Group_3146" data-name="Group 3146" transform="translate(-94 4)">
+      <g id="Ellipse_166-2" data-name="Ellipse 166" transform="translate(-5201 650)" fill="none" stroke="#656565" stroke-miterlimit="10" stroke-width="15">
+        <circle cx="40.5" cy="40.5" r="40.5" stroke="none"/>
+        <circle cx="40.5" cy="40.5" r="33" fill="none"/>
+      </g>
+      <line id="Line_649" data-name="Line 649" x2="23" y2="23" transform="translate(-5136.5 714.5)" fill="none" stroke="#656565" stroke-linecap="round" stroke-miterlimit="10" stroke-width="15"/>
+    </g>
+  </g>
+</svg>

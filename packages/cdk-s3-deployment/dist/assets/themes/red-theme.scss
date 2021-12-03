@@ -1,0 +1,82 @@
+@import '../../styles/component-themes';
+@include mat-core();
+@import '../../../node_modules/@angular/material/theming';
+
+$custom-typography: mat-typography-config(
+    $font-family: 'DM Sans, sans-serif'
+);
+
+@include angular-material-typography($custom-typography);
+
+$saloniris-red: (
+    50 : #f6e7e7,
+    100 : #e8c2c2,
+    200 : #d99a9a,
+    300 : #c97171,
+    400 : #be5252,
+    500 : #b23434,
+    600 : #473c34,
+    700 : #a22727,
+    800 : #992121,
+    900 : #8a1515,
+    A100 : #ffbebe,
+    A200 : #ff8b8b,
+    A400 : #ff5858,
+    A700 : #ff3f3f,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #ffffff,
+    )
+);
+
+// Theme used for material components
+$saloniris-primary: mat-palette($saloniris-red, 500);
+$saloniris-accent: mat-palette($saloniris-red, 500);
+$saloniris-warn: mat-palette($mat-red);
+$theme: mat-light-theme($saloniris-primary, $saloniris-accent, $saloniris-warn);
+
+// Theme used for app components we created
+// For example: navbar icon active state background color
+$posonline-accent: mat-palette($saloniris-red, 600);
+$posonline-theme: mat-light-theme($saloniris-primary, $posonline-accent, $saloniris-warn);
+
+@include angular-material-theme($theme);
+@include component-themes($posonline-theme);
+
+$accent: mat-color($saloniris-primary, 500); /* Get primary color from material to override accent variable in kendo */
+@import '../../styles/kendo-override-variables';
+@import "../../../node_modules/@progress/kendo-theme-default/scss/all";
+@import '../../styles/kendo-override-styles';
+
+.mat-raised-button, .k-button {
+    .mat-spinner circle {
+        stroke: map-get(map-get($saloniris-red, contrast), 500);
+    }
+}
+
+
+.mat-step-header .mat-step-label.mat-step-label-active {
+    color: map-get($saloniris-red, 500);
+}
+
+.mat-button.mat-primary[disabled], .mat-button.mat-accent[disabled], .mat-button.mat-warn[disabled], .mat-button[disabled][disabled], .mat-icon-button.mat-primary[disabled], .mat-icon-button.mat-accent[disabled], .mat-icon-button.mat-warn[disabled], .mat-icon-button[disabled][disabled], .mat-stroked-button.mat-primary[disabled], .mat-stroked-button.mat-accent[disabled], .mat-stroked-button.mat-warn[disabled], .mat-stroked-button[disabled][disabled] {
+    outline: none;
+    cursor: default;
+    opacity: 0.6;
+    filter: grayscale(0.1);
+    pointer-events: none;
+}
+
+@import './generic-theme.scss';

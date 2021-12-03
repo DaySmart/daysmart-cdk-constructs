@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .cls-1 {
+        clip-path: url(#clip-iPhone_6_7_8_2);
+      }
+
+      .cls-2, .cls-8 {
+        fill: none;
+      }
+
+      .cls-2, .cls-4, .cls-5 {
+        stroke: #fff;
+        stroke-width: 3px;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-4, .cls-5, .cls-7 {
+        fill: none;
+      }
+
+      .cls-5 {
+        stroke-linecap: round;
+      }
+
+      .cls-6 {
+        stroke: none;
+      }
+    </style>
+    <clipPath id="clip-iPhone_6_7_8_2">
+      <rect width="100" height="100"/>
+    </clipPath>
+  </defs>
+  <g id="iPhone_6_7_8_2" data-name="iPhone 6/7/8 – 2" class="cls-1">
+    <rect class="cls-8" width="100" height="100"/>
+    <g id="Group_3140" data-name="Group 3140" transform="translate(-9341 9114)">
+      <g id="Rectangle_1352" data-name="Rectangle 1352" class="cls-2" transform="translate(9341 -9097)">
+        <rect class="cls-6" width="100" height="67" rx="10"/>
+        <rect class="cls-7" x="1.5" y="1.5" width="97" height="64" rx="8.5"/>
+      </g>
+      <g id="Group_3137" data-name="Group 3137" transform="translate(9403.392 -9065.417)">
+        <g id="Group_3096" data-name="Group 3096" transform="translate(0 0)">
+          <path id="Path_133" data-name="Path 133" class="cls-3" d="M332.052,249.3v-4.167c2.5.417,4.167,1.25,4.167,2.083a2.125,2.125,0,0,0,4.167-.833c-.417-2.917-3.75-5-8.333-5.417v-2.083a2.083,2.083,0,1,0-4.167,0v2.083c-5,.417-8.333,2.917-8.333,6.25,0,3.75,5,5,8.333,5.417V256.8c-2.5-.417-4.167-1.25-4.167-2.083a2.125,2.125,0,1,0-4.167.833c.417,2.917,3.75,5,8.333,5.417v2.083a2.083,2.083,0,0,0,4.167,0v-1.667c5-.417,8.333-2.917,8.333-6.25C340.386,250.967,335.386,249.717,332.052,249.3Zm-4.167-.833c-4.167-.833-4.167-1.667-4.167-1.667,0-.417,1.667-1.667,4.167-2.083Zm4.167,8.75v-3.75c4.167.833,4.167,1.667,4.167,1.667C336.219,255.55,334.969,256.383,332.052,257.217Z" transform="translate(-319.444 -236.8)"/>
+        </g>
+      </g>
+      <line id="Line_763" data-name="Line 763" class="cls-4" x2="95" transform="translate(9343.5 -9073.5)"/>
+      <line id="Line_764" data-name="Line 764" class="cls-4" y2="62" transform="translate(9368.5 -9094.5)"/>
+      <g id="Group_3139" data-name="Group 3139" transform="translate(0 -1)">
+        <path id="Path_141" data-name="Path 141" class="cls-5" d="M9449.607-9272.48a26.652,26.652,0,0,0-4.892,5.312,11.854,11.854,0,0,0-2.149,5.769" transform="translate(-83 202)"/>
+        <path id="Path_142" data-name="Path 142" class="cls-5" d="M26.519,20.607s-4.651-18.185-12.2-10.561S25.494,22.118,25.494,22.118" transform="translate(9341.75 -9094.254)"/>
+      </g>
+      <g id="Group_3138" data-name="Group 3138" transform="translate(-8.251 -1)">
+        <path id="Path_143" data-name="Path 143" class="cls-5" d="M9442.566-9272.48a26.652,26.652,0,0,1,4.892,5.312,11.854,11.854,0,0,1,2.149,5.769" transform="translate(-64.384 202)"/>
+        <path id="Path_144" data-name="Path 144" class="cls-5" d="M12.52,20.605s4.651-18.181,12.2-10.559-11.178,12.07-11.178,12.07" transform="translate(9364 -9094.252)"/>
+      </g>
+    </g>
+  </g>
+</svg>

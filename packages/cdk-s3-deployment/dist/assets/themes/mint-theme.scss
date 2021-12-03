@@ -1,0 +1,91 @@
+@import '../../styles/component-themes';
+@include mat-core();
+@import '../../../node_modules/@angular/material/theming';
+
+$custom-typography: mat-typography-config(
+    $font-family: 'DM Sans, sans-serif',
+);
+
+@include angular-material-typography($custom-typography);
+
+$saloniris-mint: (
+    50: #3c9f92,
+    100: #3c9f92,
+    200: #3c9f92,
+    300: #3c9f92,
+    400: #3c9f92,
+    500: #3c9f92,
+    600: #190e30,
+    700: #3c9f92,
+    800: #3c9f92,
+    900: #3c9f92,
+    A100: #3c9f92,
+    A200: #3c9f92,
+    A400: #3c9f92,
+    A700: #3c9f92,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #000000,
+        700: #000000,
+        800: #000000,
+        900: #000000,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    ),
+);
+
+// Theme used for material components
+$saloniris-primary: mat-palette($saloniris-mint, 500);
+$saloniris-accent: mat-palette($saloniris-mint, 500);
+$saloniris-warn: mat-palette($mat-red);
+$theme: mat-light-theme($saloniris-primary, $saloniris-accent, $saloniris-warn);
+
+// Theme used for app components we created
+// For example: navbar icon active state background color
+$posonline-accent: mat-palette($saloniris-mint, 600);
+$posonline-theme: mat-light-theme($saloniris-primary, $posonline-accent, $saloniris-warn);
+
+@include angular-material-theme($theme);
+@include component-themes($posonline-theme);
+
+$accent: mat-color($saloniris-primary, 500); /* Get primary color from material to override accent variable in kendo */
+@import '../../styles/kendo-override-variables';
+@import '../../../node_modules/@progress/kendo-theme-default/scss/all';
+@import '../../styles/kendo-override-styles';
+
+.mat-raised-button,
+.k-button {
+    .mat-spinner circle {
+        stroke: map-get(map-get($saloniris-mint, contrast), 500);
+    }
+}
+
+.mat-step-header .mat-step-label.mat-step-label-active {
+    color: map-get($saloniris-mint, 500);
+}
+
+.mat-button.mat-primary[disabled],
+.mat-button.mat-accent[disabled],
+.mat-button.mat-warn[disabled],
+.mat-button[disabled][disabled],
+.mat-icon-button.mat-primary[disabled],
+.mat-icon-button.mat-accent[disabled],
+.mat-icon-button.mat-warn[disabled],
+.mat-icon-button[disabled][disabled],
+.mat-stroked-button.mat-primary[disabled],
+.mat-stroked-button.mat-accent[disabled],
+.mat-stroked-button.mat-warn[disabled],
+.mat-stroked-button[disabled][disabled] {
+    outline: none;
+    cursor: default;
+    opacity: 0.6;
+    filter: grayscale(0.1);
+    pointer-events: none;
+}

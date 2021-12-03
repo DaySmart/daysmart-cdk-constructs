@@ -1,0 +1,13 @@
+{
+    "employee": {
+        "contractor_tab": "Booth Renter Settings",
+        "contractor_heading": "Booth Renter",
+        "contractor_desc": "A booth renter manages their own sales and taxes. They cannot be on the same ticket as other employees."
+    },
+    "client": {
+        "search_placeholder": "Search for Client"
+    },
+    "client_pet": {
+        "search_placeholder": "Search by Client, Pet, Species or Breed"
+    }
+}

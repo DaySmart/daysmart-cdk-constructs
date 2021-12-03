@@ -1,0 +1,13 @@
+{
+    "employee": {
+        "contractor_tab": "Independent Contractor Settings",
+        "contractor_heading": "Independent Contractor",
+        "contractor_desc": "An independent contractor manages their own sales and taxes. They cannot be on the same ticket as other employees."
+    },
+    "client": {
+        "search_placeholder": "Search for Client"
+    },
+    "client_pet": {
+        "search_placeholder": "Search by Client, Pet, Species or Breed"
+    }
+}

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="222.286" viewBox="0 0 180 222.286">
+  <g id="Group_4873" data-name="Group 4873" transform="translate(-870 -387)">
+    <g id="list" transform="translate(870 387)">
+      <g id="Group_4855" data-name="Group 4855" transform="translate(0)">
+        <g id="Group_4854" data-name="Group 4854">
+          <path id="Path_337" data-name="Path 337" d="M172.789,11.959V0H96.254V11.959H54V204.094H215.043V11.959Zm-64.577,0h52.618V35.876H108.213Zm94.872,180.177H65.959V23.917h30.3V47.835h76.535V23.917h30.3Z" transform="translate(-54)" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4857" data-name="Group 4857" transform="translate(47.919 67.035)">
+        <g id="Group_4856" data-name="Group 4856">
+          <rect id="Rectangle_2624" data-name="Rectangle 2624" width="88.505" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4859" data-name="Group 4859" transform="translate(25.228 67.035)">
+        <g id="Group_4858" data-name="Group 4858" transform="translate(0)">
+          <rect id="Rectangle_2625" data-name="Rectangle 2625" width="12.224" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4861" data-name="Group 4861" transform="translate(47.919 98.244)">
+        <g id="Group_4860" data-name="Group 4860">
+          <rect id="Rectangle_2626" data-name="Rectangle 2626" width="88.505" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4863" data-name="Group 4863" transform="translate(25.228 98.244)">
+        <g id="Group_4862" data-name="Group 4862" transform="translate(0)">
+          <rect id="Rectangle_2627" data-name="Rectangle 2627" width="12.224" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4865" data-name="Group 4865" transform="translate(47.919 129.452)">
+        <g id="Group_4864" data-name="Group 4864">
+          <rect id="Rectangle_2628" data-name="Rectangle 2628" width="88.505" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4867" data-name="Group 4867" transform="translate(25.228 129.452)">
+        <g id="Group_4866" data-name="Group 4866" transform="translate(0)">
+          <rect id="Rectangle_2629" data-name="Rectangle 2629" width="12.224" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4869" data-name="Group 4869" transform="translate(47.919 160.661)">
+        <g id="Group_4868" data-name="Group 4868">
+          <rect id="Rectangle_2630" data-name="Rectangle 2630" width="88.505" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+      <g id="Group_4871" data-name="Group 4871" transform="translate(25.228 160.661)">
+        <g id="Group_4870" data-name="Group 4870" transform="translate(0)">
+          <rect id="Rectangle_2631" data-name="Rectangle 2631" width="12.224" height="12.224" fill="#656565"/>
+        </g>
+      </g>
+    </g>
+    <g id="Group_4872" data-name="Group 4872" transform="translate(987.204 545.359)">
+      <circle id="Ellipse_158" data-name="Ellipse 158" cx="31.5" cy="31.5" r="31.5" transform="translate(-0.204 -0.359)" fill="#fff"/>
+      <g id="Ellipse_157" data-name="Ellipse 157" transform="translate(8.796 8.641)" fill="#fff" stroke="#656565" stroke-width="10">
+        <circle cx="22.5" cy="22.5" r="22.5" stroke="none"/>
+        <circle cx="22.5" cy="22.5" r="17.5" fill="none"/>
+      </g>
+      <line id="Line_759" data-name="Line 759" x2="17.894" y2="17.894" transform="translate(40.708 42.497)" fill="none" stroke="#656565" stroke-width="10"/>
+    </g>
+  </g>
+</svg>
