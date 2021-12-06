@@ -74,7 +74,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
             metricName: "MemoryReservation",
             dimensionsMap: {
                 "ClusterName": `${props.stage}-${props.project}`
-            }
+            },
+            period: cdk.Duration.minutes(3)
         });
 
         const scalingPolicy = autoScalingGroup.scaleOnMetric("ScalingPolicy", {
@@ -82,16 +83,16 @@ export class CdkEnvironmentResources extends cdk.Construct {
             scalingSteps: [
                 {
                     lower: 75,
-                    change: -10
+                    change: 10
                 },
                 {
-                    upper: 25,
-                    change: 10
+                    upper: 50,
+                    change: -10
                 }
             ],
             adjustmentType: autoscaling.AdjustmentType.PERCENT_CHANGE_IN_CAPACITY,
             minAdjustmentMagnitude: 1,
-            evaluationPeriods: 3
+            evaluationPeriods: 2
         });
 
         const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
