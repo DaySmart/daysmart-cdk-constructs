@@ -35,6 +35,11 @@ export interface StaticWebsiteCDNProps {
      * The name of the hosted zone that includes all of the domain names given
      */
     hostedZoneDomain: string;
+
+    /**
+     * A custom origin path in the S3 bucket for the CloudFront origin
+     */
+    originPath?: string;
 }
 
 /**
@@ -50,7 +55,8 @@ export class StaticWebsiteCDN extends cdk.Construct {
         const distribution = new cloudfront.Distribution(this, 'Distribution', {
             defaultBehavior: {
                 origin: new origins.S3Origin(appBucket, {
-                    originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity)
+                    originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity),
+                    originPath: props.originPath
                 }),
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
             },
@@ -58,10 +64,10 @@ export class StaticWebsiteCDN extends cdk.Construct {
             domainNames: props.domainNames,
             enableLogging: true,
             logIncludesCookies: true,
-            defaultRootObject: '/index.html',
+            defaultRootObject: 'index.html',
             errorResponses: [
                 {
-                    httpStatus: 403,
+                    httpStatus: 404,
                     responseHttpStatus: 200,
                     responsePagePath: '/index.html'
                 }
