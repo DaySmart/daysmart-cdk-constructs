@@ -69,12 +69,31 @@ export class CdkEnvironmentResources extends cdk.Construct {
             applyToLaunchedInstances: true
         });
 
-        const memoryReservationMetric = new cloudwatch.Metric({
-            namespace: "AWS/ECS/ClusterName",
-            metricName: "MemoryReservation",
-            dimensionsMap: {
-                "ClusterName": `${props.stage}-${props.project}`
-            },
+        // const memoryReservationMetric = new cloudwatch.Metric({
+        //     namespace: "AWS/ECS/ClusterName",
+        //     metricName: "MemoryReservation",
+        //     dimensionsMap: {
+        //         "ClusterName": `${props.stage}-${props.project}`
+        //     },
+        //     period: cdk.Duration.minutes(3)
+        // });
+
+        const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
+            capacityProviderName: `${props.stage}-${props.project}-asg-capacity-provider`,
+            autoScalingGroup: autoScalingGroup,
+            enableManagedTerminationProtection: false,
+            targetCapacityPercent: 100,
+            canContainersAccessInstanceRole: true,
+            enableManagedScaling: false
+        })
+
+        const cluster = new ecs.Cluster(this, "Cluster", {
+            clusterName: `${props.stage}-${props.project}`,
+            vpc: vpc,
+            containerInsights: true
+        });
+
+        const memoryReservationMetric = cluster.metricMemoryReservation({
             period: cdk.Duration.minutes(3)
         });
 
@@ -93,21 +112,6 @@ export class CdkEnvironmentResources extends cdk.Construct {
             adjustmentType: autoscaling.AdjustmentType.PERCENT_CHANGE_IN_CAPACITY,
             minAdjustmentMagnitude: 1,
             evaluationPeriods: 2
-        });
-
-        const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
-            capacityProviderName: `${props.stage}-${props.project}-asg-capacity-provider`,
-            autoScalingGroup: autoScalingGroup,
-            enableManagedTerminationProtection: false,
-            targetCapacityPercent: 100,
-            canContainersAccessInstanceRole: true,
-            enableManagedScaling: false
-        })
-
-        const cluster = new ecs.Cluster(this, "Cluster", {
-            clusterName: `${props.stage}-${props.project}`,
-            vpc: vpc,
-            containerInsights: true
         });
 
         cluster.addAsgCapacityProvider(defaultAsgCapacityProvider);
