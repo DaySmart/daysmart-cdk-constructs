@@ -22,6 +22,7 @@ export interface CdkEcsAlbProps {
     hostedZoneDomainName?: string;
     minTaskCapacity: string;
     maxTaskCapacity: string;
+    desiredTaskCapacity: string;
 
 }
 
@@ -127,7 +128,7 @@ export class CdkEcsAlb extends cdk.Construct {
             applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
                 cluster,
                 serviceName: `${props.stage}-${props.appName}`,
-                desiredCount: 1,
+                desiredCount: parseInt(props.desiredTaskCapacity),
                 taskDefinition: taskDefinition,
                 deploymentController: {
                     type: ecs.DeploymentControllerType.CODE_DEPLOY
