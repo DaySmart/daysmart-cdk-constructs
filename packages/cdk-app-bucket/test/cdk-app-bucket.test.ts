@@ -8,7 +8,8 @@ test("AppBucket", () => {
         stage: 'test',
         appName: 'test2',
         dynamicEnvName: 'test3',
-        projectName: 'test4'
+        projectName: 'test4',
+        sharedServicesAccountId: '1234567'
     });
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot();

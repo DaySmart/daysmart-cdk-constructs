@@ -46,7 +46,7 @@ Object {
           ],
           "CustomErrorResponses": Array [
             Object {
-              "ErrorCode": 403,
+              "ErrorCode": 404,
               "ResponseCode": 200,
               "ResponsePagePath": "/index.html",
             },
@@ -57,7 +57,7 @@ Object {
             "TargetOriginId": "stackWebsiteCDNDistributionOrigin1BCB5126C",
             "ViewerProtocolPolicy": "redirect-to-https",
           },
-          "DefaultRootObject": "/index.html",
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
