@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as autoscaling from "@aws-cdk/aws-autoscaling";
+import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as iam from "@aws-cdk/aws-iam";
 
@@ -60,7 +61,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
             groupMetrics: [autoscaling.GroupMetrics.all()]
         });
 
-        if(props.userData){
+        if (props.userData) {
             autoScalingGroup.addUserData(props.userData);
         }
 
@@ -68,9 +69,14 @@ export class CdkEnvironmentResources extends cdk.Construct {
             applyToLaunchedInstances: true
         });
 
-        const targetTrackingScalingPolicy = autoScalingGroup.scaleOnCpuUtilization("ScalingPolicy", {
-            targetUtilizationPercent: 50,
-        });
+        // const memoryReservationMetric = new cloudwatch.Metric({
+        //     namespace: "AWS/ECS/ClusterName",
+        //     metricName: "MemoryReservation",
+        //     dimensionsMap: {
+        //         "ClusterName": `${props.stage}-${props.project}`
+        //     },
+        //     period: cdk.Duration.minutes(3)
+        // });
 
         const defaultAsgCapacityProvider = new ecs.AsgCapacityProvider(this, "DefaultAutoScalingGroupCapacityProvider", {
             capacityProviderName: `${props.stage}-${props.project}-asg-capacity-provider`,
@@ -85,6 +91,27 @@ export class CdkEnvironmentResources extends cdk.Construct {
             clusterName: `${props.stage}-${props.project}`,
             vpc: vpc,
             containerInsights: true
+        });
+
+        const memoryReservationMetric = cluster.metricMemoryReservation({
+            period: cdk.Duration.minutes(3)
+        });
+
+        const scalingPolicy = autoScalingGroup.scaleOnMetric("ScalingPolicy", {
+            metric: memoryReservationMetric,
+            scalingSteps: [
+                {
+                    lower: 75,
+                    change: 10
+                },
+                {
+                    upper: 50,
+                    change: -10
+                }
+            ],
+            adjustmentType: autoscaling.AdjustmentType.PERCENT_CHANGE_IN_CAPACITY,
+            minAdjustmentMagnitude: 1,
+            evaluationPeriods: 2
         });
 
         cluster.addAsgCapacityProvider(defaultAsgCapacityProvider);
