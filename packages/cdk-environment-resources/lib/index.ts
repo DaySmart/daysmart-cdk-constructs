@@ -15,6 +15,9 @@ export interface CdkEnvironmentResourcesProps {
     securityGroupId: string;
     instanceProfileArn: string;
     userData?: string;
+    instanceType?: string;
+    minCapacity?: string;
+    maxCapacity?: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -26,6 +29,19 @@ export class CdkEnvironmentResources extends cdk.Construct {
         super(scope, id);
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
+
+        let instanceType = "c5.2xlarge";
+        if(props.instanceType != undefined) {
+            instanceType = props.instanceType
+        }
+        let minCapacity = null;
+        let maxCapacity = null;
+        if (props.minCapacity != undefined) {
+            minCapacity = parseInt(props.minCapacity)
+        }
+        if (props.maxCapacity != undefined) {
+            maxCapacity = parseInt(props.maxCapacity)
+        }
 
         const bucket = new s3.Bucket(this, 'Bucket', {
             bucketName: `deploy-${props.project}.${props.stage}.ecs`,
@@ -43,7 +59,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
-            instanceType: new ec2.InstanceType("m5.large"),
+            instanceType: new ec2.InstanceType(instanceType),
             newInstancesProtectedFromScaleIn: false,
             role: iam.Role.fromRoleArn(this, "InstanceProfileRole", props.instanceProfileArn),
             maxInstanceLifetime: cdk.Duration.days(120),
@@ -52,9 +68,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 name: `${props.amiName}*`,
                 windows: true
             }),
-            minCapacity: 2,
-            desiredCapacity: 2,
-            maxCapacity: 3,
+            minCapacity: minCapacity,
+            maxCapacity: maxCapacity,
             securityGroup: ec2.SecurityGroup.fromSecurityGroupId(this, "SecurityGroup", props.securityGroupId),
             keyName: props.instanceKeyName,
             instanceMonitoring: autoscaling.Monitoring.DETAILED,

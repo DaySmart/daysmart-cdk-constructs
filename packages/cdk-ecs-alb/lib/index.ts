@@ -19,7 +19,7 @@ export interface CdkEcsAlbProps {
     tag?: string;
     certificateArn: string;
     serviceDnsRecord?: string;
-    hostedZoneDomainName?: string
+    hostedZoneDomainName?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
