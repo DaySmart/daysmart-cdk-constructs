@@ -15,6 +15,7 @@ export interface CdkEnvironmentResourcesProps {
     securityGroupId: string;
     instanceProfileArn: string;
     userData?: string;
+    instanceType?: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -26,6 +27,11 @@ export class CdkEnvironmentResources extends cdk.Construct {
         super(scope, id);
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
+
+        let instanceType = "c5.2xlarge";
+        if(props.instanceType != null) {
+            instanceType = props.instanceType
+        }
 
         const bucket = new s3.Bucket(this, 'Bucket', {
             bucketName: `deploy-${props.project}.${props.stage}.ecs`,
@@ -43,7 +49,7 @@ export class CdkEnvironmentResources extends cdk.Construct {
 
         const autoScalingGroup = new autoscaling.AutoScalingGroup(this, "AutoScalingGroup", {
             autoScalingGroupName: `${props.stage}-${props.project}-ecs-asg`,
-            instanceType: new ec2.InstanceType("c5.2xlarge"),
+            instanceType: new ec2.InstanceType(instanceType),
             newInstancesProtectedFromScaleIn: false,
             role: iam.Role.fromRoleArn(this, "InstanceProfileRole", props.instanceProfileArn),
             maxInstanceLifetime: cdk.Duration.days(120),
