@@ -63,7 +63,7 @@ export class CdkEcsAlb extends cdk.Construct {
         taskDefinition.addContainer("Container", {
             image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
             memoryLimitMiB: 2048,
-            cpu: 512,
+            cpu: 1024,
             portMappings: [
                 {
                     containerPort: 80,
