@@ -16,6 +16,8 @@ export interface CdkEnvironmentResourcesProps {
     instanceProfileArn: string;
     userData?: string;
     instanceType?: string;
+    minCapacity?: string;
+    maxCapacity?: string;
 }
 
 export class CdkEnvironmentResources extends cdk.Construct {
@@ -29,8 +31,16 @@ export class CdkEnvironmentResources extends cdk.Construct {
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
         let instanceType = "c5.2xlarge";
-        if(props.instanceType != null) {
+        if(props.instanceType != undefined) {
             instanceType = props.instanceType
+        }
+        let minCapacity = null;
+        let maxCapacity = null;
+        if (props.minCapacity != undefined) {
+            minCapacity = parseInt(props.minCapacity)
+        }
+        if (props.maxCapacity != undefined) {
+            maxCapacity = parseInt(props.maxCapacity)
         }
 
         const bucket = new s3.Bucket(this, 'Bucket', {
@@ -58,9 +68,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
                 name: `${props.amiName}*`,
                 windows: true
             }),
-            minCapacity: 2,
-            desiredCapacity: 2,
-            maxCapacity: 3,
+            minCapacity: minCapacity,
+            maxCapacity: maxCapacity,
             securityGroup: ec2.SecurityGroup.fromSecurityGroupId(this, "SecurityGroup", props.securityGroupId),
             keyName: props.instanceKeyName,
             instanceMonitoring: autoscaling.Monitoring.DETAILED,

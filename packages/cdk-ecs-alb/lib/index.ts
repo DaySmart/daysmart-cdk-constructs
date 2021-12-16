@@ -20,8 +20,6 @@ export interface CdkEcsAlbProps {
     certificateArn: string;
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string;
-    cpuSize?: string;
-    memorySize?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -61,20 +59,11 @@ export class CdkEcsAlb extends cdk.Construct {
                 family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
             }
         );
-        
-        let cpuSize = 1024;
-        let memorySize = 2048;
-        if (props.cpuSize != null) {
-            cpuSize = parseInt(props.cpuSize);
-        }
-        if (props.memorySize != null) {
-            memorySize = parseInt(props.memorySize)
-        }
 
         taskDefinition.addContainer("Container", {
             image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
-            memoryLimitMiB: memorySize,
-            cpu: cpuSize,
+            memoryLimitMiB: 2048,
+            cpu: 512,
             portMappings: [
                 {
                     containerPort: 80,
