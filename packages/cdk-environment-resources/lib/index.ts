@@ -34,8 +34,8 @@ export class CdkEnvironmentResources extends cdk.Construct {
         if(props.instanceType != undefined) {
             instanceType = props.instanceType
         }
-        let minCapacity = undefined;
-        let maxCapacity = undefined;
+        let minCapacity = null;
+        let maxCapacity = null;
         if (props.minCapacity != undefined) {
             minCapacity = parseInt(props.minCapacity)
         }
