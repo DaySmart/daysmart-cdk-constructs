@@ -6,6 +6,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as route53 from "@aws-cdk/aws-route53";
+import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -101,6 +102,7 @@ export class CdkEcsAlb extends cdk.Construct {
                 cluster,
                 serviceName: `${props.stage}-${props.appName}`,
                 desiredCount: 1,
+                sslPolicy: SslPolicy.TLS12,
                 taskDefinition: taskDefinition,
                 deploymentController: {
                     type: ecs.DeploymentControllerType.CODE_DEPLOY
@@ -125,6 +127,7 @@ export class CdkEcsAlb extends cdk.Construct {
                 cluster,
                 serviceName: `${props.stage}-${props.appName}`,
                 desiredCount: 1,
+                sslPolicy: SslPolicy.TLS12,
                 taskDefinition: taskDefinition,
                 deploymentController: {
                     type: ecs.DeploymentControllerType.CODE_DEPLOY
