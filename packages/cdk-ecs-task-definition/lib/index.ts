@@ -12,7 +12,7 @@ export interface CdkEcsTaskDefinitionProps {
   taskRoleArn: string;
   memoryUnits: string;
   cpuUnits: string;
-  isFargate: string;
+  isFargate?: string;
 }
 
 export class CdkEcsTaskDefinition extends cdk.Construct {
