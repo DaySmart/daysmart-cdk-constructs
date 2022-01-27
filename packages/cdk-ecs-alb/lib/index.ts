@@ -68,7 +68,9 @@ export class CdkEcsAlb extends cdk.Construct {
                 this,
                 "TaskDefinition",
                 {
-                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
+                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`,
+                    cpu: 1024,
+                    memoryLimitMiB: 2048
                 }
             );
             //---------------------------------------------------------------------------------------------------
