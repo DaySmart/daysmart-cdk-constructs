@@ -3,11 +3,15 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
-import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 
 export interface CdkRoutingSplitProps {
+    tableName: string;
+    appName: string;
     partitionKey: string;
     originBucketName: string;
+    runtime: string;
+    stage: string;
 }
 
 export class CdkRoutingSplit extends Construct {
@@ -15,19 +19,18 @@ export class CdkRoutingSplit extends Construct {
   constructor(scope: Construct, id: string, props: CdkRoutingSplitProps) {
     super(scope, id);
 
-    const bucket = new s3.Bucket(this, 'application-split-code');
-
-    const originBucket = s3.Bucket.fromBucketName(this, 'Bucket', props.originBucketName);
+    const codeBucket = new s3.Bucket(this, 'routing-split-code');
+    const runtime = new lambda.Runtime(props.runtime);
 
     const edgeFunc = new cloudfront.experimental.EdgeFunction(this, 'Function', {
-        runtime: lambda.Runtime.NODEJS_14_X,
+        runtime: runtime,
         handler: 'index.handler',
-        code: lambda.Code.fromBucket(bucket, 'edge')
+        code: lambda.Code.fromBucket(codeBucket, 'olb-routing-split')
     });
 
-    const distrubution = new cloudfront.Distribution(this, 'Dist', {
+    new cloudfront.Distribution(this, 'Dist', {
         defaultBehavior: { 
-            origin: new S3Origin(originBucket),
+            origin: new HttpOrigin('*.mysalononline.com'),
             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             edgeLambdas: [
                 {
@@ -38,25 +41,25 @@ export class CdkRoutingSplit extends Construct {
         },
     });
 
-    const addFn = new lambda.Function(this, 'AddFunction', {
-        runtime: lambda.Runtime.NODEJS_14_X,
+    new lambda.Function(this, `${props.stage}-${props.appName}-split-add`, {
+        runtime: runtime,
         handler: 'index.handler',
-        code: lambda.Code.fromBucket(bucket, 'AddAccount')
+        code: lambda.Code.fromBucket(codeBucket, 'AddAccount')
     });
     
-    const updateFn = new lambda.Function(this, 'UpdateFunction', {
-        runtime: lambda.Runtime.NODEJS_14_X,
+    new lambda.Function(this, `${props.stage}-${props.appName}-split-update` {
+        runtime: runtime,
         handler: 'index.handler',
-        code: lambda.Code.fromBucket(bucket, 'UpdateAccount')
+        code: lambda.Code.fromBucket(codeBucket, 'UpdateAccount')
     });
 
-    const deleteFn = new lambda.Function(this, 'DeleteFunction', {
-        runtime: lambda.Runtime.NODEJS_14_X,
+    new lambda.Function(this, `${props.stage}-${props.appName}-split-delete`, {
+        runtime: runtime,
         handler: 'index.handler',
-        code: lambda.Code.fromBucket(bucket, 'DeleteAccount')
+        code: lambda.Code.fromBucket(codeBucket, 'DeleteAccount')
     });
 
-    new dynamodb.Table(this, 'Table', {
+    new dynamodb.Table(this, `${props.stage}-${props.appName}-split-table`, {
         partitionKey: {name: props.partitionKey, type: dynamodb.AttributeType.STRING},
         replicationRegions: ['us-east-1', 'us-east-2', 'us-west-2']
     });
