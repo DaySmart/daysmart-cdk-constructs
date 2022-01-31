@@ -21,14 +21,18 @@ export interface CdkEcsAlbProps {
     certificateArn: string;
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string;
+    isFargate?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, props: CdkEcsAlbProps) {
         super(scope, id);
 
-        let applicationLoadBalancedEC2Service: ecspattern.ApplicationLoadBalancedEc2Service;
+        let applicationLoadBalancedService: ecspattern.ApplicationLoadBalancedEc2Service | ecspattern.ApplicationLoadBalancedFargateService;
         let listenerOutput: cdk.CfnOutput;
+        let taskDefinition: ecs.TaskDefinition;
+        let portMappings: ecs.PortMapping[];
+        let albTargetGroup2: elbv2.TargetGroupBase;
 
         const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
@@ -38,7 +42,7 @@ export class CdkEcsAlb extends cdk.Construct {
             props.repositoryName
         );
 
-        const securityGroup = ec2.SecurityGroup.fromLookup(
+        const securityGroup = ec2.SecurityGroup.fromLookupById(
             this,
             "SecurityGroup",
             props.securityGroupId
@@ -50,45 +54,80 @@ export class CdkEcsAlb extends cdk.Construct {
             securityGroups: [securityGroup],
         });
 
-        //---------------------------------------------------------------------------------------------------
-        //Temporary task definition created.  This will eventually be overrided so it can be ignored. 
-        const taskDefinition = new ecs.Ec2TaskDefinition(
-            this,
-            "TaskDefinition",
-            {
-                networkMode: ecs.NetworkMode.NAT,
-                family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
-            }
-        );
+
+        if (props.isFargate) {
+            portMappings = [
+                {
+                    containerPort: 80,
+                    protocol: ecs.Protocol.TCP
+                }
+            ];
+            //---------------------------------------------------------------------------------------------------
+            //Temporary task definition created.  This will eventually be overrided so it can be ignored. 
+            taskDefinition = new ecs.FargateTaskDefinition(
+                this,
+                "TaskDefinition",
+                {
+                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`,
+                    cpu: 1024,
+                    memoryLimitMiB: 2048
+                }
+            );
+            //---------------------------------------------------------------------------------------------------
+            albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+                targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
+                targetType: elbv2.TargetType.IP,
+                protocol: elbv2.ApplicationProtocol.HTTP,
+                healthCheck: {
+                    path: props.healthCheckPath,
+                    healthyThresholdCount: 2,
+                    unhealthyThresholdCount: 5,
+                    interval: cdk.Duration.seconds(30),
+                    timeout: cdk.Duration.seconds(10)
+                },
+                vpc: vpc
+            });
+        } else {
+            portMappings = [
+                {
+                    containerPort: 80,
+                    hostPort: 0,
+                    protocol: ecs.Protocol.TCP
+                }
+            ];
+            //---------------------------------------------------------------------------------------------------
+            //Temporary task definition created.  This will eventually be overrided so it can be ignored. 
+            taskDefinition = new ecs.Ec2TaskDefinition(
+                this,
+                "TaskDefinition",
+                {
+                    networkMode: ecs.NetworkMode.NAT,
+                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
+                }
+            );
+            //---------------------------------------------------------------------------------------------------
+            albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+                targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
+                targetType: elbv2.TargetType.INSTANCE,
+                protocol: elbv2.ApplicationProtocol.HTTP,
+                healthCheck: {
+                    path: props.healthCheckPath,
+                    healthyThresholdCount: 2,
+                    unhealthyThresholdCount: 5,
+                    interval: cdk.Duration.seconds(30),
+                    timeout: cdk.Duration.seconds(10)
+                },
+                vpc: vpc
+            });
+        }
 
         taskDefinition.addContainer("Container", {
             image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
             memoryLimitMiB: 2048,
             cpu: 512,
-            portMappings: [
-                {
-                    containerPort: 80,
-                    hostPort: 0,
-                    protocol: ecs.Protocol.TCP,
-                },
-            ],
+            portMappings: portMappings,
             entryPoint: ["powershell", "-Command"],
             command: ["C:\\ServiceMonitor.exe w3svc"],
-        });
-        //---------------------------------------------------------------------------------------------------
-
-        const albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-            targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
-            targetType: elbv2.TargetType.INSTANCE,
-            protocol: elbv2.ApplicationProtocol.HTTP,
-            healthCheck: {
-                path: props.healthCheckPath,
-                healthyThresholdCount: 2,
-                unhealthyThresholdCount: 5,
-                interval: cdk.Duration.seconds(30),
-                timeout: cdk.Duration.seconds(10)
-            },
-            vpc: vpc
         });
 
         if (props.serviceDnsRecord && props.hostedZoneDomainName) {
@@ -98,57 +137,91 @@ export class CdkEcsAlb extends cdk.Construct {
                 privateZone: false
             });
 
-            applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
-                cluster,
-                serviceName: `${props.stage}-${props.appName}`,
-                desiredCount: 1,
-                sslPolicy: SslPolicy.TLS12,
-                taskDefinition: taskDefinition,
-                deploymentController: {
-                    type: ecs.DeploymentControllerType.CODE_DEPLOY
-                },
-                certificate: httpsCertificate,
-                protocol: elbv2.ApplicationProtocol.HTTPS,
-                domainName: props.serviceDnsRecord,
-                domainZone: domainHostedZone,
-                recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-                redirectHTTP: true,
-                loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
-            });
+            if(props.isFargate){
+                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+                    cluster,
+                    serviceName: `${props.stage}-${props.appName}`,
+                    desiredCount: 1,
+                    sslPolicy: SslPolicy.TLS12,
+                    taskDefinition: taskDefinition,
+                    deploymentController: {
+                        type: ecs.DeploymentControllerType.CODE_DEPLOY
+                    },
+                    certificate: httpsCertificate,
+                    protocol: elbv2.ApplicationProtocol.HTTPS,
+                    domainName: props.serviceDnsRecord,
+                    domainZone: domainHostedZone,
+                    recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
+                    redirectHTTP: true,
+                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                });
+            } else {
+                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
+                    cluster,
+                    serviceName: `${props.stage}-${props.appName}`,
+                    desiredCount: 1,
+                    sslPolicy: SslPolicy.TLS12,
+                    taskDefinition: taskDefinition,
+                    deploymentController: {
+                        type: ecs.DeploymentControllerType.CODE_DEPLOY
+                    },
+                    certificate: httpsCertificate,
+                    protocol: elbv2.ApplicationProtocol.HTTPS,
+                    domainName: props.serviceDnsRecord,
+                    domainZone: domainHostedZone,
+                    recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
+                    redirectHTTP: true,
+                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                });
+            }
 
             listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
-                value: applicationLoadBalancedEC2Service.listener.listenerArn
+                value: applicationLoadBalancedService.listener.listenerArn
             });
 
             listenerOutput.overrideLogicalId("ListenerARN");
         }
         else {
-            applicationLoadBalancedEC2Service = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
-                cluster,
-                serviceName: `${props.stage}-${props.appName}`,
-                desiredCount: 1,
-                sslPolicy: SslPolicy.TLS12,
-                taskDefinition: taskDefinition,
-                deploymentController: {
-                    type: ecs.DeploymentControllerType.CODE_DEPLOY
-                },
-                loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
-            });
+            if(props.isFargate){
+                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+                    cluster,
+                    serviceName: `${props.stage}-${props.appName}`,
+                    desiredCount: 1,
+                    sslPolicy: SslPolicy.TLS12,
+                    taskDefinition: taskDefinition,
+                    deploymentController: {
+                        type: ecs.DeploymentControllerType.CODE_DEPLOY
+                    },
+                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                });
+            } else {
+                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
+                    cluster,
+                    serviceName: `${props.stage}-${props.appName}`,
+                    desiredCount: 1,
+                    sslPolicy: SslPolicy.TLS12,
+                    taskDefinition: taskDefinition,
+                    deploymentController: {
+                        type: ecs.DeploymentControllerType.CODE_DEPLOY
+                    },
+                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                });
+            }
 
             const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
 
-            const httpsListener = applicationLoadBalancedEC2Service.loadBalancer.addListener("HttpsListener", {
+            const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
                 protocol: elbv2.ApplicationProtocol.HTTPS,
                 port: 443,
                 certificates: [
                     httpsListenerCertificate
                 ],
                 defaultTargetGroups: [
-                    applicationLoadBalancedEC2Service.targetGroup
+                    applicationLoadBalancedService.targetGroup
                 ]
             });
 
-            applicationLoadBalancedEC2Service.listener.addAction("HttpsRedirect", {
+            applicationLoadBalancedService.listener.addAction("HttpsRedirect", {
                 action: elbv2.ListenerAction.redirect({
                     protocol: "HTTPS",
                     host: "#{host}",
@@ -165,7 +238,7 @@ export class CdkEcsAlb extends cdk.Construct {
             listenerOutput.overrideLogicalId("ListenerARN");
         }
 
-        applicationLoadBalancedEC2Service.targetGroup.configureHealthCheck({
+        applicationLoadBalancedService.targetGroup.configureHealthCheck({
             path: props.healthCheckPath,
             healthyThresholdCount: 2,
             unhealthyThresholdCount: 5,
@@ -173,7 +246,7 @@ export class CdkEcsAlb extends cdk.Construct {
             timeout: cdk.Duration.seconds(10)
         });
 
-        const scalableTarget = applicationLoadBalancedEC2Service.service.autoScaleTaskCount({
+        const scalableTarget = applicationLoadBalancedService.service.autoScaleTaskCount({
             minCapacity: 1,
             maxCapacity: 4,
         });
@@ -182,18 +255,18 @@ export class CdkEcsAlb extends cdk.Construct {
             targetUtilizationPercent: 50,
         });
 
-        const cfnService = applicationLoadBalancedEC2Service.service.node.defaultChild as ecs.CfnService;
+        const cfnService = applicationLoadBalancedService.service.node.defaultChild as ecs.CfnService;
 
         cfnService.addPropertyOverride('TaskDefinition', props.taskDefinitionArn);
 
         const ecsServiceOutput = new cdk.CfnOutput(this, "ServiceName", {
-            value: applicationLoadBalancedEC2Service.service.serviceName
+            value: applicationLoadBalancedService.service.serviceName
         });
 
         ecsServiceOutput.overrideLogicalId("ServiceName");
 
         const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
-            value: applicationLoadBalancedEC2Service.targetGroup.targetGroupName
+            value: applicationLoadBalancedService.targetGroup.targetGroupName
         });
 
         targetGroup.overrideLogicalId("TargetGroupName");
