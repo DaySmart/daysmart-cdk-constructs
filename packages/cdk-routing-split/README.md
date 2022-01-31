@@ -1,9 +1,9 @@
 # Welcome to your CDK TypeScript Construct Library project!
 
-You should explore the contents of this project. It demonstrates a CDK Construct Library that includes a construct (`CdkMultiApplication`)
+You should explore the contents of this project. It demonstrates a CDK Construct Library that includes a construct (`CdkRoutingSplit`)
 which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
 
-The construct defines an interface (`CdkMultiApplicationProps`) to configure the visibility timeout of the queue.
+The construct defines an interface (`CdkRoutingSplitProps`) to configure the visibility timeout of the queue.
 
 ## Useful commands
 

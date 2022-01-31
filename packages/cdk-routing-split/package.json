@@ -1,5 +1,5 @@
 {
-  "name": "cdk-multi-application",
+  "name": "cdk-routing-split",
   "version": "0.1.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

@@ -5,14 +5,14 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 
-export interface CdkMultiApplicationProps {
+export interface CdkRoutingSplitProps {
     partitionKey: string;
     originBucketName: string;
 }
 
-export class CdkMultiApplication extends Construct {
+export class CdkRoutingSplit extends Construct {
 
-  constructor(scope: Construct, id: string, props: CdkMultiApplicationProps) {
+  constructor(scope: Construct, id: string, props: CdkRoutingSplitProps) {
     super(scope, id);
 
     const bucket = new s3.Bucket(this, 'application-split-code');
