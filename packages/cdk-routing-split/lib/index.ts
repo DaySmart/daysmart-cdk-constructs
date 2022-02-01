@@ -6,10 +6,10 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 
 export interface CdkRoutingSplitProps {
+    originSourceDomain: string;
     tableName: string;
     appName: string;
     partitionKey: string;
-    originBucketName: string;
     runtime: string;
     stage: string;
 }
@@ -21,6 +21,11 @@ export class CdkRoutingSplit extends Construct {
 
     const codeBucket = new s3.Bucket(this, 'routing-split-code');
     const runtime = new lambda.Runtime(props.runtime);
+    let originSourceDomain = new HttpOrigin(props.originSourceDomain);
+
+    if (props.stage != 'prod') {
+        originSourceDomain = new HttpOrigin(`${props.stage} - ${props.originSourceDomain}`)
+    }
 
     const edgeFunc = new cloudfront.experimental.EdgeFunction(this, 'Function', {
         runtime: runtime,
@@ -30,7 +35,7 @@ export class CdkRoutingSplit extends Construct {
 
     new cloudfront.Distribution(this, 'Dist', {
         defaultBehavior: { 
-            origin: new HttpOrigin('*.mysalononline.com'),
+            origin: originSourceDomain,
             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             edgeLambdas: [
                 {
@@ -39,6 +44,7 @@ export class CdkRoutingSplit extends Construct {
                 },
             ],
         },
+        comment: `${props.stage} ${props.appName} route split Distribution`,
     });
 
     new lambda.Function(this, `${props.stage}-${props.appName}-split-add`, {
@@ -47,7 +53,7 @@ export class CdkRoutingSplit extends Construct {
         code: lambda.Code.fromBucket(codeBucket, 'AddAccount')
     });
     
-    new lambda.Function(this, `${props.stage}-${props.appName}-split-update` {
+    new lambda.Function(this, `${props.stage}-${props.appName}-split-update`, {
         runtime: runtime,
         handler: 'index.handler',
         code: lambda.Code.fromBucket(codeBucket, 'UpdateAccount')
