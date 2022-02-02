@@ -187,7 +187,6 @@ export class CdkEcsAlb extends cdk.Construct {
                     cluster,
                     serviceName: `${props.stage}-${props.appName}`,
                     desiredCount: 1,
-                    sslPolicy: SslPolicy.TLS12,
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
@@ -199,7 +198,6 @@ export class CdkEcsAlb extends cdk.Construct {
                     cluster,
                     serviceName: `${props.stage}-${props.appName}`,
                     desiredCount: 1,
-                    sslPolicy: SslPolicy.TLS12,
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
@@ -212,6 +210,7 @@ export class CdkEcsAlb extends cdk.Construct {
 
             const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
                 protocol: elbv2.ApplicationProtocol.HTTPS,
+                sslPolicy: SslPolicy.TLS12,
                 port: 443,
                 certificates: [
                     httpsListenerCertificate
