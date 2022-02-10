@@ -39,22 +39,3 @@ custom:
         number: 3
     modularize:
         glob: 'src/**/serverless.module.yml'
-
-resources:
-    Resources:
-        LoggingServiceRole:
-            Type: 'AWS::IAM::Role'
-            Properties:
-                RoleName: 'CloudwatchLogging-${self:custom.name}-Role'
-                Policies:
-                    - PolicyName: 'CloudwatchLogging-${self:custom.name}-Policy'
-                      PolicyDocument:
-                          Version: '2012-10-17'
-                          Statement:
-                              - Effect: 'Allow'
-                                Action:
-                                    - 'logs:CreateLogGroup'
-                                    - 'logs:CreateLogStream'
-                                    - 'logs:PutLogEvents'
-                                Resource:
-                                    - '*'
