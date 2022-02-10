@@ -41,5 +41,4 @@ module.exports = {
         'unused-imports/no-unused-vars-ts': ['error', { vars: 'all', varsIgnorePattern: '^_', args: 'none' }],
         'prefer-arrow/prefer-arrow-functions': ['error'],
     },
-
 };

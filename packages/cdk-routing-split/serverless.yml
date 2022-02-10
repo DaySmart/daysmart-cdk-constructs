@@ -46,15 +46,6 @@ resources:
             Type: 'AWS::IAM::Role'
             Properties:
                 RoleName: 'CloudwatchLogging-${self:custom.name}-Role'
-                AssumeRolePolicyDocument:
-                    Version: '2012-10-17'
-                    Statement:
-                        - Effect: 'Allow'
-                          Principal:
-                              Service:
-                                  - 'appsync.amazonaws.com'
-                          Action:
-                              - 'sts:AssumeRole'
                 Policies:
                     - PolicyName: 'CloudwatchLogging-${self:custom.name}-Policy'
                       PolicyDocument:

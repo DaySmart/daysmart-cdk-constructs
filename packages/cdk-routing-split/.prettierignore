@@ -48,3 +48,7 @@ cucumber.yaml
 
 .serverless
 .git
+
+lib/*.js
+
+readme

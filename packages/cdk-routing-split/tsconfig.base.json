@@ -2,18 +2,14 @@
     "compilerOptions": {
         "target": "ES2018",
         "module": "commonjs",
-        "lib": [
-            "es2018"
-        ],
+        "lib": ["es2018"],
         "outDir": "./dist" /* Redirect output structure to the directory. */,
-        "rootDir": "./src", /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+        "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
         "declaration": true,
         "strict": true,
         "noImplicitAny": true,
         "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
-        "types": [
-            "node"
-        ],
+        "types": ["node"],
         "allowJs": true,
         "strictNullChecks": true,
         "noImplicitThis": true,
@@ -26,6 +22,6 @@
         "inlineSources": true,
         "experimentalDecorators": true,
         "strictPropertyInitialization": false,
-        "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+        "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     }
 }
