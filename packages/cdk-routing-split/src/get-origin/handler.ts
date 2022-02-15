@@ -7,7 +7,7 @@ export const handler = async (event: any, context: Context): Promise<any> => {
     let logger!: Logger;
 
     try {
-        logger = createLogger(!!(event?.debug || process.env.DEBUG), context.awsRequestId);
+        logger = createLogger(process.env.DEBUG === 'true', context.awsRequestId);
         logger.debug('get-origin event', { event });
 
         return {

@@ -27,7 +27,6 @@ provider:
 
 custom:
     name: ${self:service}-${opt:stage, self:provider.stage}
-    config: ${file(infrastructure/config.${opt:stage, self:provider.stage}.yml)}
     newRelic:
         accountId: 1464764
         enableExtension: false
