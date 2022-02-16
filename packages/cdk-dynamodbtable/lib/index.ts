@@ -26,5 +26,8 @@ export class CdkDynamodbtable extends cdk.Construct {
 
     const tableOutput = new CfnOutput(this, 'TableOutput', { value: this.globalTable.tableName });
     tableOutput.overrideLogicalId("TableName");
+
+    const tableArn = new CfnOutput(this, 'TableArn', { value: this.globalTable.tableArn });
+    tableArn.overrideLogicalId("TableArn");
   }
 }
