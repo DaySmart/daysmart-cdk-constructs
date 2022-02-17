@@ -1,0 +1,40 @@
+service: cdk-routing-split
+
+plugins:
+    - serverless-prune-plugin
+    - serverless-plugin-modularize
+    - serverless-newrelic-lambda-layers
+    - serverless-export-env
+
+package:
+    excludeDevDependencies: true
+    exclude:
+        - '**'
+        - '!node_modules/**'
+    include:
+        - 'dist/**'
+
+provider:
+    name: aws
+    runtime: nodejs14.x
+    lambdaHashingVersion: 20201221
+    region: us-east-1
+    stage: ${opt:stage, "sandbox"}
+    timeout: 120
+    memorySize: 192
+    tracing:
+        apiGateway: true
+
+custom:
+    name: ${self:service}-${opt:stage, self:provider.stage}
+    newRelic:
+        accountId: 1464764
+        enableExtension: false
+        enableIntegrations: false
+    output:
+        file: ./output-${opt:stage}.json
+    prune:
+        automatic: true
+        number: 3
+    modularize:
+        glob: 'src/**/serverless.module.yml'

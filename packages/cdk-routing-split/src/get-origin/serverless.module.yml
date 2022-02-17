@@ -1,0 +1,3 @@
+functions:
+    get-origin:
+        handler: dist/get-origin/handler.handler
