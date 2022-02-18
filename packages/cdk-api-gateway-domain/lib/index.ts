@@ -12,6 +12,7 @@ export interface CdkApiGatewayDomainProps {
   certificateArn: string;
   restApiId: string;
   basePath: string;
+  stageName?: string;
 }
 
 export class CdkApiGatewayDomain extends cdk.Construct {
@@ -24,6 +25,8 @@ export class CdkApiGatewayDomain extends cdk.Construct {
     let customDomain: apigw.DomainName;
     let usagePlan: apigw.CfnUsagePlan;
     let cloudformationBasePathMapping: apigw.CfnBasePathMapping;
+
+    const stageName = props.stageName || props.dynamicEnv || props.baseEnv;
 
     if (props.dynamicEnv) {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
@@ -38,7 +41,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         apiStages: [
           {
             apiId: props.restApiId,
-            stage: props.dynamicEnv
+            stage: stageName
           }
         ]
       });
@@ -47,7 +50,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         basePath: `${props.basePath}`,
         domainName: customDomain.domainName,
         restApiId: `${props.restApiId}`,
-        stage: `${props.dynamicEnv}`
+        stage: `${stageName}`
       });
     } else {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
@@ -62,7 +65,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         apiStages: [
           {
             apiId: props.restApiId,
-            stage: props.baseEnv
+            stage: stageName
           }
         ]
       });
@@ -71,7 +74,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         basePath: `${props.basePath}`,
         domainName: customDomain.domainName,
         restApiId: `${props.restApiId}`,
-        stage: `${props.baseEnv}`
+        stage: `${stageName}`
       });
     }
 
