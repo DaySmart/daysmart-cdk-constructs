@@ -11,13 +11,14 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
         logger = createLogger(process.env.DEBUG === 'true', context.awsRequestId);
         logger.debug('add event', { event });
 
-        const body = JSON.parse(event.body as string);
-        validateEvent(body);
+        const request: AddRequest = JSON.parse(event.body as string);
+        validateRequest(request);
 
-        const request: AddRequest = body;
+        await action(request);
+
         return {
             statusCode: 200,
-            body: await action(request),
+            body: 'Success',
         };
     } catch (error: any) {
         logger?.error('handler_error', { logError: serializeError(error) });
@@ -30,14 +31,14 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
     }
 };
 
-const validateEvent = (body: any): void => {
+const validateRequest = (request: AddRequest): void => {
     const keyList: string[] = Object.values(Key);
 
-    if (!keyList?.includes(body.key)) {
+    if (!keyList?.includes(request.key)) {
         throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList}`);
     }
 
-    if (!body.value?.length) {
+    if (!request.value?.length) {
         throw new HttpError(400, 'Field value is required.');
     }
 };
