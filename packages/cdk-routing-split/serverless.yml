@@ -24,9 +24,18 @@ provider:
     memorySize: 192
     tracing:
         apiGateway: true
+    environment:
+        DEBUG: ${self:custom.config.DEBUG, false}
+        CDK_ROUTING_SPLIT_TABLE: ${self:custom.config.CDK_ROUTING_SPLIT_TABLE}
 
 custom:
     name: ${self:service}-${opt:stage, self:provider.stage}
+    config:
+        API_GATEWAY_SUB_DOMAIN: olbroutingservice
+        HOST_DOMAIN: daysmart.com
+        CERTIFICATE_ARN: arn:aws:acm:us-east-1:933922255734:certificate/3d09aac7-844f-4f8d-a925-3b6c025924c0
+        DEBUG: 'true'
+        CDK_ROUTING_SPLIT_TABLE: cdk-routing-split-sandbox
     newRelic:
         accountId: 1464764
         enableExtension: false
@@ -38,3 +47,33 @@ custom:
         number: 3
     modularize:
         glob: 'src/**/serverless.module.yml'
+
+resources:
+    Resources:
+        DynamoDbTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                SSESpecification:
+                    SSEEnabled: true
+                TableName: ${self:custom.config.CDK_ROUTING_SPLIT_TABLE}
+                AttributeDefinitions:
+                    - AttributeName: PK
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: PK
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST
+        domainName:
+            Type: 'AWS::ApiGateway::DomainName'
+            DependsOn: ApiGatewayRestApi
+            Properties:
+                DomainName: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
+                CertificateArn: ${self:custom.config.CERTIFICATE_ARN}
+        basePathMapping:
+            Type: 'AWS::ApiGateway::BasePathMapping'
+            DependsOn: domainName
+            Properties:
+                BasePath: api
+                DomainName: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
+                RestApiId: { 'Ref': 'ApiGatewayRestApi' }
+                Stage: ${opt:stage, self:provider.stage}
