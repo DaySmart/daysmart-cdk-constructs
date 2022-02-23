@@ -29,6 +29,7 @@ provider:
     environment:
         DEBUG: ${self:custom.config.DEBUG, false}
         CDK_ROUTING_SPLIT_TABLE: ${self:custom.config.CDK_ROUTING_SPLIT_TABLE}
+        DSI_AWS_REGION: ${self:provider.region}
     iam:
         role:
             statements:

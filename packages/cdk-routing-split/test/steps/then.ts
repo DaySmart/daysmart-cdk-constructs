@@ -1,18 +1,14 @@
-import { AddRequest } from '../../src/add/interface';
 import { getClient } from '../../src/shared/get-client';
-import { createPK } from '../../src/shared/make-keys';
 
-export const item_exists_in_CdkRoutingSplitTable = async (request: AddRequest) => {
-    const pk: string = createPK(request.key, request.value);
-
-    console.log(`looking for item with PK [${pk}] in table [${process.env.CDK_ROUTING_SPLIT_TABLE}]`);
+export const item_exists_in_CdkRoutingSplitTable = async (expectedItem: any) => {
+    console.log(`looking for item with PK [${expectedItem.PK}] in table [${process.env.CDK_ROUTING_SPLIT_TABLE}]`);
 
     const dynamo = getClient();
     const response = await dynamo
         .query({
             TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
             ExpressionAttributeValues: {
-                ':pk': pk,
+                ':pk': expectedItem.PK,
             },
             KeyConditionExpression: '#PK = :pk',
             ExpressionAttributeNames: {
@@ -21,5 +17,6 @@ export const item_exists_in_CdkRoutingSplitTable = async (request: AddRequest) =
         })
         .promise();
 
-    expect(response).toStrictEqual({ PK: pk, Priority: request.priority, Origin: request.origin });
+    expect(response.Items.length).toEqual(1);
+    expect(response.Items[0]).toStrictEqual(expectedItem);
 };
