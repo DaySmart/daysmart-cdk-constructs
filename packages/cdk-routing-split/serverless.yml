@@ -22,6 +22,8 @@ provider:
     stage: ${opt:stage, "sandbox"}
     timeout: 120
     memorySize: 192
+    apiGateway:
+        shouldStartNameWithService: true
     tracing:
         apiGateway: true
     environment:

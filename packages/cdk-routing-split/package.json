@@ -19,6 +19,7 @@
         "prettier:fix": "prettier --write --ignore-path .prettierignore \"**\" --ignore-unknown"
     },
     "devDependencies": {
+        "@types/aws-lambda": "~8.10.92",
         "@types/jest": "~27.4.0",
         "@types/mssql": "~7.1.4",
         "@types/node": "~17.0.17",
@@ -46,7 +47,6 @@
         "constructs": "^10.0.0"
     },
     "dependencies": {
-        "@types/aws-lambda": "~8.10.92",
         "@daysmart/aws-lambda-logger": "~0.0.6"
     }
 }
