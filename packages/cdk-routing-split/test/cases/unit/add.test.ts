@@ -11,9 +11,9 @@ describe('When an api user', () => {
 
     it('calls add with invalid key field', async () => {
         requestBody['key'] = 'invalidKey';
-        const expectedError = { statusCode: 400, body: `Field key is invalid. Valid values are: ${Object.values(Key)}` };
+        const expectedError = { statusCode: 400, body: `Field key is invalid. Valid values are: ${Object.values(Key).join(', ')}` };
 
-        const response = await when.we_invoke_add(JSON.stringify(requestBody));
+        const response = await when.we_invoke_add(requestBody);
 
         expect(response).toStrictEqual(expectedError);
     });
@@ -22,7 +22,7 @@ describe('When an api user', () => {
         requestBody['value'] = '';
         const expectedError = { statusCode: 400, body: 'Field value is required.' };
 
-        const response = await when.we_invoke_add(JSON.stringify(requestBody));
+        const response = await when.we_invoke_add(requestBody);
 
         expect(response).toStrictEqual(expectedError);
     });

@@ -35,7 +35,7 @@ const validateRequest = (request: AddRequest): void => {
     const keyList: string[] = Object.values(Key);
 
     if (!keyList?.includes(request.key)) {
-        throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList}`);
+        throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList.join(', ')}`);
     }
 
     if (!request.value?.length) {

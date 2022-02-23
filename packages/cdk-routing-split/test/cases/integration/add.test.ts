@@ -12,7 +12,7 @@ describe('When an api user', () => {
     it('calls add with valid fields', async () => {
         const expectedResponse = { statusCode: 200, body: 'Success' };
 
-        const response = await when.we_invoke_add(JSON.stringify(requestBody));
+        const response = await when.we_invoke_add(requestBody);
 
         expect(response).toStrictEqual(expectedResponse);
         await then.item_exists_in_CdkRoutingSplitTable(requestBody);

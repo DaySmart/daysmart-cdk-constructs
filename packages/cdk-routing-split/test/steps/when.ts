@@ -5,12 +5,13 @@ import { handler as updateHandler } from '../../src/update/handler';
 import { handler as getOriginHandler } from '../../src/get-origin/handler';
 import { APIGatewayEvent, Context } from 'aws-lambda';
 
-export const we_invoke_add = async (body: string) => {
+export const we_invoke_add = async (body: any) => {
     const addEvent: any = {
-        body: body,
+        body: JSON.stringify(body),
     };
+    const context: any = {};
 
-    return await when.we_invoke_lambda(addHandler, addEvent, {} as Context);
+    return await when.we_invoke_lambda(addHandler, addEvent, context);
 };
 
 export const we_invoke_delete = async () => {
