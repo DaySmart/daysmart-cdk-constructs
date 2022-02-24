@@ -12,6 +12,21 @@ Object {
       },
     },
   },
+  "Outputs": Object {
+    "DistributionDomainName": Object {
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "WebsiteCDNDistribution87C8E1D8",
+          "DomainName",
+        ],
+      },
+    },
+    "DistributionId": Object {
+      "Value": Object {
+        "Ref": "WebsiteCDNDistribution87C8E1D8",
+      },
+    },
+  },
   "Resources": Object {
     "WebsiteCDNAlias0ECFCB318": Object {
       "Properties": Object {

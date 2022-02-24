@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-static-website",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.128.0",
+    "@aws-cdk/assert": "^1.145.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "jest": "^26.4.2",
@@ -17,14 +17,14 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-certificatemanager": "^1.128.0",
-    "@aws-cdk/aws-cloudfront": "^1.128.0",
-    "@aws-cdk/aws-cloudfront-origins": "^1.128.0",
-    "@aws-cdk/aws-route53": "^1.128.0",
-    "@aws-cdk/aws-route53-targets": "^1.128.0",
-    "@aws-cdk/aws-s3": "^1.128.0",
-    "@aws-cdk/core": "1.128.0",
-    "@daysmart/cdk-app-bucket": "^1.0.11"
+    "@aws-cdk/aws-certificatemanager": "^1.145.0",
+    "@aws-cdk/aws-cloudfront": "^1.145.0",
+    "@aws-cdk/aws-cloudfront-origins": "^1.145.0",
+    "@aws-cdk/aws-route53": "^1.145.0",
+    "@aws-cdk/aws-route53-targets": "^1.145.0",
+    "@aws-cdk/aws-s3": "^1.145.0",
+    "@aws-cdk/core": "^1.145.0",
+    "@daysmart/cdk-app-bucket": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"
