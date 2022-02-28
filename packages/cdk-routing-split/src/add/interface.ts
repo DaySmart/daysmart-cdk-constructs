@@ -4,10 +4,3 @@ export interface AddRequest {
     priority: number;
     origin: string;
 }
-
-export enum Key {
-    subdomain = 'Subdomain',
-    domain = 'Domain',
-    queryStringParam = 'QueryStringParam',
-    pathStartsWith = 'PathStartsWith',
-}

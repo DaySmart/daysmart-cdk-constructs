@@ -11,7 +11,7 @@ describe('When an api user', () => {
     });
 
     it('calls add with valid fields', async () => {
-        const expectedResponse = { statusCode: 200, body: 'Success' };
+        const expectedResponse = { statusCode: 200 };
         const expectedItem = {
             PK: createPK(requestBody.key, requestBody.value),
             Priority: requestBody.priority,

@@ -1,6 +1,5 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
-import { Key } from '../../../src/add/interface';
 
 describe('When an api user', () => {
     let requestBody: any;
@@ -11,7 +10,10 @@ describe('When an api user', () => {
 
     it('calls add with invalid key field', async () => {
         requestBody['key'] = 'invalidKey';
-        const expectedError = { statusCode: 400, body: `Field key is invalid. Valid values are: ${Object.values(Key).join(', ')}` };
+        const expectedError = {
+            statusCode: 400,
+            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith',
+        };
 
         const response = await when.we_invoke_add(requestBody);
 

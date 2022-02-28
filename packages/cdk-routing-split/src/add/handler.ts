@@ -2,7 +2,7 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
 import { HttpError } from '../http-error';
-import { AddRequest, Key } from './interface';
+import { AddRequest } from './interface';
 
 export const add = async (event: APIGatewayEvent, context: Context): Promise<any> => {
     let logger!: Logger;
@@ -29,7 +29,7 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
 };
 
 const validateRequest = (request: AddRequest): void => {
-    const keyList: string[] = Object.values(Key);
+    const keyList: string[] = ['Subdomain', 'Domain', 'QueryStringParam', 'PathStartsWith'];
 
     if (!keyList?.includes(request.key)) {
         throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList.join(', ')}`);
