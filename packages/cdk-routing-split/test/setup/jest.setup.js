@@ -2,7 +2,9 @@
 const AWS = require('aws-sdk');
 
 AWS.config.update({ region: 'us-east-1' });
-AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'sandbox' });
+if (process.env.DSI_PARAMETER_NAME && process.env.DSI_PARAMETER_NAME.includes('sandbox')) {
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'sandbox' });
+}
 
 // prevent lambdas from logging to jest
 global.console = {

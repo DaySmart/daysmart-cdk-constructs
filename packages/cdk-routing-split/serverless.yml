@@ -30,6 +30,7 @@ provider:
         DEBUG: ${self:custom.config.DEBUG, false}
         CDK_ROUTING_SPLIT_TABLE: ${self:custom.config.CDK_ROUTING_SPLIT_TABLE}
         DSI_AWS_REGION: ${self:provider.region}
+        DSI_PARAMETER_NAME: ${self:custom.config.DSI_PARAMETER_NAME}
     iam:
         role:
             statements:
@@ -44,13 +45,14 @@ provider:
                       - !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.config.CDK_ROUTING_SPLIT_TABLE}/index/*'
 
 custom:
-    name: ${self:service}-${opt:stage, self:provider.stage}
+    name: ${self:service}-${self:provider.stage}
     config:
         API_GATEWAY_SUB_DOMAIN: olbroutingservice
         HOST_DOMAIN: sandbox-saloniris.com
         DOMAIN_CERTIFICATE: d7600eee-753e-449d-8bc9-7251f537fb45
         DEBUG: true
         CDK_ROUTING_SPLIT_TABLE: cdk-routing-split-sandbox
+        DSI_PARAMETER_NAME: ${self:service}-${self:provider.stage}
     newRelic:
         accountId: 1464764
         enableExtension: false
@@ -91,4 +93,4 @@ resources:
                 BasePath: api
                 DomainName: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
                 RestApiId: { 'Ref': 'ApiGatewayRestApi' }
-                Stage: ${opt:stage, self:provider.stage}
+                Stage: ${self:provider.stage}
