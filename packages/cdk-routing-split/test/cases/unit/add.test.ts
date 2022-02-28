@@ -6,7 +6,7 @@ describe('When an api user', () => {
     let requestBody: any;
 
     beforeEach(() => {
-        requestBody = given.valid_api_request_body();
+        requestBody = given.get_add_request_body();
     });
 
     it('calls add with invalid key field', async () => {
