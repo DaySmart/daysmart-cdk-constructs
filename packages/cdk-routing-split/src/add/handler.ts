@@ -16,10 +16,7 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
 
         await action(request);
 
-        return {
-            statusCode: 200,
-            body: 'Success',
-        };
+        return { statusCode: 200 };
     } catch (error: any) {
         logger?.error('handler_error', { logError: serializeError(error) });
 
