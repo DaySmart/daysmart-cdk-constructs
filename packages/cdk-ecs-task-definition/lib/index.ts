@@ -3,6 +3,7 @@ import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecr from "@aws-cdk/aws-ecr";
 import * as iam from "@aws-cdk/aws-iam";
 import * as logs from "@aws-cdk/aws-logs";
+import * as s3 from "@aws-cdk/aws-s3";
 
 export interface CdkEcsTaskDefinitionProps {
   appName: string;
@@ -13,6 +14,7 @@ export interface CdkEcsTaskDefinitionProps {
   memoryUnits: string;
   cpuUnits: string;
   isFargate?: string;
+  deployBucket: string;
 }
 
 export class CdkEcsTaskDefinition extends cdk.Construct {
@@ -24,6 +26,8 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
     let portMappings: ecs.PortMapping[];
     const repository = ecr.Repository.fromRepositoryName(this, "Repo", props.repositoryName);
     var taskRole = iam.Role.fromRoleArn(this, "TaskRole", props.taskRoleArn)
+    const bucket = s3.Bucket.fromBucketName(this, "Bucket", props.deployBucket)
+
     if (props.isFargate) {
       portMappings = [
         {
@@ -73,6 +77,9 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
         }),
         streamPrefix: "ecs",
       }),
+      environmentFiles: [
+        ecs.EnvironmentFile.fromBucket(bucket, `${props.stage}/${props.stage}-ecs-envars.env`)
+      ]
     });
 
     const taskDefinitionOutput = new cdk.CfnOutput(this, "TaskDefinitionOutput", {
