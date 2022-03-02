@@ -22,7 +22,13 @@ export interface CdkEcsNlbProps {
   serviceDnsRecord?: string;
   hostedZoneDomainName?: string;
   isFargate?: string;
-  port: string;
+  targetGroupPort?: string;
+  healthCheckHealthyThreshold?: string;
+  healthCheckUnhealthyThreshold?: string;
+  healthCheckInterval?: string;
+  healthCheckProtocol: "https" | "tcp";
+  healthyHttpCodes?: string;
+  healthCheckTimeout?: string;
 }
 
 export class CdkEcsNlb extends cdk.Construct {
@@ -34,6 +40,7 @@ export class CdkEcsNlb extends cdk.Construct {
     let taskDefinition: ecs.TaskDefinition;
     let portMappings: ecs.PortMapping[];
     let albTargetGroup2: elbv2.TargetGroupBase;
+    const healthyHttpCodes = '200-399';
 
     const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
 
@@ -75,16 +82,23 @@ export class CdkEcsNlb extends cdk.Construct {
         }
       );
       //---------------------------------------------------------------------------------------------------
-      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+      const healthyHttpCodes = '200-399';
+
+      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
+        port: props.targetGroupPort ? parseInt(props.targetGroupPort) : 443,
+        protocol: elbv2.Protocol.TCP,
+        preserveClientIp: true,
         targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
         targetType: elbv2.TargetType.IP,
-        protocol: elbv2.ApplicationProtocol.HTTP,
+        deregistrationDelay: props.stage.includes("prod") ? cdk.Duration.seconds(30) : undefined,
         healthCheck: {
           path: props.healthCheckPath,
-          healthyThresholdCount: 2,
-          unhealthyThresholdCount: 5,
-          interval: cdk.Duration.seconds(30),
-          timeout: cdk.Duration.seconds(10)
+          healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+          unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+          interval: props.healthCheckInterval ? cdk.Duration.seconds(parseInt(props.healthCheckInterval)) : cdk.Duration.seconds(30),
+          timeout: props.healthCheckTimeout ? cdk.Duration.seconds(parseInt(props.healthCheckTimeout)) : cdk.Duration.seconds(10),
+          protocol: (props.healthCheckProtocol == "https") ? elbv2.Protocol.HTTPS : elbv2.Protocol.TCP,
+          healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes
         },
         vpc: vpc
       });
@@ -107,16 +121,22 @@ export class CdkEcsNlb extends cdk.Construct {
         }
       );
       //---------------------------------------------------------------------------------------------------
-      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+
+      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
+        port: props.targetGroupPort ? parseInt(props.targetGroupPort) : 443,
+        protocol: elbv2.Protocol.TCP,
+        preserveClientIp: true,
         targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
         targetType: elbv2.TargetType.INSTANCE,
-        protocol: elbv2.ApplicationProtocol.HTTP,
+        deregistrationDelay: props.stage.includes("prod") ? cdk.Duration.seconds(30) : undefined,
         healthCheck: {
           path: props.healthCheckPath,
-          healthyThresholdCount: 2,
-          unhealthyThresholdCount: 5,
-          interval: cdk.Duration.seconds(30),
-          timeout: cdk.Duration.seconds(10)
+          healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+          unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+          interval: props.healthCheckInterval ? cdk.Duration.seconds(parseInt(props.healthCheckInterval)) : cdk.Duration.seconds(30),
+          timeout: props.healthCheckTimeout ? cdk.Duration.seconds(parseInt(props.healthCheckTimeout)) : cdk.Duration.seconds(10),
+          protocol: (props.healthCheckProtocol == "https") ? elbv2.Protocol.HTTPS : elbv2.Protocol.TCP,
+          healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes
         },
         vpc: vpc
       });
@@ -139,40 +159,39 @@ export class CdkEcsNlb extends cdk.Construct {
       });
 
       if (props.isFargate) {
-        networkLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+        networkLoadBalancedService = new ecspattern.NetworkLoadBalancedFargateService(this, "NetworkLB Fargate Service", {
           cluster,
           serviceName: `${props.stage}-${props.appName}`,
           desiredCount: 1,
-          sslPolicy: SslPolicy.TLS12,
+          // sslPolicy: SslPolicy.TLS12,
           taskDefinition: taskDefinition,
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          certificate: httpsCertificate,
-          protocol: elbv2.ApplicationProtocol.HTTPS,
+          // certificate: httpsCertificate,
+          // protocol: elbv2.ApplicationProtocol.HTTPS,
           domainName: props.serviceDnsRecord,
           domainZone: domainHostedZone,
-          recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-          redirectHTTP: true,
-          loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+          recordType: ecspattern.NetworkLoadBalancedServiceRecordType.ALIAS,
+          // loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
       } else {
-        networkLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
+        networkLoadBalancedService = new ecspattern.NetworkLoadBalancedEc2Service(this, "NetworkLB EC2 Service", {
           cluster,
           serviceName: `${props.stage}-${props.appName}`,
           desiredCount: 1,
-          sslPolicy: SslPolicy.TLS12,
+          // sslPolicy: SslPolicy.TLS12,
           taskDefinition: taskDefinition,
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          certificate: httpsCertificate,
-          protocol: elbv2.ApplicationProtocol.HTTPS,
+          // certificate: httpsCertificate,
+          // protocol: elbv2.ApplicationProtocol.HTTPS,
           domainName: props.serviceDnsRecord,
           domainZone: domainHostedZone,
-          recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-          redirectHTTP: true,
-          loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+          recordType: ecspattern.NetworkLoadBalancedServiceRecordType.ALIAS,
+          // redirectHTTP: true,
+          // loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
       }
 
@@ -184,7 +203,7 @@ export class CdkEcsNlb extends cdk.Construct {
     }
     else {
       if (props.isFargate) {
-        networkLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+        networkLoadBalancedService = new ecspattern.NetworkLoadBalancedFargateService(this, "NetworkLB Fargate Service", {
           cluster,
           serviceName: `${props.stage}-${props.appName}`,
           desiredCount: 1,
@@ -192,10 +211,10 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+          // loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
       } else {
-        networkLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
+        networkLoadBalancedService = new ecspattern.NetworkLoadBalancedEc2Service(this, "NetworkLB EC2 Service", {
           cluster,
           serviceName: `${props.stage}-${props.appName}`,
           desiredCount: 1,
@@ -203,36 +222,36 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+          // loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
         });
       }
 
-      const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
+      // const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
 
-      const httpsListener = networkLoadBalancedService.loadBalancer.addListener("HttpsListener", {
-        protocol: elbv2.ApplicationProtocol.HTTPS,
-        sslPolicy: SslPolicy.TLS12,
-        port: 443,
-        certificates: [
-          httpsListenerCertificate
-        ],
-        defaultTargetGroups: [
-          networkLoadBalancedService.targetGroup
-        ]
-      });
+      // const httpsListener = networkLoadBalancedService.loadBalancer.addListener("HttpsListener", {
+      //   protocol: elbv2.Protocol.HTTPS,
+      //   sslPolicy: SslPolicy.TLS12,
+      //   port: 443,
+      //   certificates: [
+      //     httpsListenerCertificate
+      //   ],
+      //   defaultTargetGroups: [
+      //     networkLoadBalancedService.targetGroup
+      //   ]
+      // });
 
-      networkLoadBalancedService.listener.addAction("HttpsRedirect", {
-        action: elbv2.ListenerAction.redirect({
-          protocol: "HTTPS",
-          host: "#{host}",
-          port: "443",
-          path: "/#{path}",
-          query: "#{query}"
-        })
-      });
+      // networkLoadBalancedService.listener.addAction("HttpsRedirect", {
+      //   action: elbv2.NetworkListenerAction.redirect({
+      //     protocol: "HTTPS",
+      //     host: "#{host}",
+      //     port: "443",
+      //     path: "/#{path}",
+      //     query: "#{query}"
+      //   })
+      // });
 
       listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
-        value: httpsListener.listenerArn
+        value: networkLoadBalancedService.listener.listenerArn
       });
 
       listenerOutput.overrideLogicalId("ListenerARN");
@@ -240,10 +259,12 @@ export class CdkEcsNlb extends cdk.Construct {
 
     networkLoadBalancedService.targetGroup.configureHealthCheck({
       path: props.healthCheckPath,
-      healthyThresholdCount: 2,
-      unhealthyThresholdCount: 5,
-      interval: cdk.Duration.seconds(30),
-      timeout: cdk.Duration.seconds(10)
+      healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+      unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
+      interval: props.healthCheckInterval ? cdk.Duration.seconds(parseInt(props.healthCheckInterval)) : cdk.Duration.seconds(30),
+      timeout: props.healthCheckTimeout ? cdk.Duration.seconds(parseInt(props.healthCheckTimeout)) : cdk.Duration.seconds(10),
+      protocol: (props.healthCheckProtocol == "https") ? elbv2.Protocol.HTTPS : elbv2.Protocol.TCP,
+      healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes
     });
 
     const scalableTarget = networkLoadBalancedService.service.autoScaleTaskCount({
