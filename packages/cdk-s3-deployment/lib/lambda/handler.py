@@ -176,10 +176,16 @@ def cloudfront_invalidate(distribution_paths, dest_bucket_name):
                     },
                     'CallerReference': str(uuid4()),
                 })
-            # by default, will wait up to 10 minutes
+            logger.info('Invalidation started for: %s' % distribution_id)
+            # by default, will wait up to 10 minutes, waiter config update to only wait 5 mins
             cloudfront.get_waiter('invalidation_completed').wait(
                 DistributionId=distribution_id,
-                Id=invalidation_resp['Invalidation']['Id'])
+                Id=invalidation_resp['Invalidation']['Id'],
+                WaiterConfig={
+                    'Delay': 20,
+                    'MaxAttempts': 15
+                }
+            )
         except Exception as e:
             failed_invalidation_list.append(distribution_id)
             pass
