@@ -30,7 +30,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
 
     if (props.dynamicEnv) {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
-        domainName: `${props.dynamicEnv}-api.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
+        domainName: (props.baseEnv == 'prod') ? `${props.dynamicEnv}-api.${props.baseEnv}.${props.project}.${props.companyDomainName}`: `${props.dynamicEnv}-api.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
         certificate: acm.Certificate.fromCertificateArn(this, "Certificate", `${props.certificateArn}`),
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
