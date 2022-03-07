@@ -1,6 +1,12 @@
 {
   "name": "@daysmart/cdk-api-gateway-domain",
   "version": "0.2.1",
+  "keywords": ["api-gateway", "apigateway", "cdk", "custom domain", ],
+  "author": "DaySmart Software <support@daysmart.com> (https://daysmart.com)",
+  "bugs": {
+    "url": "https://github.com/DaySmart/daysmart-cdk-constructs/issues"
+  },
+  "homepage": "https://github.com/DaySmart/daysmart-cdk-constructs/tree/main/packages/cdk-api-gateway-domain",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
