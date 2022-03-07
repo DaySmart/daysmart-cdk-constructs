@@ -1,3 +1,7 @@
 functions:
     delete:
-        handler: dist/delete/handler.handler
+        handler: dist/delete/handler.deleteRecord
+        events:
+            - http:
+                  path: records/delete
+                  method: DELETE
