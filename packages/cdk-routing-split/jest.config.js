@@ -1,4 +1,5 @@
 module.exports = {
+    verbose: true,
     roots: ['.'],
     collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
     coverageDirectory: '<rootDir>/coverage',
@@ -9,6 +10,7 @@ module.exports = {
     globals: {
         'ts-jest': {
             tsconfig: 'tsconfig.test.json',
+            isolatedModules: true,
         },
     },
     globalSetup: '<rootDir>/test/setup/jest.config-env-vars.js',

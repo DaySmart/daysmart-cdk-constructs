@@ -1,25 +1,29 @@
 import { Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
-import { HttpError } from '../http-error';
 import { action } from './action';
-
-export const handler = async (event: any, context: Context): Promise<any> => {
+type CloudfrontEvent = { body: any };
+export const handler = async (event: CloudfrontEvent, context: Context): Promise<any> => {
     let logger!: Logger;
 
     try {
         logger = createLogger(process.env.DEBUG === 'true', context.awsRequestId);
+
         logger.debug('get-origin event', { event });
 
+        const { url } = event?.body;
+        let origin = await action(process.env.CDK_ROUTING_SPLIT_TABLE, url);
+        if (!origin) {
+            origin = '';
+        }
         return {
             statusCode: 200,
-            body: action(),
+            body: { origin: origin },
         };
     } catch (error: any) {
         logger?.error('handler_error', { logError: serializeError(error) });
-        if (error instanceof HttpError) {
-            return { statusCode: error.statusCode, body: error.message };
-        } else {
-            return { statusCode: 500, body: error.message };
-        }
+        return {
+            statusCode: 200,
+            body: { origin: '' },
+        };
     }
 };
