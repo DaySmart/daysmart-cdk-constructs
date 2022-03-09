@@ -4,8 +4,9 @@ import { deleteRecord as deleteHandler } from '../../src/delete/handler';
 import { handler as updateHandler } from '../../src/update/handler';
 import { handler as getOriginHandler } from '../../src/get-origin/handler';
 import { APIGatewayEvent, Context } from 'aws-lambda';
+import { AddRequest } from '../../src/add/add-request';
 
-export const we_invoke_add = async (body: any) => {
+export const we_invoke_add = async (body: AddRequest) => {
     const addEvent: any = {
         body: JSON.stringify(body),
     };
@@ -27,6 +28,6 @@ export const we_invoke_update = async () => {
     return await when.we_invoke_lambda(updateHandler, {} as APIGatewayEvent, {} as Context);
 };
 
-export const we_invoke_getOrigin = async () => {
-    return await when.we_invoke_lambda(getOriginHandler, {} as APIGatewayEvent, {} as Context);
+export const we_invoke_getOrigin = async (request: any) => {
+    return await when.we_invoke_lambda(getOriginHandler, { body: request } as APIGatewayEvent, {} as Context);
 };

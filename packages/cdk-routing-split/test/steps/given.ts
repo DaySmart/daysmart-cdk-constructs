@@ -1,18 +1,39 @@
 import { Chance } from 'chance';
-import { Key } from '../../src/delete/interface';
+import { DeleteRequest } from '../../src/delete/interface';
+import { AddRequest } from '../../src/add/add-request';
+import { GetOriginRequest } from '../../src/get-origin/get-origin-request';
+import { UrlSegment } from '../../src/shared/url-segment.enum';
 
-export const get_add_request_body = (): any => {
+export const get_add_request_body = (): AddRequest => {
     return {
         key: 'Domain',
-        value: `domain-${new Chance().string({ alpha: true })}.com`,
-        priority: 1,
-        origin: 'Cloud',
+        value: `domain-${new Chance().string({ alpha: true })}.com`.toLowerCase(),
+        priority: new Chance().integer({ min: 0 }),
+        origin: `https://${new Chance().string({ alpha: true })}.${new Chance().string({ alpha: true })}.com`,
     };
 };
 
-export const get_delete_request_body = (): any => {
+export const get_delete_request_body = (): DeleteRequest => {
     return {
-        key: Key.domain,
+        key: UrlSegment.Domain,
         value: `domain-${new Chance().string({ alpha: true })}.com`,
     };
+};
+
+export const get_getOrigin_domain_request_body = (): GetOriginRequest => ({
+    url: `http://domain-${new Chance().string({ alpha: true })}.com`.toLowerCase(),
+});
+
+export const get_getOrigin_subdomain_request_body = (): GetOriginRequest => ({
+    url: `http://sub-${new Chance().string({ alpha: true })}.domain-${new Chance()
+        .string({ alpha: true })
+        .toLowerCase()}.com`.toLowerCase(),
+});
+
+export const key = (): any => {
+    return 'Domain';
+};
+
+export const value = (): string => {
+    return 'domain-origintest.com';
 };

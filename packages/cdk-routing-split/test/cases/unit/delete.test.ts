@@ -1,7 +1,6 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
 import * as then from '../../steps/then';
-import { Key } from '../../../src/delete/interface';
 import { createPK } from '../../../src/shared/make-keys';
 
 describe('When an api user', () => {
@@ -15,7 +14,7 @@ describe('When an api user', () => {
         requestBody['key'] = 'invalidKey';
         const expectedError = {
             statusCode: 400,
-            body: `Field key is invalid. Valid values are: ${Object.values(Key).join(', ')}`,
+            body: `Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith`,
         };
 
         const response = await when.we_invoke_delete(requestBody);

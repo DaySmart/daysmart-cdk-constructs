@@ -41,6 +41,7 @@ provider:
                       - 'dynamodb:UpdateItem'
                       - 'dynamodb:Query'
                       - 'dynamodb:DeleteItem'
+                      - 'dynamodb:BatchGetItem'
                   Resource:
                       - !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.config.CDK_ROUTING_SPLIT_TABLE}'
                       - !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.config.CDK_ROUTING_SPLIT_TABLE}/index/*'
