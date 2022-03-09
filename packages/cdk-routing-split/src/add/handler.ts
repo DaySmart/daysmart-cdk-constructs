@@ -1,4 +1,4 @@
-import { APIGatewayEvent, Context } from 'aws-lambda';
+import { APIGatewayEvent, Context, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
 import { HttpError } from '../shared/http-error';
@@ -6,7 +6,7 @@ import { Request as AddRequest } from './request';
 import { transformUrlSegment } from '../shared/transform-url-segment';
 import { validateKey, validateOrigin, validatePriority, validateValue } from '../shared/record-property-validators';
 
-export const add = async (event: APIGatewayEvent, context: Context): Promise<any> => {
+export const add = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResultV2> => {
     let logger: Logger;
 
     try {
