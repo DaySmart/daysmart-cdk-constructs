@@ -6,7 +6,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 export const action = async (key: string, value: string, priority: number, origin: string): Promise<void> => {
     const dynamo = getClient();
     const input: DocumentClient.PutItemInput = {
-        TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
+        TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
         Item: {
             PK: createPK(key, value),
             Priority: priority,
