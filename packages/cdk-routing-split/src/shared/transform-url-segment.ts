@@ -1,7 +1,7 @@
 import { getDomainData } from './get-domain-data';
 import { UrlSegment } from './url-segment.enum';
 
-export const transformHostnameSegment = (key: string, value: string) => {
+export const transformUrlSegment = (key: string, value: string) => {
     let possibleDomain = value;
     if (key === UrlSegment.Domain) {
         const domainData = getDomainData(possibleDomain);
