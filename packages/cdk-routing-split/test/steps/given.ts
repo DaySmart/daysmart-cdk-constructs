@@ -1,6 +1,7 @@
 import { Chance } from 'chance';
 import { AddRequest } from '../../src/add/add-request';
 import { GetOriginRequest } from '../../src/get-origin/get-origin-request';
+import { Request } from '../../src/update/request';
 
 export const get_add_request_body = (): AddRequest => {
     return {
@@ -11,12 +12,12 @@ export const get_add_request_body = (): AddRequest => {
     };
 };
 
-export const get_update_request_body = (): any => {
+export const get_update_request_body = (): Request => {
     return {
         key: 'Domain',
-        value: `domain-${new Chance().string({ alpha: true })}.com`,
-        priority: 1,
-        origin: 'Cloud',
+        value: `domain-${new Chance().string({ alpha: true })}.com`.toLowerCase(),
+        priority: new Chance().integer({ min: 0 }),
+        origin: `https://${new Chance().string({ alpha: true })}.${new Chance().string({ alpha: true })}.com`,
     };
 };
 

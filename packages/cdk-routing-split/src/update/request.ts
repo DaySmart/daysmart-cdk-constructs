@@ -1,4 +1,4 @@
-export interface UpdateRequest {
+export interface Request {
     key: string;
     value: string;
     priority: number;
