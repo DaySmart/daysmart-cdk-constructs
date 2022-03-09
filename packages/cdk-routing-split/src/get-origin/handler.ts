@@ -11,7 +11,7 @@ export const handler = async (event: CloudfrontEvent, context: Context): Promise
         logger.debug('get-origin event', { event });
 
         const { url } = event?.body;
-        let origin = await action(process.env.CDK_ROUTING_SPLIT_TABLE, url);
+        let origin = await action(process.env.DSI_ROUTING_SPLIT_TABLE, url);
         if (!origin) {
             origin = '';
         }
