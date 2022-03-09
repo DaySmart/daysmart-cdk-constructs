@@ -2,7 +2,7 @@ import * as when from '../../steps/when';
 import * as given from '../../steps/given';
 import * as then from '../../steps/then';
 import { createPK } from '../../../src/shared/make-keys';
-import { transformHostnameSegment } from '../../../src/shared/transform-hostname-segment';
+import { transformUrlSegment } from '../../../src/shared/transform-url-segment';
 
 describe('When an api user', () => {
     let requestBody: any;
@@ -13,7 +13,7 @@ describe('When an api user', () => {
 
     it('calls add with valid fields', async () => {
         const expectedResponse = { statusCode: 200 };
-        const value = transformHostnameSegment(requestBody.key, requestBody.value);
+        const value = transformUrlSegment(requestBody.key, requestBody.value);
         const expectedItem = {
             PK: createPK(requestBody.key, value),
             Priority: requestBody.priority,
