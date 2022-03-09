@@ -1,12 +1,12 @@
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
-import { APIGatewayEvent, Context } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResultV2, Context } from 'aws-lambda';
 import { HttpError } from '../shared/http-error';
 import { validateKey, validateOrigin, validatePriority, validateValue } from '../shared/record-property-validators';
 import { transformUrlSegment } from '../shared/transform-url-segment';
 import { action } from './action';
 import { Request } from './request';
 
-export const handler = async (event: APIGatewayEvent, context: Context): Promise<any> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResultV2> => {
     let logger: Logger;
 
     try {
