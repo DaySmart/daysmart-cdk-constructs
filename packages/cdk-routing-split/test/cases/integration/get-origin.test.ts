@@ -45,7 +45,7 @@ describe('When an entity', () => {
         expect(response).toStrictEqual(success);
     });
     it('calls get-origin with a valid url with a pathname', async () => {
-        addRequest.key = UrlSegment.PathStartsWith;
+        addRequest.key = UrlSegment.FirstPathSegment;
         addRequest.value = domainData.pathname;
         await when.we_invoke_add(addRequest);
 
