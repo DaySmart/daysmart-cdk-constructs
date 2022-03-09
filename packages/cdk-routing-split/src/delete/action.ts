@@ -5,7 +5,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 export const action = async (key: string, value: string): Promise<void> => {
     const dynamo = getClient();
     const input: DocumentClient.DeleteItemInput = {
-        TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
+        TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
         Key: {
             PK: createPK(key, value),
         },

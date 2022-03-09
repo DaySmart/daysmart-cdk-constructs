@@ -22,12 +22,12 @@ export const item_exists_in_CdkRoutingSplitTable = async (expectedItem: any) => 
 };
 
 export const item_not_in_CdkRoutingSplitTable = async (expectedItem: any) => {
-    console.log(`looking for item with PK [${expectedItem.PK}] in table [${process.env.CDK_ROUTING_SPLIT_TABLE}]`);
+    console.log(`looking for item with PK [${expectedItem.PK}] in table [${process.env.DSI_ROUTING_SPLIT_TABLE}]`);
 
     const dynamo = getClient();
     const response = await dynamo
         .query({
-            TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
+            TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
             ExpressionAttributeValues: {
                 ':pk': expectedItem.PK,
             },
