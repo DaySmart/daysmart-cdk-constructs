@@ -7,7 +7,7 @@ describe('When an api user', () => {
     let addRequestBody: any;
 
     beforeEach(() => {
-        addRequestBody = given.get_add_request_body();
+        addRequestBody = given.an_add_request_body();
     });
 
     it('calls delete with valid fields', async () => {

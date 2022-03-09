@@ -4,7 +4,7 @@ import { deleteRecord as deleteHandler } from '../../src/delete/handler';
 import { handler as updateHandler } from '../../src/update/handler';
 import { handler as getOriginHandler } from '../../src/get-origin/handler';
 import { APIGatewayEvent, Context } from 'aws-lambda';
-import { AddRequest } from '../../src/add/add-request';
+import { Request as AddRequest } from '../../src/add/request';
 
 export const we_invoke_add = async (body: AddRequest) => {
     const addEvent: any = {

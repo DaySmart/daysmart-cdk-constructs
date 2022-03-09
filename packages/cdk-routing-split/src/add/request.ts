@@ -1,4 +1,4 @@
-export interface AddRequest {
+export interface Request {
     key: string;
     value: string;
     priority: number;

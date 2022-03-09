@@ -15,7 +15,7 @@ describe('When an api user', () => {
         requestBody['key'] = caseArg;
         const expectedError = {
             statusCode: 400,
-            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith',
+            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, FirstPathSegment',
         };
 
         const response = await when.we_invoke_add(requestBody);

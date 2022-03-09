@@ -1,11 +1,11 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
-import { GetOriginRequest } from '../../../src/get-origin/get-origin-request';
+import { Request as GetOriginRequest } from '../../../src/get-origin/request';
 
 describe('When an entity', () => {
     let request: GetOriginRequest;
     beforeEach(() => {
-        request = given.get_getOrigin_domain_request_body();
+        request = given.a_getOrigin_domain_request_body();
     });
     it('calls get-origin with no url', async () => {
         request.url = undefined;
