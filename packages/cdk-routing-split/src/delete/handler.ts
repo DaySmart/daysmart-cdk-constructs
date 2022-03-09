@@ -1,19 +1,19 @@
-import { APIGatewayEvent, Context } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResultV2, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { HttpError } from '../shared/http-error';
 import { action } from './action';
-import { DeleteRequest } from './delete-request';
+import { Request } from './request';
 import { validateKey, validateValue } from '../shared/record-property-validators';
 import { transformUrlSegment } from '../shared/transform-url-segment';
 
-export const handler = async (event: APIGatewayEvent, context: Context): Promise<any> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResultV2> => {
     let logger!: Logger;
 
     try {
         logger = createLogger(process.env.DEBUG === 'true', context.awsRequestId);
         logger.debug('delete event', { event });
 
-        const request: DeleteRequest = JSON.parse(event.body as string);
+        const request: Request = JSON.parse(event.body as string);
         validateRequest(request);
 
         const value = transformUrlSegment(request.key, request.value);
@@ -32,7 +32,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     }
 };
 
-const validateRequest = (request: DeleteRequest): void => {
+const validateRequest = (request: Request): void => {
     validateKey(request?.key);
     validateValue(request?.value);
 };

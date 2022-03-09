@@ -2,7 +2,7 @@ import * as when from '../../steps/when';
 import * as given from '../../steps/given';
 import * as then from '../../steps/then';
 import { createPK } from '../../../src/shared/make-keys';
-import { DeleteRequest } from '../../../src/delete/delete-request';
+import { Request as DeleteRequest } from '../../../src/delete/request';
 
 describe('When an api user', () => {
     let request: DeleteRequest;
