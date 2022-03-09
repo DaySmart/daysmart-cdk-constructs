@@ -3,7 +3,7 @@ import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logge
 import { action } from './action';
 import { HttpError } from '../shared/http-error';
 import { AddRequest } from './add-request';
-import { transformHostnameSegment } from '../shared/transform-hostname-segment';
+import { transformUrlSegment } from '../shared/transform-url-segment';
 import { validateKey, validateOrigin, validatePriority, validateValue } from '../shared/record-property-validators';
 
 export const add = async (event: APIGatewayEvent, context: Context): Promise<any> => {
@@ -16,9 +16,9 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
         const request: AddRequest = JSON.parse(event.body as string);
         validateRequest(request, logger);
 
-        const possibleDomain = transformHostnameSegment(request.key, request.value);
+        const value = transformUrlSegment(request.key, request.value);
 
-        await action(request.key, possibleDomain, request.priority, request.origin);
+        await action(request.key, value, request.priority, request.origin);
 
         return { statusCode: 200 };
     } catch (error: any) {
