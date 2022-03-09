@@ -1,6 +1,6 @@
 import * as when from '../lib/we_invoke_lambda';
 import { add as addHandler } from '../../src/add/handler';
-import { deleteRecord as deleteHandler } from '../../src/delete/handler';
+import { handler as deleteHandler } from '../../src/delete/handler';
 import { handler as updateHandler } from '../../src/update/handler';
 import { handler as getOriginHandler } from '../../src/get-origin/handler';
 import { APIGatewayEvent, Context } from 'aws-lambda';
