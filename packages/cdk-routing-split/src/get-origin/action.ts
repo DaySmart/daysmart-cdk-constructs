@@ -15,7 +15,7 @@ export const action = async (tableName: string, url: string): Promise<string> =>
     }
 
     if (pathname) {
-        keys.push(makeKey(UrlSegment.PathStartsWith, pathname));
+        keys.push(makeKey(UrlSegment.FirstPathSegment, pathname));
     }
 
     queryStrings.forEach((q) => {

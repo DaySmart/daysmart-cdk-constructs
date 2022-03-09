@@ -2,54 +2,50 @@ import * as when from '../../steps/when';
 import * as given from '../../steps/given';
 import * as then from '../../steps/then';
 import { createPK } from '../../../src/shared/make-keys';
-import { getClient } from '../../../src/shared/get-client';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { Request as AddRequest } from '../../../src/add/request';
+import { Request as UpdateRequest } from '../../../src/update/request';
+import { Chance } from 'chance';
+import { transformUrlSegment } from '../../../src/shared/transform-url-segment';
 
 describe('When an api user', () => {
-    let request: any;
-    const dynamo = getClient();
+    const chance = new Chance();
+    let addRequest: AddRequest;
+    let updateRequest: UpdateRequest;
 
-    beforeAll(async () => {
-        const key = given.key();
-        const value = given.value();
+    beforeEach(() => {
+        addRequest = given.an_add_request_body();
 
-        request = {
-            key: key,
-            value: value,
-            priority: 1,
-            origin: 'Cloud',
+        updateRequest = {
+            key: addRequest.key,
+            value: addRequest.value,
+            priority: chance.integer({ min: 0 }),
+            origin: given.a_simple_random_url(true),
         };
+    });
 
-        const input: DocumentClient.PutItemInput = {
-            TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
-            Item: {
-                PK: createPK(request.key, request.value),
-                Priority: request.priority,
-                Origin: request.origin,
-            },
-        };
+    it('calls update with no matching record in table', async () => {
+        const expectedValue = transformUrlSegment(updateRequest.key, updateRequest.value);
+        const partitionKey: string = createPK(updateRequest.key, expectedValue);
+        const expectedError = { statusCode: 400, body: 'Origin record not found.' };
 
-        await dynamo.put(input).promise();
+        const response = await when.we_invoke_update(updateRequest);
+
+        await then.item_does_not_exist_in_CdkRoutingSplitTable(partitionKey);
+        expect(response).toStrictEqual(expectedError);
     });
 
     it('calls update with valid fields', async () => {
-        const priority = 2;
-        const origin = 'Winform';
+        await when.we_invoke_add(addRequest);
+
         const expectedResponse = { statusCode: 200 };
+        const expectedValue = transformUrlSegment(updateRequest.key, updateRequest.value);
         const expectedItem = {
-            pk: createPK(request.key, request.value),
-            priority: priority,
-            origin: origin,
+            PK: createPK(updateRequest.key, expectedValue),
+            Priority: updateRequest.priority,
+            Origin: updateRequest.origin,
         };
 
-        const updateRequestBody = {
-            key: request.key,
-            value: request.value,
-            priority: priority,
-            origin: origin,
-        };
-
-        const updateResponse = when.we_invoke_update(updateRequestBody);
+        const updateResponse = await when.we_invoke_update(updateRequest);
 
         expect(updateResponse).toStrictEqual(expectedResponse);
         await then.item_exists_in_CdkRoutingSplitTable(expectedItem);

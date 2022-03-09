@@ -7,7 +7,7 @@ describe('When an api user', () => {
     let requestBody: any;
 
     beforeEach(() => {
-        requestBody = given.get_update_request_body();
+        requestBody = given.an_update_request_body();
     });
 
     const invalidKeyValues = [undefined, null, '', 'invalidKey'];
@@ -15,7 +15,7 @@ describe('When an api user', () => {
         requestBody['key'] = caseArg;
         const expectedError = {
             statusCode: 400,
-            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith',
+            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, FirstPathSegment',
         };
 
         const response = await when.we_invoke_add(requestBody);
@@ -50,16 +50,6 @@ describe('When an api user', () => {
 
         const response = await when.we_invoke_add(requestBody);
 
-        expect(response).toStrictEqual(expectedError);
-    });
-
-    it('calls update with no matching record in table', async () => {
-        const partitionKey: string = createPK(requestBody.key, requestBody.value);
-        const expectedError = { statusCode: 400, body: 'Origin record not found.' };
-
-        const response = await when.we_invoke_update(requestBody);
-
-        await then.item_does_not_exist_in_CdkRoutingSplitTable(partitionKey);
         expect(response).toStrictEqual(expectedError);
     });
 });
