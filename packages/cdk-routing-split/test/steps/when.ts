@@ -18,8 +18,13 @@ export const we_invoke_delete = async () => {
     return await when.we_invoke_lambda(deleteHandler, {} as APIGatewayEvent, {} as Context);
 };
 
-export const we_invoke_update = async () => {
-    return await when.we_invoke_lambda(updateHandler, {} as APIGatewayEvent, {} as Context);
+export const we_invoke_update = async (body: any) => {
+    const updateEvent: any = {
+        body: JSON.stringify(body),
+    };
+    const context: any = {};
+
+    return await when.we_invoke_lambda(updateHandler, updateEvent, context);
 };
 
 export const we_invoke_getOrigin = async () => {
