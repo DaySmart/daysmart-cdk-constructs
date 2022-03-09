@@ -21,7 +21,7 @@ export const item_exists_in_CdkRoutingSplitTable = async (expectedItem: any) => 
     expect(response.Items[0]).toStrictEqual(expectedItem);
 };
 
-export const item_not_in_CdkRoutingSplitTable = async (expectedItem: any) => {
+export const item_does_not_exist_in_CdkRoutingSplitTable = async (expectedItem: any) => {
     console.log(`looking for item with PK [${expectedItem.PK}] in table [${process.env.DSI_ROUTING_SPLIT_TABLE}]`);
 
     const dynamo = getClient();

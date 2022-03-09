@@ -2,11 +2,11 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { HttpError } from '../shared/http-error';
 import { action } from './action';
-import { DeleteRequest } from './request';
+import { DeleteRequest } from './delete-request';
 import { validateKey, validateValue } from '../shared/record-property-validators';
 import { transformUrlSegment } from '../shared/transform-url-segment';
 
-export const deleteRecord = async (event: APIGatewayEvent, context: Context): Promise<any> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<any> => {
     let logger!: Logger;
 
     try {
