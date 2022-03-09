@@ -5,6 +5,7 @@ import { createPK } from '../../../src/shared/make-keys';
 import { getClient } from '../../../src/shared/get-client';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { Request as AddRequest } from '../../../src/add/request';
+import { Request as DeleteRequest } from '../../../src/delete/request';
 import { transformUrlSegment } from '../../../src/shared/transform-url-segment';
 
 describe('When an api user', () => {
@@ -30,7 +31,7 @@ describe('When an api user', () => {
     });
 
     it('calls delete with valid fields', async () => {
-        const deleteRequest = {
+        const deleteRequest: DeleteRequest = {
             key: addRequest.key,
             value: addRequest.value,
         };
