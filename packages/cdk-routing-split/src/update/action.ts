@@ -14,7 +14,7 @@ export const action = async (key: string, value: string, priority: number, origi
     }
 
     const params: DocumentClient.UpdateItemInput = {
-        TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
+        TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
         Key: {
             PK: partitionKey,
         },

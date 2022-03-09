@@ -17,11 +17,11 @@ describe('When an api user', () => {
             key: key,
             value: value,
             priority: 1,
-            origin: 'Cloud'
+            origin: 'Cloud',
         };
 
         const input: DocumentClient.PutItemInput = {
-            TableName: process.env.CDK_ROUTING_SPLIT_TABLE,
+            TableName: process.env.DSI_ROUTING_SPLIT_TABLE,
             Item: {
                 PK: createPK(request.key, request.value),
                 Priority: request.priority,
@@ -39,14 +39,14 @@ describe('When an api user', () => {
         const expectedItem = {
             pk: createPK(request.key, request.value),
             priority: priority,
-            origin: origin
+            origin: origin,
         };
 
         const updateRequestBody = {
             key: request.key,
             value: request.value,
             priority: priority,
-            origin: origin
+            origin: origin,
         };
 
         const updateResponse = when.we_invoke_update(updateRequestBody);
