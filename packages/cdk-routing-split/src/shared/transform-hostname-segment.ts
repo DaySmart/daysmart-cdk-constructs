@@ -1,12 +1,12 @@
 import { getDomainData } from './get-domain-data';
-import { DomainSegment } from './url-key.enum';
+import { UrlSegment } from './url-segment.enum';
 
 export const transformHostnameSegment = (key: string, value: string) => {
     let possibleDomain = value;
-    if (key === DomainSegment.Domain) {
+    if (key === UrlSegment.Domain) {
         const domainData = getDomainData(possibleDomain);
         possibleDomain = domainData.domain;
-    } else if (key === DomainSegment.Subdomain) {
+    } else if (key === UrlSegment.Subdomain) {
         const domainData = getDomainData(`http://${value}.domain.com`); // can't pass just a subdomain down
         possibleDomain = domainData.subdomain;
     }

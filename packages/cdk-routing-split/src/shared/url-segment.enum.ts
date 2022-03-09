@@ -1,4 +1,4 @@
-export enum DomainSegment {
+export enum UrlSegment {
     Subdomain = 'Subdomain',
     Domain = 'Domain',
     QueryStringParam = 'QueryStringParam',

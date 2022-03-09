@@ -1,25 +1,25 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { getClient } from '../shared/get-client';
 import { createPK } from '../shared/make-keys';
-import { DomainSegment } from '../shared/url-key.enum';
+import { UrlSegment } from '../shared/url-segment.enum';
 import { getDomainData } from '../shared/get-domain-data';
-const makeKey = (urlKey: DomainSegment, part: string) => ({ PK: createPK(urlKey, `${part}`) } as DocumentClient.Key);
+const makeKey = (urlKey: UrlSegment, part: string) => ({ PK: createPK(urlKey, `${part}`) } as DocumentClient.Key);
 export const action = async (tableName: string, url: string): Promise<string> => {
     const { domain, subdomain, pathname, queryStrings } = getDomainData(url);
     const keys: DocumentClient.KeyList = [];
 
-    keys.push(makeKey(DomainSegment.Domain, domain));
+    keys.push(makeKey(UrlSegment.Domain, domain));
 
     if (subdomain) {
-        keys.push(makeKey(DomainSegment.Subdomain, subdomain));
+        keys.push(makeKey(UrlSegment.Subdomain, subdomain));
     }
 
     if (pathname) {
-        keys.push(makeKey(DomainSegment.PathStartsWith, pathname));
+        keys.push(makeKey(UrlSegment.PathStartsWith, pathname));
     }
 
     queryStrings.forEach((q) => {
-        keys.push(makeKey(DomainSegment.QueryStringParam, q));
+        keys.push(makeKey(UrlSegment.QueryStringParam, q));
     });
 
     const dynamo = getClient();
