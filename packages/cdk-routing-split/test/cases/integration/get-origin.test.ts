@@ -1,6 +1,6 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
-import { UrlKey } from '../../../src/shared/url-key.enum';
+import { DomainSegment } from '../../../src/shared/url-key.enum';
 import { Chance } from 'chance';
 import { getDomainData } from '../../../src/shared/get-domain-data';
 
@@ -14,7 +14,7 @@ describe('When an entity', () => {
     const domainData = getDomainData(testUrl);
     it('calls get-origin with a valid url with a subdomain', async () => {
         const addRequest = given.get_add_request_body();
-        addRequest.key = UrlKey.Subdomain;
+        addRequest.key = DomainSegment.Subdomain;
         addRequest.value = domainData.subdomain;
         await when.we_invoke_add(addRequest);
 
@@ -27,7 +27,7 @@ describe('When an entity', () => {
     });
     it('calls get-origin with a valid url with a querystring', async () => {
         const addRequest = given.get_add_request_body();
-        addRequest.key = UrlKey.QueryStringParam;
+        addRequest.key = DomainSegment.QueryStringParam;
         addRequest.value = domainData.queryStrings[0];
         await when.we_invoke_add(addRequest);
 
@@ -40,7 +40,7 @@ describe('When an entity', () => {
     });
     it('calls get-origin with a valid url with a pathname', async () => {
         const addRequest = given.get_add_request_body();
-        addRequest.key = UrlKey.PathStartsWith;
+        addRequest.key = DomainSegment.PathStartsWith;
         addRequest.value = domainData.pathname;
         await when.we_invoke_add(addRequest);
 
@@ -53,7 +53,7 @@ describe('When an entity', () => {
     });
     it('calls get-origin with a valid url with a domain', async () => {
         const addRequest = given.get_add_request_body();
-        addRequest.key = UrlKey.Domain;
+        addRequest.key = DomainSegment.Domain;
         addRequest.value = domainData.domain;
         await when.we_invoke_add(addRequest);
 

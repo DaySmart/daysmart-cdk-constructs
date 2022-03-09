@@ -20,4 +20,9 @@ describe('When an entity', () => {
         const failure = { statusCode: 200, body: { origin: '' } };
         expect(response).toStrictEqual(failure);
     });
+    it('calls get-origin with no request', async () => {
+        const response = await when.we_invoke_getOrigin(undefined);
+        const failure = { statusCode: 200, body: { origin: '' } };
+        expect(response).toStrictEqual(failure);
+    });
 });

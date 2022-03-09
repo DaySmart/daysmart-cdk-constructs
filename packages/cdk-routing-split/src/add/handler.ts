@@ -3,8 +3,8 @@ import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logge
 import { action } from './action';
 import { HttpError } from '../http-error';
 import { AddRequest } from './add-request';
-import { UrlKey } from '../shared/url-key.enum';
-import { getDomainData } from '../shared/get-domain-data';
+import { DomainSegment } from '../shared/url-key.enum';
+import { transformHostnameSegment } from '../shared/transform-hostname-segment';
 
 export const add = async (event: APIGatewayEvent, context: Context): Promise<any> => {
     let logger!: Logger;
@@ -17,16 +17,7 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
 
         validateRequest(request);
 
-        //const { key, value, priority, origin } = request;
-        let possibleDomain = request.value;
-
-        if (request.key === UrlKey.Domain) {
-            const domainData = getDomainData(possibleDomain);
-            possibleDomain = domainData.domain;
-        } else if (request.key === UrlKey.Subdomain) {
-            const domainData = getDomainData(`http://${request.value}.domain.com`); // can't pass just a subdomain down
-            possibleDomain = domainData.subdomain;
-        }
+        const possibleDomain = transformHostnameSegment(request.key, request.value);
 
         await action(request.key, possibleDomain, request.priority, request.origin);
 
@@ -43,7 +34,7 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
 };
 
 const validateRequest = (request: AddRequest): void => {
-    const keyList: string[] = Object.keys(UrlKey);
+    const keyList: string[] = Object.keys(DomainSegment);
 
     if (!keyList?.includes(request?.key)) {
         throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList.join(', ')}`);

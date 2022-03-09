@@ -1,5 +1,4 @@
 import { parse } from 'tldts';
-
 export interface DomainData {
     subdomain: string; // https://www.subdomain.domain.com/some/path/in/url?guid=1234&name=bob => www.subdomain
     domain: string; // https://subdomain.domain.com/some/path/in/url?guid=1234&name=bob => domain.com
