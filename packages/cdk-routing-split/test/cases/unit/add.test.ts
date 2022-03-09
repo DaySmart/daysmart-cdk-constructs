@@ -5,7 +5,7 @@ describe('When an api user', () => {
     let requestBody: any;
 
     beforeEach(() => {
-        requestBody = given.get_add_request_body();
+        requestBody = given.an_add_request_body();
     });
 
     const invalidKeyValues = [undefined, null, '', 'invalidKey'];

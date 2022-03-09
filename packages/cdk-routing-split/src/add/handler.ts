@@ -2,7 +2,7 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
 import { HttpError } from '../shared/http-error';
-import { AddRequest } from './add-request';
+import { Request as AddRequest } from './request';
 import { transformHostnameSegment } from '../shared/transform-hostname-segment';
 import { validateKey, validateOrigin, validatePriority, validateValue } from '../shared/record-property-validators';
 
