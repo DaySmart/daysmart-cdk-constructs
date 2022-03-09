@@ -1,5 +1,5 @@
 import { Chance } from 'chance';
-import { DeleteRequest } from '../../src/delete/interface';
+import { DeleteRequest } from '../../src/delete/request';
 import { AddRequest } from '../../src/add/add-request';
 import { GetOriginRequest } from '../../src/get-origin/get-origin-request';
 import { UrlSegment } from '../../src/shared/url-segment.enum';
