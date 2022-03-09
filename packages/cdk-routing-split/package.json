@@ -8,6 +8,7 @@
         "package": "npm run build && serverless package --stage sandbox",
         "deploy:sandbox": "npm run build && serverless deploy --stage sandbox --aws-profile sandbox --verbose",
         "test:sandbox": "sls export-env --stage sandbox --aws-profile sandbox && jest",
+        "test:watchsandbox": "sls export-env --stage sandbox --aws-profile sandbox && jest --watch",
         "test:sandbox2": "sls export-env --stage sandbox2 --aws-profile sandbox && jest",
         "watch": "tsc -p tsconfig.app.json -w",
         "lint": "eslint **/*.ts --ignore-path .gitignore",
@@ -49,6 +50,7 @@
         "constructs": "^10.0.0"
     },
     "dependencies": {
-        "@daysmart/aws-lambda-logger": "~0.0.6"
+        "@daysmart/aws-lambda-logger": "~0.0.6",
+        "tldts": "^5.7.69"
     }
 }

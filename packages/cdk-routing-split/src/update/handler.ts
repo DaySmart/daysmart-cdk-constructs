@@ -1,6 +1,6 @@
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { APIGatewayEvent, Context } from 'aws-lambda';
-import { HttpError } from '../http-error';
+import { HttpError } from '../shared/http-error';
 import { action } from './action';
 import { UpdateRequest } from './interface';
 

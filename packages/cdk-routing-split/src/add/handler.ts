@@ -1,20 +1,24 @@
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
-import { HttpError } from '../http-error';
-import { AddRequest } from './interface';
+import { HttpError } from '../shared/http-error';
+import { AddRequest } from './add-request';
+import { transformUrlSegment } from '../shared/transform-url-segment';
+import { validateKey, validateOrigin, validatePriority, validateValue } from '../shared/record-property-validators';
 
 export const add = async (event: APIGatewayEvent, context: Context): Promise<any> => {
-    let logger!: Logger;
+    let logger: Logger;
 
     try {
         logger = createLogger(process.env.DEBUG === 'true', context.awsRequestId);
         logger.debug('add event', { event });
 
         const request: AddRequest = JSON.parse(event.body as string);
-        validateRequest(request);
+        validateRequest(request, logger);
 
-        await action(request);
+        const value = transformUrlSegment(request.key, request.value);
+
+        await action(request.key, value, request.priority, request.origin);
 
         return { statusCode: 200 };
     } catch (error: any) {
@@ -28,14 +32,9 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<any
     }
 };
 
-const validateRequest = (request: AddRequest): void => {
-    const keyList: string[] = ['Subdomain', 'Domain', 'QueryStringParam', 'PathStartsWith'];
-
-    if (!keyList?.includes(request.key)) {
-        throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList.join(', ')}`);
-    }
-
-    if (!request.value?.length) {
-        throw new HttpError(400, 'Field value is required.');
-    }
+const validateRequest = (request: AddRequest, logger: Logger): void => {
+    validateKey(request?.key);
+    validateValue(request?.value);
+    validatePriority(request?.priority);
+    validateOrigin(request?.origin, logger);
 };
