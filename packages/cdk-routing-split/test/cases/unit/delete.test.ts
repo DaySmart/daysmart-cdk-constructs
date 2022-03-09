@@ -10,23 +10,25 @@ describe('When an api user', () => {
         requestBody = given.get_delete_request_body();
     });
 
-    it('calls delete with invalid key field', async () => {
-        requestBody['key'] = 'invalidKey';
+    const invalidKeyValues = [undefined, null, '', 'invalidKey'];
+    it.each(invalidKeyValues)('calls delete with invalid key field', async (caseArg) => {
+        requestBody['key'] = caseArg;
         const expectedError = {
             statusCode: 400,
-            body: `Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith`,
+            body: 'Field key is invalid. Valid values are: Subdomain, Domain, QueryStringParam, PathStartsWith',
         };
 
-        const response = await when.we_invoke_delete(requestBody);
+        const response = await when.we_invoke_add(requestBody);
 
         expect(response).toStrictEqual(expectedError);
     });
 
-    it('calls delete with missing value field', async () => {
-        requestBody['value'] = '';
+    const invalidValues = [undefined, null, ''];
+    it.each(invalidValues)('calls delete with invalid value field', async (caseArg) => {
+        requestBody['value'] = caseArg;
         const expectedError = { statusCode: 400, body: 'Field value is required.' };
 
-        const response = await when.we_invoke_delete(requestBody);
+        const response = await when.we_invoke_add(requestBody);
 
         expect(response).toStrictEqual(expectedError);
     });

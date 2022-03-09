@@ -3,7 +3,7 @@ import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logge
 import { HttpError } from '../shared/http-error';
 import { action } from './action';
 import { DeleteRequest } from './interface';
-import { UrlSegment } from '../shared/url-segment.enum';
+import { validateKey, validateValue } from '../shared/record-property-validators';
 
 export const deleteRecord = async (event: APIGatewayEvent, context: Context): Promise<any> => {
     let logger!: Logger;
@@ -30,13 +30,6 @@ export const deleteRecord = async (event: APIGatewayEvent, context: Context): Pr
 };
 
 const validateRequest = (request: DeleteRequest): void => {
-    const keyList: string[] = Object.values(UrlSegment);
-
-    if (!keyList?.includes(request.key)) {
-        throw new HttpError(400, `Field key is invalid. Valid values are: ${keyList.join(', ')}`);
-    }
-
-    if (!request.value?.length) {
-        throw new HttpError(400, 'Field value is required.');
-    }
+    validateKey(request?.key);
+    validateValue(request?.value);
 };
