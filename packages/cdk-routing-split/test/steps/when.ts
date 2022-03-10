@@ -15,8 +15,13 @@ export const we_invoke_add = async (body: AddRequest) => {
     return await when.we_invoke_lambda(addHandler, addEvent, context);
 };
 
-export const we_invoke_delete = async () => {
-    return await when.we_invoke_lambda(deleteHandler, {} as APIGatewayEvent, {} as Context);
+export const we_invoke_delete = async (body: any) => {
+    const deleteEvent: any = {
+        body: JSON.stringify(body),
+    };
+    const context: any = {};
+
+    return await when.we_invoke_lambda(deleteHandler, deleteEvent, context);
 };
 
 export const we_invoke_update = async () => {

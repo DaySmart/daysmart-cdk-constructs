@@ -1,6 +1,9 @@
 import { Chance } from 'chance';
+import { Request as DeleteRequest } from '../../src/delete/request';
 import { Request as AddRequest } from '../../src/add/request';
 import { Request as GetOriginRequest } from '../../src/get-origin/request';
+import { UrlSegment } from '../../src/shared/url-segment.enum';
+
 const chance = new Chance();
 export const an_add_request_body = (): AddRequest => {
     return {
@@ -8,6 +11,13 @@ export const an_add_request_body = (): AddRequest => {
         value: a_random_hostname(),
         priority: chance.integer({ min: 0 }),
         origin: a_simple_random_url(),
+    };
+};
+
+export const get_delete_request_body = (): DeleteRequest => {
+    return {
+        key: UrlSegment.Domain,
+        value: a_random_hostname(),
     };
 };
 
