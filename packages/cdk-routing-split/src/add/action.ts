@@ -13,6 +13,6 @@ export const action = async (key: string, value: string, priority: number, origi
             Origin: origin,
         },
     };
-
+    console.log('adding -', input);
     await dynamo.put(input).promise();
 };

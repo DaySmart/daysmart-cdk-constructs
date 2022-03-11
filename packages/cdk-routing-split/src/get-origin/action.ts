@@ -2,10 +2,15 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { getClient } from '../shared/get-client';
 import { createPK } from '../shared/make-keys';
 import { UrlSegment } from '../shared/url-segment.enum';
-import { getDomainData } from '../shared/get-domain-data';
+
 const makeKey = (urlKey: UrlSegment, part: string) => ({ PK: createPK(urlKey, `${part}`) } as DocumentClient.Key);
-export const action = async (tableName: string, url: string): Promise<string> => {
-    const { domain, subdomain, pathname, queryStrings } = getDomainData(url);
+export const action = async (
+    tableName: string,
+    domain: string,
+    subdomain: string,
+    pathSegment: string,
+    queryStrings: string[]
+): Promise<string> => {
     const keys: DocumentClient.KeyList = [];
 
     keys.push(makeKey(UrlSegment.Domain, domain));
@@ -14,8 +19,8 @@ export const action = async (tableName: string, url: string): Promise<string> =>
         keys.push(makeKey(UrlSegment.Subdomain, subdomain));
     }
 
-    if (pathname) {
-        keys.push(makeKey(UrlSegment.FirstPathSegment, pathname));
+    if (pathSegment) {
+        keys.push(makeKey(UrlSegment.FirstPathSegment, pathSegment));
     }
 
     queryStrings.forEach((q) => {

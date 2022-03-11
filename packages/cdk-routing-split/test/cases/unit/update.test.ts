@@ -1,8 +1,9 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
+import { Request as UpdateRequest } from '../../../src/update/request';
 
 describe('When an api user', () => {
-    let requestBody: any;
+    let requestBody: UpdateRequest;
 
     beforeEach(() => {
         requestBody = given.an_update_request_body();
@@ -33,7 +34,7 @@ describe('When an api user', () => {
 
     const invalidPriorityValues = [undefined, null, '', -1];
     it.each(invalidPriorityValues)('calls update with invalid priority field', async (caseArg) => {
-        requestBody['priority'] = caseArg;
+        requestBody['priority'] = caseArg as any;
         const expectedError = { statusCode: 400, body: 'Field priority must be greater than or equal to 0.' };
 
         const response = await when.we_invoke_update(requestBody);

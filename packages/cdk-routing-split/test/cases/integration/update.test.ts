@@ -6,26 +6,24 @@ import { Request as AddRequest } from '../../../src/add/request';
 import { Request as UpdateRequest } from '../../../src/update/request';
 import { Chance } from 'chance';
 import { transformUrlSegment } from '../../../src/shared/transform-url-segment';
+const chance = new Chance();
+let addRequest: AddRequest;
+let updateRequest: UpdateRequest;
 
+beforeEach(() => {
+    addRequest = given.an_add_request_body();
+
+    updateRequest = {
+        key: addRequest.key,
+        value: addRequest.value,
+        priority: chance.integer({ min: 0 }),
+        origin: given.a_simple_url(true),
+    };
+});
 describe('When an api user', () => {
-    const chance = new Chance();
-    let addRequest: AddRequest;
-    let updateRequest: UpdateRequest;
-
-    beforeEach(() => {
-        addRequest = given.an_add_request_body();
-
-        updateRequest = {
-            key: addRequest.key,
-            value: addRequest.value,
-            priority: chance.integer({ min: 0 }),
-            origin: given.a_simple_random_url(true),
-        };
-    });
-
     it('calls update with no matching record in table', async () => {
         const expectedValue = transformUrlSegment(updateRequest.key, updateRequest.value);
-        const partitionKey: string = createPK(updateRequest.key, expectedValue);
+        const partitionKey = createPK(updateRequest.key, expectedValue);
         const expectedError = { statusCode: 400, body: 'Origin record not found.' };
 
         const response = await when.we_invoke_update(updateRequest);
@@ -35,6 +33,7 @@ describe('When an api user', () => {
     });
 
     it('calls update with valid fields', async () => {
+        console.log('update test valid', addRequest.value);
         await when.we_invoke_add(addRequest);
 
         const expectedResponse = { statusCode: 200 };
@@ -48,6 +47,6 @@ describe('When an api user', () => {
         const updateResponse = await when.we_invoke_update(updateRequest);
 
         expect(updateResponse).toStrictEqual(expectedResponse);
-        await then.item_exists_in_CdkRoutingSplitTable(expectedItem);
+        await then.item_exists_in_CdkRoutingSplitTable(expectedItem.PK);
     });
 });
