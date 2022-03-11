@@ -1,28 +1,40 @@
 import * as when from '../../steps/when';
 import * as given from '../../steps/given';
-import { Request as GetOriginRequest } from '../../../src/get-origin/request';
+import { CloudFrontRequestEvent } from 'aws-lambda';
 
 describe('When an entity', () => {
-    let request: GetOriginRequest;
+    let request: CloudFrontRequestEvent;
+    const failure = {
+        headers: {
+            location: [
+                {
+                    key: 'Location',
+                    value: 'https://book.myonlineappointment.com/Unavailable/NotFound',
+                },
+            ],
+        },
+        status: '404',
+        statusDescription: 'Not Found',
+    };
     beforeEach(() => {
-        request = given.a_getOrigin_domain_request_body();
+        request = given.a_getOrigin_event();
     });
-    it('calls get-origin with no url', async () => {
-        request.url = undefined;
+    it('calls get-origin with no domainName', async () => {
+        request.Records[0].cf.request.origin.custom.domainName = undefined;
         const response = await when.we_invoke_getOrigin(request);
-        const failure = { statusCode: 200, body: { origin: '' } };
+
         expect(response).toStrictEqual(failure);
     });
 
     it('calls get-origin with invalid url', async () => {
-        request.url = 'asdfsfsfds';
+        request.Records[0].cf.request.origin.custom.domainName = 'sdffdsfs';
         const response = await when.we_invoke_getOrigin(request);
-        const failure = { statusCode: 200, body: { origin: '' } };
+
         expect(response).toStrictEqual(failure);
     });
     it('calls get-origin with no request', async () => {
         const response = await when.we_invoke_getOrigin(undefined);
-        const failure = { statusCode: 200, body: { origin: '' } };
+
         expect(response).toStrictEqual(failure);
     });
 });

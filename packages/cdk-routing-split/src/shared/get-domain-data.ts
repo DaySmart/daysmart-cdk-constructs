@@ -14,8 +14,8 @@ export const getDomainData = (rawUrl: string): DomainData => {
     const parseResult = parse(url.hostname);
     const subdomain = parseResult?.subdomain;
     const domain = parseResult?.domain;
-    const queryStrings = url?.search?.substring(1, url.search.length - 2)?.split('&');
-    const pathname = url?.pathname?.substring(1, url.pathname.length - 2);
+    const queryStrings = getQueryStrings(url.search);
+    const pathname = getPathnameSegment(url.pathname);
 
     return {
         domain,
@@ -23,4 +23,19 @@ export const getDomainData = (rawUrl: string): DomainData => {
         queryStrings,
         pathname,
     } as DomainData;
+};
+
+export const getQueryStrings = (query: string) => {
+    if (query.indexOf('?') === 0) {
+        query = query.substring(1, query.length - 1);
+    }
+    return query.split('&');
+};
+
+export const getPathnameSegment = (pathname: string) => {
+    if (pathname.indexOf('/') === 0) {
+        pathname = pathname.substring(1, pathname.length - 1);
+    }
+
+    return pathname.split('/')?.[0];
 };

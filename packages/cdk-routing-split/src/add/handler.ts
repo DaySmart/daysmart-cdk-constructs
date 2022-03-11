@@ -17,7 +17,7 @@ export const add = async (event: APIGatewayEvent, context: Context): Promise<API
         validateRequest(request, logger);
 
         const value = transformUrlSegment(request.key, request.value);
-
+        console.log('jest-', request.key, value, request.priority, request.origin);
         await action(request.key, value, request.priority, request.origin);
 
         return { statusCode: 200 };

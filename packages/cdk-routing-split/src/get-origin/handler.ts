@@ -1,6 +1,8 @@
 import { CloudFrontRequest, CloudFrontRequestEvent, CloudFrontRequestResult, CloudFrontResponseResult, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
+import { getPathnameSegment, getQueryStrings } from '../shared/get-domain-data';
+import { parse } from 'tldts';
 
 export const handler = async (
     event: CloudFrontRequestEvent,
@@ -14,8 +16,11 @@ export const handler = async (
         logger.debug('get-origin event', { event });
 
         const request: CloudFrontRequest = event.Records[0].cf.request;
-
-        const origin = await action(process.env.DSI_ROUTING_SPLIT_TABLE, request.uri);
+        const { domain, subdomain } = parse(request.origin.custom.domainName);
+        const pathname = getPathnameSegment(request.uri);
+        const queryStrings = getQueryStrings(request.querystring);
+        console.log('jest-', subdomain, domain, pathname, queryStrings);
+        const origin = await action(process.env.DSI_ROUTING_SPLIT_TABLE, domain, subdomain, pathname, queryStrings);
         if (!origin) {
             return createFailureRedirectResponse();
         }
@@ -41,19 +46,15 @@ export const handler = async (
     }
 };
 
-const createFailureRedirectResponse = (): CloudFrontResponseResult => {
-    const failureRedirect: CloudFrontResponseResult = {
-        status: '404',
-        statusDescription: 'Not Found',
-        headers: {
-            location: [
-                {
-                    key: 'Location',
-                    value: process.env.DSI_ORIGIN_NOT_FOUND_URL,
-                },
-            ],
-        },
-    };
-
-    return failureRedirect;
-};
+const createFailureRedirectResponse = (): CloudFrontResponseResult => ({
+    status: '404',
+    statusDescription: 'Not Found',
+    headers: {
+        location: [
+            {
+                key: 'Location',
+                value: process.env.DSI_ORIGIN_NOT_FOUND_URL,
+            },
+        ],
+    },
+});
