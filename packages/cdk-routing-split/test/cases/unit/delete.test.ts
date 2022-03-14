@@ -43,6 +43,6 @@ describe('When an api user', () => {
         const response = await when.we_invoke_delete(request);
 
         expect(response).toStrictEqual(expectedResponse);
-        await then.item_does_not_exist_in_CdkRoutingSplitTable(expectedItem);
+        await then.item_does_not_exist_in_CdkRoutingSplitTable(expectedItem.PK);
     });
 });

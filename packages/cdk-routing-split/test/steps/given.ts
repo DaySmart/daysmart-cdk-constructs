@@ -1,6 +1,7 @@
 import { Chance } from 'chance';
 import { Request as DeleteRequest } from '../../src/delete/request';
 import { Request as AddRequest } from '../../src/add/request';
+import { Request as UpdateRequest } from '../../src/update/request';
 import { UrlSegment } from '../../src/shared/url-segment.enum';
 import { CloudFrontRequest, CloudFrontRequestEvent } from 'aws-lambda';
 
@@ -10,6 +11,15 @@ export const an_add_request_body = (): AddRequest => {
         key: 'Domain',
         value: a_hostname(),
         priority: chance.integer({ min: 0 }),
+        origin: a_simple_url(),
+    };
+};
+
+export const an_update_request_body = (): UpdateRequest => {
+    return {
+        key: 'Domain',
+        value: a_hostname(),
+        priority: new Chance().integer({ min: 0 }),
         origin: a_simple_url(),
     };
 };

@@ -19,7 +19,7 @@ export const handler = async (
         const { domain, subdomain } = parse(request.origin.custom.domainName);
         const pathname = getPathnameSegment(request.uri);
         const queryStrings = getQueryStrings(request.querystring);
-        console.log('jest-', subdomain, domain, pathname, queryStrings);
+
         const origin = await action(process.env.DSI_ROUTING_SPLIT_TABLE, domain, subdomain, pathname, queryStrings);
         if (!origin) {
             return createFailureRedirectResponse();
