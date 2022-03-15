@@ -33,7 +33,6 @@ describe('When an api user', () => {
     });
 
     it('calls update with valid fields', async () => {
-        console.log('update test valid', addRequest.value);
         await when.we_invoke_add(addRequest);
 
         const expectedResponse = { statusCode: 200 };

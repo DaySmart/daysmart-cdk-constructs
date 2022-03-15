@@ -19,20 +19,20 @@ describe('When an entity', () => {
     beforeEach(() => {
         request = given.a_getOrigin_event();
     });
-    it('calls get-origin with no domainName', async () => {
+    it('calls getOrigin with no domainName', async () => {
         request.Records[0].cf.request.origin.custom.domainName = undefined;
         const response = await when.we_invoke_getOrigin(request);
 
         expect(response).toStrictEqual(failure);
     });
 
-    it('calls get-origin with invalid url', async () => {
+    it('calls getOrigin with invalid url', async () => {
         request.Records[0].cf.request.origin.custom.domainName = 'sdffdsfs';
         const response = await when.we_invoke_getOrigin(request);
 
         expect(response).toStrictEqual(failure);
     });
-    it('calls get-origin with no request', async () => {
+    it('calls getOrigin with no request', async () => {
         const response = await when.we_invoke_getOrigin(undefined);
 
         expect(response).toStrictEqual(failure);

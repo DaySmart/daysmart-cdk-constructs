@@ -9,6 +9,7 @@ import { Request as DeleteRequest } from '../../src/delete/request';
 import { Request as UpdateRequest } from '../../src/update/request';
 
 export const we_invoke_add = async (body: AddRequest) => {
+    console.log('add - body', body);
     const addEvent: any = {
         body: JSON.stringify(body),
     };
