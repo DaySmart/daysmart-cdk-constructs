@@ -13,6 +13,7 @@ export interface CdkApiGatewayDomainProps {
   restApiId: string;
   basePath: string;
   stageName?: string;
+  appName?: string;
 }
 
 export class CdkApiGatewayDomain extends cdk.Construct {
@@ -28,9 +29,11 @@ export class CdkApiGatewayDomain extends cdk.Construct {
 
     const stageName = props.stageName || props.dynamicEnv || props.baseEnv;
 
+    const appName = props.appName || "api"
+
     if (props.dynamicEnv) {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
-        domainName: (props.baseEnv == 'prod') ? `${props.dynamicEnv}-api.${props.project}.${props.companyDomainName}`: `${props.dynamicEnv}-api.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
+        domainName: (props.baseEnv == 'prod') ? `${props.dynamicEnv}-${appName}.${props.project}.${props.companyDomainName}`: `${props.dynamicEnv}-${appName}.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
         certificate: acm.Certificate.fromCertificateArn(this, "Certificate", `${props.certificateArn}`),
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
@@ -54,7 +57,7 @@ export class CdkApiGatewayDomain extends cdk.Construct {
       });
     } else {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
-        domainName: (props.baseEnv == "prod") ? `api.${props.project}.${props.companyDomainName}` : `api.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
+        domainName: (props.baseEnv == "prod") ? `${appName}.${props.project}.${props.companyDomainName}` : `${appName}.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
         certificate: acm.Certificate.fromCertificateArn(this, "Certificate", `${props.certificateArn}`),
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
