@@ -9,8 +9,8 @@ if (process.env.DSI_PARAMETER_NAME && process.env.DSI_PARAMETER_NAME.includes('s
 
 // prevent lambdas from logging to jest
 global.console = {
-    //log: jest.fn(),
-    log: console.log, //Uncomment for debugging purposes
+    log: jest.fn(),
+    //log: console.log, //Uncomment for debugging purposes
     error: jest.fn(),
     //error: console.error, //Uncomment for debugging purposes
     warn: jest.fn(),

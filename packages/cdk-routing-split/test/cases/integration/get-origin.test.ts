@@ -5,22 +5,23 @@ import { DomainData, getDomainData, getPathnameSegment } from '../../../src/shar
 import { Request as AddRequest } from '../../../src/add/request';
 import { CloudFrontRequestEvent } from 'aws-lambda';
 
-let addRequest: AddRequest;
-let domainData: DomainData;
-let url: string;
-let originRequest: CloudFrontRequestEvent;
-beforeEach(() => {
-    url = given.a_complex_url(true);
-    addRequest = given.an_add_request_body();
-    domainData = getDomainData(url);
-    originRequest = given.a_getOrigin_event();
-    originRequest.Records[0].cf.request.origin.custom.domainName = `${domainData.subdomain}${domainData.subdomain ? '.' : ''}${
-        domainData.domain
-    }`;
-    originRequest.Records[0].cf.request.querystring = domainData.queryStrings.join('&');
-    originRequest.Records[0].cf.request.uri = domainData.pathname;
-});
 describe('When an entity', () => {
+    let addRequest: AddRequest;
+    let domainData: DomainData;
+    let url: string;
+    let originRequest: CloudFrontRequestEvent;
+    beforeEach(() => {
+        url = given.a_complex_url(true);
+        addRequest = given.an_add_request_body();
+        domainData = getDomainData(url);
+        originRequest = given.a_getOrigin_event();
+        originRequest.Records[0].cf.request.origin.custom.domainName = `${domainData.subdomain}${domainData.subdomain ? '.' : ''}${
+            domainData.domain
+        }`;
+        originRequest.Records[0].cf.request.querystring = domainData.queryStrings.join('&');
+        originRequest.Records[0].cf.request.uri = domainData.pathname;
+    });
+
     it('calls getOrigin with a valid url with a subdomain', async () => {
         addRequest.key = UrlSegment.Subdomain;
         addRequest.value = domainData.subdomain;
@@ -159,7 +160,7 @@ describe('When an entity', () => {
         } as AddRequest;
         await when.we_invoke_add(subdomainRequest);
 
-        const origin = pathRequest.origin;
+        const origin = domainRequest.origin;
 
         const response = await when.we_invoke_getOrigin(originRequest);
         const success = {

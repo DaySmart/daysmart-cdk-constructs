@@ -37,5 +37,5 @@ export const action = async (
     };
     const batchResponse = await dynamo.batchGet(input).promise();
     const response = batchResponse.Responses[tableName];
-    return response.sort((a, b) => +b.Priority - +a.Priority)[0]?.Origin;
+    return response.sort((a, b) => +a.Priority - +b.Priority)[0]?.Origin;
 };
