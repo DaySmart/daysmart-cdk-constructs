@@ -8,7 +8,7 @@ import { CloudFrontRequest, CloudFrontRequestEvent } from 'aws-lambda';
 const chance = new Chance();
 export const an_add_request_body = (): AddRequest => {
     return {
-        key: 'Domain',
+        key: UrlSegment.Domain,
         value: a_hostname(),
         priority: chance.integer({ min: 0 }),
         origin: a_simple_url(),
@@ -17,14 +17,14 @@ export const an_add_request_body = (): AddRequest => {
 
 export const an_update_request_body = (): UpdateRequest => {
     return {
-        key: 'Domain',
+        key: UrlSegment.Domain,
         value: a_hostname(),
         priority: new Chance().integer({ min: 0 }),
         origin: a_simple_url(),
     };
 };
 
-export const get_delete_request_body = (): DeleteRequest => {
+export const a_delete_request_body = (): DeleteRequest => {
     return {
         key: UrlSegment.Domain,
         value: a_hostname(),

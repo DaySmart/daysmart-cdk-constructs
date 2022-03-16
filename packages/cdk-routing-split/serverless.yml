@@ -21,7 +21,7 @@ provider:
     region: us-east-1
     stage: ${opt:stage, "sandbox"}
     timeout: 120
-    memorySize: 192
+    memorySize: 128
     apiGateway:
         shouldStartNameWithService: true
     tracing:
@@ -37,10 +37,8 @@ provider:
             statements:
                 - Effect: 'Allow'
                   Action:
-                      - 'dynamodb:GetItem'
                       - 'dynamodb:PutItem'
                       - 'dynamodb:UpdateItem'
-                      - 'dynamodb:Query'
                       - 'dynamodb:DeleteItem'
                       - 'dynamodb:BatchGetItem'
                   Resource:

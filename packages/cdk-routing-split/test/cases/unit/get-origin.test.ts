@@ -4,6 +4,10 @@ import { CloudFrontRequestEvent } from 'aws-lambda';
 
 describe('When an entity', () => {
     let request: CloudFrontRequestEvent;
+    beforeEach(() => {
+        request = given.a_getOrigin_event();
+    });
+
     const failure = {
         headers: {
             location: [
@@ -16,9 +20,7 @@ describe('When an entity', () => {
         status: '404',
         statusDescription: 'Not Found',
     };
-    beforeEach(() => {
-        request = given.a_getOrigin_event();
-    });
+
     it('calls getOrigin with no domainName', async () => {
         request.Records[0].cf.request.origin.custom.domainName = undefined;
         const response = await when.we_invoke_getOrigin(request);
@@ -32,6 +34,7 @@ describe('When an entity', () => {
 
         expect(response).toStrictEqual(failure);
     });
+
     it('calls getOrigin with no request', async () => {
         const response = await when.we_invoke_getOrigin(undefined);
 
