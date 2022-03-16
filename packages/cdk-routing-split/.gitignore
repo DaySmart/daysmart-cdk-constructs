@@ -1,4 +1,5 @@
 dist
+dist-testing
 lib/*.js
 *.d.ts
 node_modules

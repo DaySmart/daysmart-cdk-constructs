@@ -14,7 +14,6 @@ module.exports = () => {
     fs.unlink(envPath, (err) => {
         if (err && !err.message.includes('no such file or directory')) {
             console.error(err);
-            return;
         }
     });
 };
