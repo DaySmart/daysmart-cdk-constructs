@@ -13,6 +13,7 @@ export interface CdkEcsTaskDefinitionProps {
   memoryUnits: string;
   cpuUnits: string;
   isFargate?: string;
+  containerPort?: string;
 }
 
 export class CdkEcsTaskDefinition extends cdk.Construct {
@@ -27,7 +28,7 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
     if (props.isFargate) {
       portMappings = [
         {
-          containerPort: 80,
+          containerPort: (props.containerPort) ? parseInt(props.containerPort) : 80,
           protocol: ecs.Protocol.TCP
         }
       ];
@@ -44,7 +45,7 @@ export class CdkEcsTaskDefinition extends cdk.Construct {
     } else {
       portMappings = [
         {
-          containerPort: 80,
+          containerPort: (props.containerPort) ? parseInt(props.containerPort) : 80,
           hostPort: 0,
           protocol: ecs.Protocol.TCP
         }
