@@ -6,7 +6,6 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as route53 from "@aws-cdk/aws-route53";
-import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
 
 export interface CdkEcsNlbProps {
   clusterName: string;
@@ -40,7 +39,7 @@ export class CdkEcsNlb extends cdk.Construct {
     let listenerOutput: cdk.CfnOutput;
     let taskDefinition: ecs.TaskDefinition;
     let portMappings: ecs.PortMapping[];
-    let albTargetGroup2: elbv2.TargetGroupBase;
+    let nlbTargetGroup2: elbv2.TargetGroupBase;
     const healthyHttpCodes = '200-399';
 
     const vpc = ec2.Vpc.fromLookup(this, "VPC", { vpcId: props.vpcId });
@@ -85,7 +84,7 @@ export class CdkEcsNlb extends cdk.Construct {
       //---------------------------------------------------------------------------------------------------
       const healthyHttpCodes = '200-399';
 
-      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
+      nlbTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
         port: props.targetGroupPort ? parseInt(props.targetGroupPort) : 443,
         protocol: elbv2.Protocol.TCP,
         preserveClientIp: true,
@@ -122,7 +121,7 @@ export class CdkEcsNlb extends cdk.Construct {
       );
       //---------------------------------------------------------------------------------------------------
 
-      albTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
+      nlbTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
         port: props.targetGroupPort ? parseInt(props.targetGroupPort) : 443,
         protocol: elbv2.Protocol.TCP,
         preserveClientIp: true,
