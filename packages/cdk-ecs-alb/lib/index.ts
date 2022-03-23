@@ -75,7 +75,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
+                targetGroupName: `${props.stage}-${props.appName}-TG2`,
                 targetType: elbv2.TargetType.IP,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -107,7 +107,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TargetGroup2`,
+                targetGroupName: `${props.stage}-${props.appName}-TG2`,
                 targetType: elbv2.TargetType.INSTANCE,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
