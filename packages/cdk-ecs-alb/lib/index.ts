@@ -75,7 +75,6 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TG2`,
                 targetType: elbv2.TargetType.IP,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -107,7 +106,6 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TG2`,
                 targetType: elbv2.TargetType.INSTANCE,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -264,10 +262,16 @@ export class CdkEcsAlb extends cdk.Construct {
 
         ecsServiceOutput.overrideLogicalId("ServiceName");
 
-        const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
+        const targetGroup1 = new cdk.CfnOutput(this, "TargetGroup1Name", {
             value: applicationLoadBalancedService.targetGroup.targetGroupName
         });
 
-        targetGroup.overrideLogicalId("TargetGroupName");
+        targetGroup1.overrideLogicalId("TargetGroup1Name");
+
+        const targetGroup2 = new cdk.CfnOutput(this, "TargetGroup2Name", {
+            value: albTargetGroup2.targetGroupName
+        });
+
+        targetGroup2.overrideLogicalId("TargetGroup2Name");
     }
 }

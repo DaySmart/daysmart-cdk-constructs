@@ -258,10 +258,16 @@ export class CdkEcsNlb extends cdk.Construct {
 
     ecsServiceOutput.overrideLogicalId("ServiceName");
 
-    const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
+    const targetGroup1 = new cdk.CfnOutput(this, "TargetGroup1Name", {
       value: networkLoadBalancedService.targetGroup.targetGroupName
     });
 
-    targetGroup.overrideLogicalId("TargetGroupName");
+    targetGroup1.overrideLogicalId("TargetGroup1Name");
+
+    const targetGroup2 = new cdk.CfnOutput(this, "TargetGroup2Name", {
+      value: nlbTargetGroup2.targetGroupName
+    });
+
+    targetGroup2.overrideLogicalId("TargetGroup2Name");
   }
 }
