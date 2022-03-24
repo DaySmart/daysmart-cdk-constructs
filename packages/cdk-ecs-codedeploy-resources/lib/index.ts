@@ -161,7 +161,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
                   name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: `${props.targetGroup2Name}`
                 }
               ]
             }
