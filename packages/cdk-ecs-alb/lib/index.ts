@@ -22,6 +22,7 @@ export interface CdkEcsAlbProps {
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string;
     isFargate?: string;
+    legacyTargetGroupName?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -75,6 +76,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+                targetGroupName: (props.legacyTargetGroupName) ? `${props.stage}-${props.appName}-TargetGroup2` : undefined,
                 targetType: elbv2.TargetType.IP,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -106,6 +108,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
+                targetGroupName: (props.legacyTargetGroupName) ? `${props.stage}-${props.appName}-TargetGroup2` : undefined,
                 targetType: elbv2.TargetType.INSTANCE,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -261,6 +264,12 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         ecsServiceOutput.overrideLogicalId("ServiceName");
+
+        const targetGroup = new cdk.CfnOutput(this, "TargetGroupName", {
+            value: applicationLoadBalancedService.targetGroup.targetGroupName
+        });
+
+        targetGroup.overrideLogicalId("TargetGroupName");
 
         const targetGroup1 = new cdk.CfnOutput(this, "TargetGroup1Name", {
             value: applicationLoadBalancedService.targetGroup.targetGroupName
