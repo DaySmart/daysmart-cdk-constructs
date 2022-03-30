@@ -23,6 +23,7 @@ export interface CdkEcsAlbProps {
     hostedZoneDomainName?: string;
     isFargate?: string;
     legacyTargetGroupName?: string;
+    legacyLoadBalancerName?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -154,7 +155,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
                     redirectHTTP: true,
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -172,7 +173,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
                     redirectHTTP: true,
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
 
@@ -192,7 +193,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
                     },
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -203,7 +204,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
                     },
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
 
