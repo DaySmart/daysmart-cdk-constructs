@@ -17,6 +17,7 @@ export interface CdkEcsCodedeployResourcesProps {
   commitHash: string;
   deployBucket: string;
   taskDefinitionVersion?: string;
+  taskDefinitionArn?: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -43,7 +44,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           TargetService: {
             Type: "AWS::ECS::Service",
             Properties: {
-              TaskDefinition: (props.taskDefinitionVersion) ? `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}:${props.taskDefinitionVersion}` : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
+              TaskDefinition: (props.taskDefinitionArn) ? props.taskDefinitionArn : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
               LoadBalancerInfo: {
                 ContainerName: "Container",
                 ContainerPort: 80
