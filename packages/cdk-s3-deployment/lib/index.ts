@@ -13,6 +13,7 @@ export interface CdkS3DeploymentProps {
   distributionDomain: string;
   sourceDir?: string;
   distributionPath?: string;
+  invalidationPath?: string;
   environment: string;
   snsTopicArn: string;
 }
@@ -77,7 +78,7 @@ export class CdkS3Deployment extends cdk.Construct {
         DestinationBucketName: bucket.bucketName,
         DestinationBucketKeyPrefix: destinationPrefix,
         DistributionId: distribution.distributionId,
-        DistributionPaths: [props.distributionPath ? `${props.distributionPath}/*` : '/*'],
+        DistributionPaths: [props.invalidationPath ? props.invalidationPath : '/*'],
         Environment: props.environment,
         SnsTopicArn: props.snsTopicArn
       }
