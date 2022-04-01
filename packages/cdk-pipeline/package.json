@@ -7,7 +7,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "lint": "eslint --ext .js,.ts."
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.108.0",
