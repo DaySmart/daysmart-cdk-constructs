@@ -13,7 +13,9 @@ export interface CdkEcsCodedeployResourcesProps {
   serviceName: string;
   appName: string;
   listenerArn: string;
-  targetGroupName: string;
+  legacyTargetGroupName?: string;
+  targetGroup1Name: string;
+  targetGroup2Name?: string;
   commitHash: string;
   deployBucket: string;
   taskDefinitionVersion?: string;
@@ -157,10 +159,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }
@@ -213,10 +215,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }
