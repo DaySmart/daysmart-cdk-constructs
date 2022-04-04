@@ -18,7 +18,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "lint": "eslint --ext .js,.ts."
+    "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.95.1",
