@@ -1,0 +1,7 @@
+functions:
+    update:
+        handler: dist/update/handler.handler
+        events:
+            - http:
+                  path: records/update
+                  method: POST

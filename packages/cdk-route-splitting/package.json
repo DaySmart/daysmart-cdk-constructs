@@ -1,0 +1,52 @@
+{
+  "name": "@daysmart/cdk-route-splitting",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.app.json",
+    "watch": "tsc -p tsconfig.app.json -w",
+    "lint": "eslint **/*.ts --ignore-path .gitignore",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:all": "npm run lint && npm run prettier:check",
+    "lint:fixAll": "npm run lint:fix && npm run prettier:fix",
+    "lint:staged": "lint-staged",
+    "prettier": "prettier -c --ignore-path .prettierignore \"**\" --ignore-unknown",
+    "prettier:fix": "prettier --write --ignore-path .prettierignore \"**\" --ignore-unknown",
+    "package": "npm run build && serverless package --stage sandbox"
+  },
+  "devDependencies": {
+    "@aws-cdk/assertions": "1.149.0",
+    "@types/aws-lambda": "^8.10.93",
+    "@types/chance": "^1.1.3",
+    "@types/jest": "^26.0.10",
+    "@types/mysql": "^2.15.21",
+    "@types/node": "10.17.27",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "aws-sdk": "^2.1106.0",
+    "chance": "^1.1.8",
+    "constructs": "^10.0.105",
+    "eslint": "^8.12.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "jest": "^26.4.2",
+    "prettier": "^2.6.2",
+    "ts-jest": "^26.2.0",
+    "typescript": "~3.9.7"
+  },
+  "peerDependencies": {
+    "@aws-cdk/core": "1.149.0",
+    "constructs": "^10.0.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-cloudfront": "^1.149.0",
+    "@aws-cdk/aws-cloudfront-origins": "^1.149.0",
+    "@aws-cdk/aws-dynamodb": "^1.149.0",
+    "@aws-cdk/aws-lambda": "^1.149.0",
+    "@aws-cdk/core": "1.149.0",
+    "@daysmart/aws-lambda-logger": "^0.0.6",
+    "tldts": "^5.7.74"
+  }
+}

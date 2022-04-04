@@ -1,0 +1,7 @@
+functions:
+    add:
+        handler: dist/add/handler.add
+        events:
+            - http:
+                  path: records/add
+                  method: POST
