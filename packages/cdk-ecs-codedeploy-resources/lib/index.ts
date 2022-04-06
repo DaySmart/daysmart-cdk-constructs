@@ -13,10 +13,13 @@ export interface CdkEcsCodedeployResourcesProps {
   serviceName: string;
   appName: string;
   listenerArn: string;
-  targetGroupName: string;
+  legacyTargetGroupName?: string;
+  targetGroup1Name: string;
+  targetGroup2Name?: string;
   commitHash: string;
   deployBucket: string;
   taskDefinitionVersion?: string;
+  taskDefinitionArn?: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -43,7 +46,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           TargetService: {
             Type: "AWS::ECS::Service",
             Properties: {
-              TaskDefinition: (props.taskDefinitionVersion) ? `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}:${props.taskDefinitionVersion}` : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
+              TaskDefinition: (props.taskDefinitionArn) ? props.taskDefinitionArn : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
               LoadBalancerInfo: {
                 ContainerName: "Container",
                 ContainerPort: 80
@@ -157,10 +160,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }
@@ -213,10 +216,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }

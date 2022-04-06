@@ -22,6 +22,8 @@ export interface CdkEcsAlbProps {
     serviceDnsRecord?: string;
     hostedZoneDomainName?: string;
     isFargate?: string;
+    legacyTargetGroupName?: string;
+    legacyLoadBalancerName?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -75,7 +77,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TG2`,
+                targetGroupName: (props.legacyTargetGroupName) ? `${props.stage}-${props.appName}-TargetGroup2` : undefined,
                 targetType: elbv2.TargetType.IP,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -107,7 +109,7 @@ export class CdkEcsAlb extends cdk.Construct {
             );
             //---------------------------------------------------------------------------------------------------
             albTargetGroup2 = new elbv2.ApplicationTargetGroup(this, `ApplicationLoadBalancerTargetGroup2`, {
-                targetGroupName: `${props.stage}-${props.appName}-TG2`,
+                targetGroupName: (props.legacyTargetGroupName) ? `${props.stage}-${props.appName}-TargetGroup2` : undefined,
                 targetType: elbv2.TargetType.INSTANCE,
                 protocol: elbv2.ApplicationProtocol.HTTP,
                 healthCheck: {
@@ -153,7 +155,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
                     redirectHTTP: true,
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -171,7 +173,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
                     redirectHTTP: true,
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
 
@@ -191,7 +193,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
                     },
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -202,7 +204,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
                     },
-                    loadBalancerName: `${props.stage}-${props.appName}-ecs-alb`
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
 
@@ -269,5 +271,17 @@ export class CdkEcsAlb extends cdk.Construct {
         });
 
         targetGroup.overrideLogicalId("TargetGroupName");
+
+        const targetGroup1 = new cdk.CfnOutput(this, "TargetGroup1Name", {
+            value: applicationLoadBalancedService.targetGroup.targetGroupName
+        });
+
+        targetGroup1.overrideLogicalId("TargetGroup1Name");
+
+        const targetGroup2 = new cdk.CfnOutput(this, "TargetGroup2Name", {
+            value: albTargetGroup2.targetGroupName
+        });
+
+        targetGroup2.overrideLogicalId("TargetGroup2Name");
     }
 }
