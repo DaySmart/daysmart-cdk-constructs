@@ -397,3 +397,16 @@ jobs:
         working-directory: packages/cdk-static-website
         env:
           NODE_AUTH_TOKEN: ${{ secrets. NPM_TOKEN }}
+  
+  Slack-on-failure:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send slack message
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: platform-alerts
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: 'Workflow was, ${{ job.status }}' 
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
