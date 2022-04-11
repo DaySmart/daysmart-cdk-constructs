@@ -14,7 +14,7 @@ export interface CdkEcsNlbProps {
   securityGroupId: string;
   taskDefinitionArn: string;
   stage: string;
-  healthCheckPath: string;
+  healthCheckPath?: string;
   repositoryName: string;
   tag?: string;
   certificateArn: string;
