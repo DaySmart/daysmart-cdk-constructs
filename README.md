@@ -2,7 +2,7 @@
 
 ## When Adding a New Construct
 
-If a new construct is added, make sure to linting to it.  A quick guide for adding ESLint can be found [here.](https://blog.logrocket.com/linting-typescript-using-eslint-and-prettier/) 
+If a new construct is added, make sure to add linting to it.  A quick guide for adding ESLint can be found [here.](https://blog.logrocket.com/linting-typescript-using-eslint-and-prettier/) 
 
 Dependabot then must be updated to have it get access to your package.json and update dependencies.  When adding it to the dependabot script, please keep it in order of where it lies in the constructs.  Simply copy and paste the four lines of code for dependabot, and change the directory to yours.  
 
