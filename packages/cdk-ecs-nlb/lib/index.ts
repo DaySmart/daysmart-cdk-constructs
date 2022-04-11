@@ -91,6 +91,7 @@ export class CdkEcsNlb extends cdk.Construct {
         targetType: elbv2.TargetType.IP,
         deregistrationDelay: props.stage.includes("prod") ? cdk.Duration.seconds(30) : undefined,
         healthCheck: {
+          port: props.targetGroupPort ? props.targetGroupPort : "443",
           path: props.healthCheckPath,
           healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
           unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
