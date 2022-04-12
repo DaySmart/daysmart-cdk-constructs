@@ -1,0 +1,8 @@
+{
+  "include": ["lib/index.ts"],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+      "outDir": "./dist" /* Redirect output structure to the directory. */,
+      "rootDir": "./lib" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+  }
+}

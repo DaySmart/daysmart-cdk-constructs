@@ -5,10 +5,8 @@ import { HttpOrigin } from '@aws-cdk/aws-cloudfront-origins';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 
 export interface CdkRouteSplittingProps {
-  // Define construct properties here
   runtime: string;
   originSourceDomain: string;
-  tableName: string;
   appName: string;
   partitionKey: string;
   stage: string;
@@ -23,7 +21,7 @@ export class CdkRouteSplitting extends cdk.Construct {
     let originSourceDomain = new HttpOrigin(props.originSourceDomain);
 
       if (props.stage !== 'prod') {
-          originSourceDomain = new HttpOrigin(`${props.stage} - ${props.originSourceDomain}`);
+          originSourceDomain = new HttpOrigin(`${props.stage}-${props.originSourceDomain}`);
       }
 
     new lambda.Function(this, `${props.stage}-${props.appName}-add-index`, {

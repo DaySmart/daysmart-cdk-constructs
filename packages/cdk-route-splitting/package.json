@@ -5,6 +5,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.app.json",
+    "build:lib": "tsc -p tsconfig.lib.json",
     "watch": "tsc -p tsconfig.app.json -w",
     "lint": "eslint **/*.ts --ignore-path .gitignore",
     "lint:fix": "npm run lint -- --fix",
