@@ -95,3 +95,18 @@ resources:
                 DomainName: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
                 RestApiId: { 'Ref': 'ApiGatewayRestApi' }
                 Stage: ${self:provider.stage}
+        DNSRecord:
+            Type: AWS::Route53::RecordSetGroup
+            Properties:
+                HostedZoneName: ${self:custom.config.HOST_DOMAIN}.
+                RecordSets:
+                    - Name: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
+                      Type: A
+                      AliasTarget:
+                          HostedZoneId: !GetAtt domainName.DistributionHostedZoneId
+                          DNSName: !GetAtt domainName.DistributionDomainName
+                    - Name: ${self:custom.config.API_GATEWAY_SUB_DOMAIN}.${self:custom.config.HOST_DOMAIN}
+                      Type: AAAA
+                      AliasTarget:
+                          HostedZoneId: !GetAtt domainName.DistributionHostedZoneId
+                          DNSName: !GetAtt domainName.DistributionDomainName
