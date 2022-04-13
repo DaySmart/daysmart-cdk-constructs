@@ -63,7 +63,6 @@ export class CdkEcsNlb extends cdk.Construct {
       securityGroups: [securityGroup],
     });
 
-
     if (props.isFargate) {
       portMappings = [
         {
@@ -206,7 +205,7 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443,                                                         
+          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443                                                         
         });
       } else {
         networkLoadBalancedService = new ecspattern.NetworkLoadBalancedEc2Service(this, "NetworkLB EC2 Service", {
@@ -217,8 +216,7 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443, 
-          
+          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443          
         });        
       }
 
@@ -276,10 +274,5 @@ export class CdkEcsNlb extends cdk.Construct {
     });
 
     targetGroup2.overrideLogicalId("TargetGroup2Name");
-
-    networkLoadBalancedService.listener.addTargets('ApplicationFleet', {
-      port: 8082,
-      targets: []
-    });
   }
 }

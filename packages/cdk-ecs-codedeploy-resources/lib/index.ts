@@ -20,6 +20,7 @@ export interface CdkEcsCodedeployResourcesProps {
   deployBucket: string;
   taskDefinitionVersion?: string;
   taskDefinitionArn?: string;
+  containerPort?: string;
 }
 
 export class CdkEcsCodedeployResources extends cdk.Construct {
@@ -49,7 +50,7 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               TaskDefinition: (props.taskDefinitionArn) ? props.taskDefinitionArn : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
               LoadBalancerInfo: {
                 ContainerName: "Container",
-                ContainerPort: 80
+                ContainerPort: (props.containerPort) ? parseInt(props.containerPort) : 80,
               }
             }
           }
