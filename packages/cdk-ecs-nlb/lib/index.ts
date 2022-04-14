@@ -14,7 +14,7 @@ export interface CdkEcsNlbProps {
   securityGroupId: string;
   taskDefinitionArn: string;
   stage: string;
-  healthCheckPath: string;
+  healthCheckPath?: string;
   repositoryName: string;
   tag?: string;
   certificateArn: string;
@@ -29,6 +29,7 @@ export interface CdkEcsNlbProps {
   healthyHttpCodes?: string;
   healthCheckTimeout?: string;
   containerPort?: string;
+  securityGroupIngressPort?: string;
 }
 
 export class CdkEcsNlb extends cdk.Construct {
@@ -62,11 +63,14 @@ export class CdkEcsNlb extends cdk.Construct {
       securityGroups: [securityGroup],
     });
 
-
     if (props.isFargate) {
       portMappings = [
         {
           containerPort: (props.containerPort) ? parseInt(props.containerPort) : 443,
+          protocol: ecs.Protocol.TCP
+        },
+        {
+          containerPort: 80,
           protocol: ecs.Protocol.TCP
         }
       ];
@@ -84,13 +88,14 @@ export class CdkEcsNlb extends cdk.Construct {
       //---------------------------------------------------------------------------------------------------
       const healthyHttpCodes = '200-399';
 
-      nlbTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {
+      nlbTargetGroup2 = new elbv2.NetworkTargetGroup(this, `NetworkLoadBalancerTargetGroup2`, {        
         port: props.targetGroupPort ? parseInt(props.targetGroupPort) : 443,
         protocol: elbv2.Protocol.TCP,
         preserveClientIp: true,
         targetType: elbv2.TargetType.IP,
         deregistrationDelay: props.stage.includes("prod") ? cdk.Duration.seconds(30) : undefined,
         healthCheck: {
+          port: props.targetGroupPort ? props.targetGroupPort : "443",
           path: props.healthCheckPath,
           healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
           unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
@@ -98,13 +103,18 @@ export class CdkEcsNlb extends cdk.Construct {
           timeout: props.healthCheckTimeout ? cdk.Duration.seconds(parseInt(props.healthCheckTimeout)) : cdk.Duration.seconds(10),
           protocol: (props.healthCheckProtocol == "https") ? elbv2.Protocol.HTTPS : elbv2.Protocol.TCP,
           healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes
-        },
-        vpc: vpc
+        },        
+        vpc: vpc      
       });
     } else {
       portMappings = [
         {
           containerPort: (props.containerPort) ? parseInt(props.containerPort) : 443,
+          hostPort: 0,
+          protocol: ecs.Protocol.TCP
+        },
+        {
+          containerPort: 80,
           hostPort: 0,
           protocol: ecs.Protocol.TCP
         }
@@ -204,7 +214,7 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443
+          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443                                                         
         });
       } else {
         networkLoadBalancedService = new ecspattern.NetworkLoadBalancedEc2Service(this, "NetworkLB EC2 Service", {
@@ -215,8 +225,8 @@ export class CdkEcsNlb extends cdk.Construct {
           deploymentController: {
             type: ecs.DeploymentControllerType.CODE_DEPLOY
           },
-          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443
-        });
+          listenerPort: (props.containerPort) ? parseInt(props.containerPort) : 443          
+        });        
       }
 
       listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
@@ -224,19 +234,23 @@ export class CdkEcsNlb extends cdk.Construct {
       });
 
       listenerOutput.overrideLogicalId("ListenerARN");
+    }    
+    
+    if (props.securityGroupIngressPort) {
+      networkLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(parseInt(props.securityGroupIngressPort)));  
+    } else {
+      networkLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
     }
 
-    networkLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
-
     networkLoadBalancedService.targetGroup.configureHealthCheck({
-      port: (props.containerPort) ? props.containerPort : "443",
+      port: props.containerPort ? props.containerPort : "443",
       path: props.healthCheckPath,
       healthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
       unhealthyThresholdCount: props.healthCheckHealthyThreshold ? parseInt(props.healthCheckHealthyThreshold) : 3,
       interval: props.healthCheckInterval ? cdk.Duration.seconds(parseInt(props.healthCheckInterval)) : cdk.Duration.seconds(30),
       timeout: props.healthCheckTimeout ? cdk.Duration.seconds(parseInt(props.healthCheckTimeout)) : cdk.Duration.seconds(10),
       protocol: (props.healthCheckProtocol == "https") ? elbv2.Protocol.HTTPS : elbv2.Protocol.TCP,
-      healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes
+      healthyHttpCodes: (props.healthCheckProtocol == "https") ? healthyHttpCodes : props.healthyHttpCodes            
     });
 
     const scalableTarget = networkLoadBalancedService.service.autoScaleTaskCount({
