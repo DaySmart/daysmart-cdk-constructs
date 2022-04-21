@@ -7,6 +7,7 @@ import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as route53 from "@aws-cdk/aws-route53";
 import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
+//import { EnableVpnGatewayOptions } from "@aws-cdk/aws-ec2";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -24,6 +25,8 @@ export interface CdkEcsAlbProps {
     isFargate?: string;
     legacyTargetGroupName?: string;
     legacyLoadBalancerName?: string;
+    publicFacing?: boolean;
+    redirectHTTP?: boolean;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -56,6 +59,13 @@ export class CdkEcsAlb extends cdk.Construct {
             securityGroups: [securityGroup],
         });
 
+        if (props.redirectHTTP === undefined) {            
+            props.redirectHTTP = true;
+        }
+        
+        if (props.publicFacing === undefined) {        
+            props.publicFacing = true;
+        }
 
         if (props.isFargate) {
             portMappings = [
@@ -104,7 +114,7 @@ export class CdkEcsAlb extends cdk.Construct {
                 "TaskDefinition",
                 {
                     networkMode: ecs.NetworkMode.NAT,
-                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
+                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`                    
                 }
             );
             //---------------------------------------------------------------------------------------------------
@@ -154,8 +164,8 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainName: props.serviceDnsRecord,
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-                    redirectHTTP: true,
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
+                    redirectHTTP: true,                    
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined                    
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -172,7 +182,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainName: props.serviceDnsRecord,
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-                    redirectHTTP: true,
+                    redirectHTTP: true,                    
                     loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
@@ -184,17 +194,25 @@ export class CdkEcsAlb extends cdk.Construct {
             listenerOutput.overrideLogicalId("ListenerARN");
         }
         else {
-            if(props.isFargate){
-                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+
+            const alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+                vpc: vpc,
+                loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
+                internetFacing:  (props.publicFacing) ? true : false,
+                vpcSubnets: (props.publicFacing) ? { subnetType: ec2.SubnetType.PUBLIC, } : { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT, },
+            });
+
+            if(props.isFargate) {     
+                    applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
                     cluster,
                     serviceName: `${props.stage}-${props.appName}`,
                     desiredCount: 1,
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
-                    },
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
-                });
+                    },                                         
+                    loadBalancer: alb
+                });                
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
                     cluster,
@@ -203,38 +221,42 @@ export class CdkEcsAlb extends cdk.Construct {
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
-                    },
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
+                    },                                                                           
+                    loadBalancer: alb
                 });
             }
+            
+            if (!props.redirectHTTP) {
+                const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
 
-            const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
-
-            const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
-                protocol: elbv2.ApplicationProtocol.HTTPS,
-                sslPolicy: SslPolicy.TLS12,
-                port: 443,
-                certificates: [
-                    httpsListenerCertificate
-                ],
-                defaultTargetGroups: [
-                    applicationLoadBalancedService.targetGroup
-                ]
-            });
-
-            applicationLoadBalancedService.listener.addAction("HttpsRedirect", {
-                action: elbv2.ListenerAction.redirect({
-                    protocol: "HTTPS",
-                    host: "#{host}",
-                    port: "443",
-                    path: "/#{path}",
-                    query: "#{query}"
-                })
-            });
-
-            listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
-                value: httpsListener.listenerArn
-            });
+                const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
+                    protocol: elbv2.ApplicationProtocol.HTTPS,
+                    sslPolicy: SslPolicy.TLS12,
+                    port: 443,
+                    certificates: [
+                        httpsListenerCertificate
+                    ],
+                    defaultTargetGroups: [
+                        applicationLoadBalancedService.targetGroup
+                    ]
+                });
+                applicationLoadBalancedService.listener.addAction("HttpsRedirect", {
+                    action: elbv2.ListenerAction.redirect({
+                        protocol: "HTTPS",
+                        host: "#{host}",
+                        port: "443",
+                        path: "/#{path}",
+                        query: "#{query}"
+                    })
+                });
+                listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
+                    value: httpsListener.listenerArn
+                });
+            } else {
+                listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
+                    value: applicationLoadBalancedService.listener.listenerArn
+                });
+            }
 
             listenerOutput.overrideLogicalId("ListenerARN");
         }
