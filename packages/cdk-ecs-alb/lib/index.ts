@@ -7,7 +7,6 @@ import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
 import * as route53 from "@aws-cdk/aws-route53";
 import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
-//import { EnableVpnGatewayOptions } from "@aws-cdk/aws-ec2";
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -25,8 +24,8 @@ export interface CdkEcsAlbProps {
     isFargate?: string;
     legacyTargetGroupName?: string;
     legacyLoadBalancerName?: string;
-    publicFacing?: boolean;
-    redirectHTTP?: boolean;
+    publicFacing?: "true" | "false";    
+    redirectHTTP?: "true" | "false";
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -58,13 +57,13 @@ export class CdkEcsAlb extends cdk.Construct {
             vpc: vpc,
             securityGroups: [securityGroup],
         });
-
+       
         if (props.redirectHTTP === undefined) {            
-            props.redirectHTTP = true;
+            props.redirectHTTP = "true"
         }
-        
-        if (props.publicFacing === undefined) {        
-            props.publicFacing = true;
+                
+        if (props.publicFacing === undefined) {             
+            props.publicFacing  = "true";
         }
 
         if (props.isFargate) {
@@ -193,14 +192,28 @@ export class CdkEcsAlb extends cdk.Construct {
 
             listenerOutput.overrideLogicalId("ListenerARN");
         }
-        else {
-
-            const alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
-                vpc: vpc,
-                loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
-                internetFacing:  (props.publicFacing) ? true : false,
-                vpcSubnets: (props.publicFacing) ? { subnetType: ec2.SubnetType.PUBLIC, } : { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT, },
-            });
+        else {                                
+            let alb: elbv2.ApplicationLoadBalancer            
+            
+            if (props.publicFacing === "true") {                               
+                alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+                    vpc: vpc,
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
+                    internetFacing: true,              
+                    vpcSubnets: { 
+                        subnetType: ec2.SubnetType.PUBLIC, 
+                    }                
+                }); 
+            } else {                
+                alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+                    vpc: vpc,
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
+                    internetFacing: false,              
+                    vpcSubnets: { 
+                        subnetType: ec2.SubnetType.PRIVATE_WITH_NAT, 
+                    }                
+                }); 
+            }
 
             if(props.isFargate) {     
                     applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
