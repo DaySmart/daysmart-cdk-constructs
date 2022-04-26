@@ -242,6 +242,10 @@ export class CdkEcsNlb extends cdk.Construct {
       networkLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
     }
 
+    networkLoadBalancedService.listener.addCertificates("ListenerCertArray", [
+      elbv2.ListenerCertificate.fromCertificateManager(acm.Certificate.fromCertificateArn(this, "SSL Listener Cert", props.certificateArn))
+    ]);
+
     networkLoadBalancedService.targetGroup.configureHealthCheck({
       port: props.containerPort ? props.containerPort : "443",
       path: props.healthCheckPath,
