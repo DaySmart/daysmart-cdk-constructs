@@ -27,6 +27,7 @@ export interface CdkCloudfrontAddS3OriginProps {
   project: string;
   baseEnv: string;
   origins: S3Origin[];
+  responseHeadersPolicyId?: string;
 }
 
 export interface CdkCloudfrontAddHttpOriginProps {
@@ -126,13 +127,19 @@ export class CdkCloudfrontBehavior extends cdk.Construct {
       const originAccessIdentity = cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, `${origin.bucketName.split(".").join("-")}-OriginAccessIdentity`, origin.originAccessIdentity);
 
       this.distribution.addBehavior(origin.path, new origins.S3Origin(codeBucket, {
-        originAccessIdentity: originAccessIdentity
+        originAccessIdentity: originAccessIdentity,
       }),
         {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           cachePolicy: this.s3OriginCachePolicy,
-          originRequestPolicy: this.s3OriginRequestPolicy
+          originRequestPolicy: this.s3OriginRequestPolicy,
+          responseHeadersPolicy: props.responseHeadersPolicyId ? 
+            cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(
+              this, 
+              'HeadersPolicy', 
+              props.responseHeadersPolicyId
+            ) : undefined
         }
       );
     });
