@@ -18,7 +18,6 @@ test('Custom Domain Made', () => {
         baseEnv: 'test'
     });
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2))
     template.hasResourceProperties("AWS::Route53::RecordSet", {
         Name: 'api.test.cdkv2.example.com.'
     });
