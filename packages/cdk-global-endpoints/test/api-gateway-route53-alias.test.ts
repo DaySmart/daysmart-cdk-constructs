@@ -12,13 +12,14 @@ test('Custom Domain Made', () => {
 
     new ApiGatewayDomainRoute53Alias(stack, 'ApiGatewayDomainRoute53Alias', {
         companyDomainName: 'example.com',
-        project: 'CDK V2',
+        project: 'cdkv2',
         customDomainAlias: 'abcdef',
         customDomainHostedZoneId: '123456',
         baseEnv: 'test'
     });
     const template = Template.fromStack(stack);
-    template.hasResourceProperties("AWS::APIGatewayDomain::Route53Alias", {
-        CompanyDomainName: 'example.com'
+    console.log(JSON.stringify(template, null, 2))
+    template.hasResourceProperties("AWS::Route53::RecordSet", {
+        Name: 'api.test.cdkv2.example.com.'
     });
 });

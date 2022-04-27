@@ -11,15 +11,15 @@ test('Custom Domain Made', () => {
     });
 
     new ApiGatewayDomainMultiRegion(stack, 'ApiGatewayDomainMultiRegion', {
-        companyDomainName: 'example.com',
-        project: 'CDK V2',
+        companyDomainName: 'taylor.com',
+        project: 'cdkv2',
         baseEnv: 'test',
         certificateArn: '123456',
         restApiId: 'abcdefg',
         restApiRootResourceId: '987654' 
     });
     const template = Template.fromStack(stack);
-    template.hasResourceProperties("AWS::APIGatewayDomain::MultiRegion", {
-        CompanyDomainName: 'example.com'
+    template.hasResourceProperties("AWS::ApiGateway::DomainName", {
+        DomainName: 'api.test.cdkv2.taylor.com'
     });
 });

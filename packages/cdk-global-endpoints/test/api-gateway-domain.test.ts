@@ -13,14 +13,14 @@ test('Usage plan created', () => {
     new CdkApiGatewayDomain(stack, 'ApiGatewayDomain', {
         companyDomainName: 'example.com',
         companyHostedZoneId: 'example',
-        project: 'CDK v2',
+        project: 'cdkv2',
         baseEnv:  'test',
         certificateArn: '123456',
         restApiId: 'abcdefg',
         basePath: 'test'
     });
     const template = Template.fromStack(stack);
-    template.hasResourceProperties("AWS::APIGateway::Domain", {
-        CompanyDomainName: 'example.com'
+    template.hasResourceProperties("AWS::ApiGateway::DomainName", {
+        DomainName: 'api.test.cdkv2.example.com'
     });
 });
