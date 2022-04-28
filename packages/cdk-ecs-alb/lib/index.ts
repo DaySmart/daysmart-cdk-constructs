@@ -26,6 +26,7 @@ export interface CdkEcsAlbProps {
     legacyLoadBalancerName?: string;
     publicFacing?: "true" | "false";    
     redirectHTTP?: "true" | "false";
+    securityGroupIngressPort?: string;
 }
 
 export class CdkEcsAlb extends cdk.Construct {
@@ -272,6 +273,12 @@ export class CdkEcsAlb extends cdk.Construct {
             }
 
             listenerOutput.overrideLogicalId("ListenerARN");
+        }
+
+        if (props.securityGroupIngressPort) {
+            applicationLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(parseInt(props.securityGroupIngressPort)));  
+        } else {
+            applicationLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
         }
 
         applicationLoadBalancedService.targetGroup.configureHealthCheck({
