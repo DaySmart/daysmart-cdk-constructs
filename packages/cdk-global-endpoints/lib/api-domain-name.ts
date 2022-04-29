@@ -1,5 +1,4 @@
 import * as cdk from 'aws-cdk-lib';
-import { getAliasTarget } from './alias-target';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Construct } from 'constructs';
@@ -14,14 +13,19 @@ export interface ApiGatewayProps {
     basePath?: string;
 }
 
+interface GetAliasTargetProps {
+    companyDomainName: string;
+}
+export function getAliasTarget(props: GetAliasTargetProps) {
+    return  `-api.${props.companyDomainName}` 
+}
+
 export class ApiGateway extends Construct {
     constructor(scope: Construct, id: string, props: ApiGatewayProps) {
         super(scope, id);
 
         const aliasTarget = getAliasTarget({
-            baseEnv: props.baseEnv,
             companyDomainName: props.companyDomainName,
-            project: props.project
         })
         let customDomain: apigw.DomainName;
         let cloudformationBasePathMapping: apigw.CfnBasePathMapping;
