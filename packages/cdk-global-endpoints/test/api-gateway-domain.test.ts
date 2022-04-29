@@ -1,6 +1,7 @@
 import { CdkApiGatewayDomain } from "../lib/api-gateway-domain"
 import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
+import { CfnBasePathMapping } from "aws-cdk-lib/aws-apigateway";
 
 test('Usage plan created', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
@@ -24,3 +25,23 @@ test('Usage plan created', () => {
         DomainName: 'api.test.cdkv2.example.com'
     });
 });
+
+test('Cloudformation Route53 Change', () => {
+    const stack = new cdk.Stack(undefined, 'stack', {
+        env: {
+            account: '987654',
+            region: 'us-east-1'
+        }
+    });
+
+    new CfnBasePathMapping(stack, 'BasePathMapping', {
+        basePath: 'taylor',
+        domainName: 'example.com',
+        restApiId: '123456',
+        stage: 'taylor'
+    });
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties("AWS::ApiGateway::BasePathMapping", {
+        DomainName: 'example.com'
+    })
+})
