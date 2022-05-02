@@ -5,6 +5,7 @@ import { Construct } from 'constructs';
 
 export interface ApiGatewayProps {
     companyDomainName: string;
+    domainName: string;
     project: string;
     baseEnv: string;
     dynamicEnv?: string;
@@ -13,32 +14,22 @@ export interface ApiGatewayProps {
     basePath?: string;
 }
 
-interface GetAliasTargetProps {
-    companyDomainName: string;
-}
-export function getAliasTarget(props: GetAliasTargetProps) {
-    return  `-api.${props.companyDomainName}` 
-}
-
 export class ApiGateway extends Construct {
     constructor(scope: Construct, id: string, props: ApiGatewayProps) {
         super(scope, id);
 
-        const aliasTarget = getAliasTarget({
-            companyDomainName: props.companyDomainName,
-        })
         let customDomain: apigw.DomainName;
         let cloudformationBasePathMapping: apigw.CfnBasePathMapping;
 
         customDomain = new apigw.DomainName(this, 'Custom Domain', {
-            domainName: aliasTarget,
+            domainName: `${props.domainName}`,
             certificate: acm.Certificate.fromCertificateArn(this, "Certificate", `${props.certificateArn}`),
             endpointType: apigw.EndpointType.REGIONAL,
             securityPolicy: apigw.SecurityPolicy.TLS_1_2
         })
 
         cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
-            basePath: '${props.basePath}',
+            basePath: `${props.basePath}`,
             domainName: customDomain.domainName
         })
     };

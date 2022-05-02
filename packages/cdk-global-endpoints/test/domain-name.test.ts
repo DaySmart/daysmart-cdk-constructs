@@ -11,6 +11,7 @@ test('Custom Domain created', () => {
     });
     new ApiGateway(stack, 'ApiGateway', {
         companyDomainName: 'example.com',
+        domainName: 'example',
         project: 'cdkv2',
         baseEnv:  'test',
         certificateArn: '123456',
@@ -18,8 +19,7 @@ test('Custom Domain created', () => {
         basePath: 'test'
     });
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2))
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
-        DomainName: 'api.test.cdkv2.example.com'
+        DomainName: 'example'
     });
 });
