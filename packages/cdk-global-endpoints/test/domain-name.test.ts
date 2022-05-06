@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
-import { ApiGateway } from "../lib/api-domain-name"
+import { CustomDomain } from "../lib/api-domain-name"
 import { Template } from "aws-cdk-lib/assertions"
+import { BasePathMapping } from 'aws-cdk-lib/aws-apigateway';
 
 test('Custom Domain created', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
@@ -9,17 +10,30 @@ test('Custom Domain created', () => {
             region: 'us-east-1'
         }
     });
-    new ApiGateway(stack, 'ApiGateway', {
+    new CustomDomain(stack, 'ApiGateway', {
         companyDomainName: 'example.com',
         domainName: 'example',
-        project: 'cdkv2',
-        baseEnv:  'test',
         certificateArn: '123456',
-        restApiId: 'abcdefg',
-        basePath: 'test'
+        restApiId: 'abcde',
+        restApiRootResourceId: 'asdfg'
     });
     const template = Template.fromStack(stack);
+    console.log(JSON.stringify(template, null, 2))
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
-        DomainName: 'example'
+        DomainName: 'example',
     });
 });
+
+// test('Base Path Mapping', () => {
+//     const stack = new cdk.Stack(undefined, 'stack', {
+//         env: {
+//             account: '987654',
+//             region: 'us-east-1'
+//         }
+//     });
+//     new BasePathMapping(stack, 'BasePath', {
+//         basePath: 'example',
+//         domainName: 'example.com',
+        
+//     })
+// })

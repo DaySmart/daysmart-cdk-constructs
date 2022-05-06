@@ -1,25 +1,29 @@
 import * as cdk from 'aws-cdk-lib';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import { Route53RecordTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 
-export interface ApiGatewayProps {
+export interface CustomDomainProps {
     companyDomainName: string;
     domainName: string;
-    project: string;
-    baseEnv: string;
     dynamicEnv?: string;
     certificateArn: string;
     restApiId: string;
+    restApiRootResourceId: string;
     basePath?: string;
 }
 
-export class ApiGateway extends Construct {
-    constructor(scope: Construct, id: string, props: ApiGatewayProps) {
+export class CustomDomain extends Construct {
+    constructor(scope: Construct, id: string, props: CustomDomainProps) {
         super(scope, id);
 
         let customDomain: apigw.DomainName;
-        let cloudformationBasePathMapping: apigw.CfnBasePathMapping;
+        
+        const api = apigw.RestApi.fromRestApiAttributes(this, "RestApi", {
+            restApiId: props.restApiId,
+            rootResourceId: props.restApiRootResourceId
+          });
 
         customDomain = new apigw.DomainName(this, 'Custom Domain', {
             domainName: `${props.domainName}`,
@@ -28,9 +32,9 @@ export class ApiGateway extends Construct {
             securityPolicy: apigw.SecurityPolicy.TLS_1_2
         })
 
-        cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
-            basePath: `${props.basePath}`,
-            domainName: customDomain.domainName
-        })
+        customDomain.addBasePathMapping(api, {
+            basePath: props.basePath,
+            stage: api.deploymentStage
+          });
     };
 }
