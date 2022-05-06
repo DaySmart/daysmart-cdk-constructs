@@ -1,7 +1,8 @@
-import cdk = require('@aws-cdk/core');
-import s3 = require('@aws-cdk/aws-s3');
-import cloudfront = require('@aws-cdk/aws-cloudfront');
-import iam = require('@aws-cdk/aws-iam');
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { aws_s3 as s3 } from 'aws-cdk-lib';
+import { aws_cloudfront as cloudfront } from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
 
 export interface AppBucketProps {
     stage: string;
@@ -10,8 +11,8 @@ export interface AppBucketProps {
     projectName: string;
     sharedServicesAccountId?: string;
 }
-export class AppBucket extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: AppBucketProps) {
+export class AppBucket extends Construct {
+    constructor(scope: Construct, id: string, props: AppBucketProps) {
         super(scope, id);
 
         const bucket = new s3.Bucket(this, 'Bucket', {
