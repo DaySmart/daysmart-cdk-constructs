@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import '@aws-cdk/assert/jest'
 import { PipelineArtifactsBucket } from '../lib/PipelineArtifactsBucket';
 import { arrayWith, objectLike } from '@aws-cdk/assert';
+import { SynthUtils } from '@aws-cdk/assert';
 
 const keyArn = 'arn:aws:kms:us-west-2:123456:key/blah';
 
@@ -11,6 +12,9 @@ const stack = new cdk.Stack();
         kmsKeyId: keyArn,
         productGroup: 'test'
     });
+
+    const template = SynthUtils.toCloudFormation(stack)
+    console.log(JSON.stringify(template, null, 2))
 
 test('bucket is versioned', () => {
     expect(stack).toHaveResource('AWS::S3::Bucket', {
