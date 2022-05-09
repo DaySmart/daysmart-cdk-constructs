@@ -2,6 +2,9 @@ import * as cdk from 'aws-cdk-lib';
 import { CustomDomain } from "../lib/api-domain-name"
 import { Template } from "aws-cdk-lib/assertions"
 import { BasePathMapping } from 'aws-cdk-lib/aws-apigateway';
+import { Stack } from 'aws-cdk-lib';
+import { CdkApiGatewayDomain } from '../lib/api-gateway-domain';
+import exp = require('constants');
 
 test('Custom Domain created', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
@@ -22,6 +25,12 @@ test('Custom Domain created', () => {
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
         DomainName: 'example',
     });
+    template.hasResourceProperties("AWS::ApiGateway::DomainName", {
+        RegionalCertificateArn: '123456'
+    });
+    template.hasResourceProperties("AWS::ApiGateway::BasePathMapping", {
+        RestApiId: 'abcde'
+    });
 });
 
 // test('Base Path Mapping', () => {
@@ -35,5 +44,33 @@ test('Custom Domain created', () => {
 //         basePath: 'example',
 //         domainName: 'example.com',
         
+//     })
+// })
+
+// const stack = new Stack();
+// new CustomDomain(stack, "CustomDomain", {
+//     certificateArn: '123456',
+//     companyDomainName: 'example.com',
+//     domainName: 'testing',
+//     restApiId: '987654',
+//     restApiRootResourceId: 'asdfg'
+// })
+
+// const template = Template.fromStack(stack);
+// console.log(JSON.stringify(template, null, 2))
+
+// test("Cert set", () => {
+//     expect(stack).toHaveProperty("AWS::ApiGateway::DomainName", {
+//         RegionalCertificateArn: '123456'
+//     })
+// })
+// test("Domain Name", () => {
+//     expect(stack).toHaveProperty("AWS::ApiGateway::DomainName", {
+//         DomainName: 'testing'
+//     })
+// })
+// test("Rest Api ID", () => {
+//     expect(stack).toHaveProperty("AWS::ApiGateway::BasePathMapping", {
+//         RestApiId: '987654'
 //     })
 // })

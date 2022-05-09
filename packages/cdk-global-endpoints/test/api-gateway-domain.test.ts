@@ -24,6 +24,9 @@ test('Usage plan created', () => {
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
         DomainName: 'api.test.cdkv2.example.com'
     });
+    template.hasResourceProperties("AWS::ApiGateway::DomainName", {
+        CertificateArn: '123456'
+    });
 });
 
 test('Cloudformation Route53 Change', () => {
@@ -43,5 +46,8 @@ test('Cloudformation Route53 Change', () => {
     const template = Template.fromStack(stack);
     template.hasResourceProperties("AWS::ApiGateway::BasePathMapping", {
         DomainName: 'example.com'
-    })
+    });
+    template.hasResourceProperties("AWS::ApiGateway::BasePathMapping", {
+        RestApiId: '123456'
+    });
 })
