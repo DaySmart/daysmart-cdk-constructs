@@ -22,4 +22,14 @@ test('Custom Domain Made', () => {
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
         DomainName: 'api.test.cdkv2.taylor.com'
     });
+    template.hasResourceProperties("AWS::ApiGateway::DomainName", {
+        EndpointConfiguration: {
+            Types: [
+                'REGIONAL'
+            ]
+        }
+    });
+    template.hasResourceProperties("AWS::ApiGateway::BasePathMapping", {
+        RestApiId: 'abcdefg'
+    });
 });

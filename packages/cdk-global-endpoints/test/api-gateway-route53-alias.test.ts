@@ -21,4 +21,10 @@ test('Custom Domain Made', () => {
     template.hasResourceProperties("AWS::Route53::RecordSet", {
         Name: 'api.test.cdkv2.example.com.'
     });
+    template.hasResourceProperties("AWS::Route53::RecordSet", {
+        AliasTarget: {
+            DNSName: 'abcdef',
+            HostedZoneId: '123456'
+        }
+    });
 });
