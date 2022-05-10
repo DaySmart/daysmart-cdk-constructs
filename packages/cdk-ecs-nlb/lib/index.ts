@@ -242,6 +242,10 @@ export class CdkEcsNlb extends cdk.Construct {
       networkLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
     }
 
+    const cfnTargetGroup = networkLoadBalancedService.targetGroup.node.defaultChild as elbv2.CfnTargetGroup;
+
+    cfnTargetGroup.addOverride("Properties.Port" , 443);
+
     networkLoadBalancedService.targetGroup.configureHealthCheck({
       port: props.containerPort ? props.containerPort : "443",
       path: props.healthCheckPath,
