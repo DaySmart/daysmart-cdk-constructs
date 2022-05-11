@@ -29,14 +29,6 @@ test("Distribution Config", () => {
     })
 })
 
-// test("Cert Set", () => {
-//     expect(stack).toHaveResourceLike('AWS::CloudFront::Distribution', {
-//         ViewerCertficate: {
-//             AcmCertificateArn: '123456'
-//         }
-//     })
-// })
-
 test("Route53 Hosted Zone ID", () => {
     expect(stack).toHaveResource('AWS::Route53::RecordSet', {
         HostedZoneId: 'abcde'
@@ -48,3 +40,4 @@ test("Route53 Name", () => {
         Name: 'test.app-cloudfront.example.com.'
     })
 })
+// Complete

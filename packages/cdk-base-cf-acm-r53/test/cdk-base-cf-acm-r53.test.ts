@@ -10,7 +10,7 @@ new CdkBaseCfAcmR53(stack, "CdkBaseCfAcmR53", {
     baseEnv: 'test',
     componentName: 'testing',
     certificateArn: '123456',
-    defaultBehaviorOptions: ,
+    defaultBehaviorOptions: '',
     domains: ['example.com']
 }) 
 

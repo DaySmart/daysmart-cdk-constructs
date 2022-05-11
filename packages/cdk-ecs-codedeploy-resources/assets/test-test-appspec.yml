@@ -4,7 +4,7 @@ Resources:
       Type: AWS::ECS::Service
       Properties:
         TaskDefinition: >-
-          arn:aws:ecs:${Token[AWS.Region.9]}:${Token[AWS.AccountId.5]}:task-definition/test-test
+          arn:aws:ecs:${Token[AWS.Region.10]}:${Token[AWS.AccountId.6]}:task-definition/test-test
         LoadBalancerInfo:
           ContainerName: Container
           ContainerPort: 80
