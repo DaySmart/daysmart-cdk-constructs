@@ -21,7 +21,6 @@ test('Custom Domain created', () => {
         restApiRootResourceId: 'asdfg'
     });
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2))
     template.hasResourceProperties("AWS::ApiGateway::DomainName", {
         DomainName: 'example',
     });
