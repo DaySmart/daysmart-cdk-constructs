@@ -17,7 +17,6 @@ const stack = new Stack();
     });
 
     const template = SynthUtils.toCloudFormation(stack)
-    console.log(JSON.stringify(template, null, 2))
 
 test("Distribution Config", () => {
     expect(stack).toHaveResourceLike('AWS::CloudFront::Distribution', {

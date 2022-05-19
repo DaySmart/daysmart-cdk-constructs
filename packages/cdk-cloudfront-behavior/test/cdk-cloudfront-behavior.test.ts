@@ -14,7 +14,8 @@ new CdkCloudfrontBehavior(stack, "CdkCloudFrontBehavior", {
     httpOriginRequestPolicyId: '1234',
     project: 'CDK',
     s3OriginCachePolicyId: 'asdf',
-    s3OriginRequestPolicyId: 'zxcv'
+    s3OriginRequestPolicyId: 'zxcv',
+    defaultHttpOriginName: 'qwert'
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
