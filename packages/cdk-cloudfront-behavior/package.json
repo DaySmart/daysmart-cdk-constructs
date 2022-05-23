@@ -10,7 +10,6 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.93.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
@@ -22,10 +21,8 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/core": "^1.93.0",
-    "@aws-cdk/aws-cloudfront": "^1.93.0",
-    "@aws-cdk/aws-cloudfront-origins": "^1.93.0",
-    "@aws-cdk/aws-s3": "^1.93.0",
+    "aws-cdk-lib": "^2.24.1",
+    "constructs": "^10.1.12",
     "@daysmart/cdk-base-cf-acm-r53": "^0.1.9"
   },
   "publishConfig": {

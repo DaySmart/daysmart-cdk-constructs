@@ -12,7 +12,6 @@ new CdkCertificate(stack, "CdkBaseCfAcmR53", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Valid Domain",  () => {
     expect(stack).toHaveResourceLike("AWS::CertificateManager::Certificate", {

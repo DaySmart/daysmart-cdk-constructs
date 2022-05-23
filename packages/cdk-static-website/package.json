@@ -10,7 +10,6 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.128.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
@@ -22,14 +21,9 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-certificatemanager": "^1.128.0",
-    "@aws-cdk/aws-cloudfront": "^1.128.0",
-    "@aws-cdk/aws-cloudfront-origins": "^1.128.0",
-    "@aws-cdk/aws-route53": "^1.128.0",
-    "@aws-cdk/aws-route53-targets": "^1.128.0",
-    "@aws-cdk/aws-s3": "^1.128.0",
-    "@aws-cdk/core": "1.128.0",
-    "@daysmart/cdk-app-bucket": "^1.0.11"
+    "@daysmart/cdk-app-bucket": "2.0.0",
+    "aws-cdk-lib": "^2.25.0",
+    "constructs": "^10.1.15"
   },
   "publishConfig": {
     "access": "public"

@@ -1,8 +1,9 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib/core';
 import * as base from '@daysmart/cdk-base-cf-acm-r53';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
-import * as origins from "@aws-cdk/aws-cloudfront-origins";
-import * as s3 from "@aws-cdk/aws-s3";
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import { Construct } from 'constructs'
 
 export interface CdkCloudfrontBehaviorProps {
   defaultBehaviorOrigin: "http" | "s3"/* | "load-balancer"*/;
@@ -46,14 +47,14 @@ export interface HttpOrigin {
   path: string;
 }
 
-export class CdkCloudfrontBehavior extends cdk.Construct {
+export class CdkCloudfrontBehavior extends Construct {
   readonly s3OriginCachePolicy: cloudfront.ICachePolicy;
   readonly httpOriginCachePolicy: cloudfront.ICachePolicy;
   readonly s3OriginRequestPolicy: cloudfront.IOriginRequestPolicy;
   readonly httpOriginRequestPolicy: cloudfront.IOriginRequestPolicy;
   public distribution: cloudfront.Distribution;
 
-  constructor(scope: cdk.Construct, id: string, props: CdkCloudfrontBehaviorProps) {
+  constructor(scope: Construct, id: string, props: CdkCloudfrontBehaviorProps) {
     super(scope, id);
     let defaultBehaviorOptions: cloudfront.BehaviorOptions
     this.s3OriginCachePolicy = cloudfront.CachePolicy.fromCachePolicyId(this, "S3OriginCachePolicy", props.s3OriginCachePolicyId);

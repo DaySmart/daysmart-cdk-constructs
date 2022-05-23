@@ -1,8 +1,9 @@
-import * as cdk from '@aws-cdk/core';
-import s3 = require('@aws-cdk/aws-s3');
-import cloudfront = require('@aws-cdk/aws-cloudfront');
-import iam = require('@aws-cdk/aws-iam');
-import { BucketPolicy } from '@aws-cdk/aws-s3';
+import * as cdk from 'aws-cdk-lib/core';
+import s3 = require('aws-cdk-lib/aws-s3');
+import cloudfront = require('aws-cdk-lib/aws-cloudfront');
+import iam = require('aws-cdk-lib/aws-iam');
+import { BucketPolicy } from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
 
 export interface CdkFilesBucketProps {
   stage: string;
@@ -13,7 +14,7 @@ export interface CdkFilesBucketProps {
   restrictFileTypes?: boolean;
 }
 
-export class CdkFilesBucket extends cdk.Construct {
+export class CdkFilesBucket extends Construct {
 
   ALLOWED_FILE_TYPES_IMAGES = [
     'png',
@@ -40,7 +41,7 @@ export class CdkFilesBucket extends cdk.Construct {
     'csv'
   ]
 
-  constructor(scope: cdk.Construct, id: string, props: CdkFilesBucketProps) {
+  constructor(scope: Construct, id: string, props: CdkFilesBucketProps) {
     super(scope, id);
 
     const bucket = new s3.Bucket(this, 'Bucket', {

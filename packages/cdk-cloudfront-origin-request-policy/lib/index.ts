@@ -1,5 +1,6 @@
-import * as cdk from '@aws-cdk/core';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as cdk from 'aws-cdk-lib/core';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import { Construct } from 'constructs';
 
 export interface CdkCloudfrontOriginRequestPolicyProps {
   queryStringBehavior: "all" | "none" | string[];
@@ -9,9 +10,9 @@ export interface CdkCloudfrontOriginRequestPolicyProps {
   description?: string;
 }
 
-export class CdkCloudfrontOriginRequestPolicy extends cdk.Construct {
+export class CdkCloudfrontOriginRequestPolicy extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkCloudfrontOriginRequestPolicyProps) {
+  constructor(scope: Construct, id: string, props: CdkCloudfrontOriginRequestPolicyProps) {
     super(scope, id);
     let queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior;
     let cookieBehavior: cloudfront.OriginRequestCookieBehavior;
