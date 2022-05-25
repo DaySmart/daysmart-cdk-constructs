@@ -3,7 +3,6 @@ import { Construct } from 'constructs'
 import { aws_s3 as s3 } from 'aws-cdk-lib';
 import { aws_iam as iam } from 'aws-cdk-lib';
 import { aws_kms as kms } from 'aws-cdk-lib';
-import * as assert from 'aws-cdk-lib/assertions'
 
 
 /**

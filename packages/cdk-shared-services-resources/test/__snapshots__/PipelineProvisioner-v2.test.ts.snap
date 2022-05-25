@@ -1,0 +1,245 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App Cloudfront 1`] = `
+Object {
+  "Parameters": Object {
+    "BootstrapVersion": Object {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": Object {
+    "AppCloudfrontPolicy6835BCDC": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "codedeploy:*",
+                "codestar:*",
+                "codestar-connections:*",
+                "s3:List*",
+                "s3:Get*",
+                "s3:Describe",
+                "iam:Attach*",
+                "iam:Create*",
+                "iam:Get*",
+                "iam:List*",
+                "iam:PassRole",
+                "iam:Put*",
+                "lambda:*",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AppCloudfrontPolicy6835BCDC",
+        "Roles": Array [
+          Object {
+            "Ref": "AppCloudfrontRoleB0CF141D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AppCloudfrontProjectEE854E63": Object {
+      "Properties": Object {
+        "Artifacts": Object {
+          "Type": "NO_ARTIFACTS",
+        },
+        "BadgeEnabled": false,
+        "Cache": Object {
+          "Type": "NO_CACHE",
+        },
+        "ConcurrentBuildLimit": 1,
+        "EncryptionKey": "alias/aws/s3",
+        "Environment": Object {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": "aws/codebuild/standard:5.0",
+          "ImagePullCredentialsType": "CODEBUILD",
+          "PrivilegedMode": false,
+          "Type": "LINUX_CONTAINER",
+        },
+        "Name": "cdk-pipeline-provisioner",
+        "ServiceRole": Object {
+          "Fn::GetAtt": Array [
+            "AppCloudfrontRoleB0CF141D",
+            "Arn",
+          ],
+        },
+        "Source": Object {
+          "BuildSpec": "{
+  \\"version\\": \\"0.2\\",
+  \\"phases\\": {
+    \\"install\\": {
+      \\"runtime-versions\\": {
+        \\"nodejs\\": 14
+      },
+      \\"commands\\": [
+        \\"cd infrastructure/pipeline\\",
+        \\"npm i\\"
+      ]
+    },
+    \\"build\\": {
+      \\"commands\\": [
+        \\"npx cdk deploy --require-approval never\\"
+      ]
+    }
+  }
+}",
+          "Location": "https://bitbucket.org/tester/cdk.git",
+          "ReportBuildStatus": true,
+          "Type": "BITBUCKET",
+        },
+        "Triggers": Object {
+          "FilterGroups": Array [
+            Array [
+              Object {
+                "Pattern": "PUSH",
+                "Type": "EVENT",
+              },
+            ],
+          ],
+          "Webhook": true,
+        },
+      },
+      "Type": "AWS::CodeBuild::Project",
+    },
+    "AppCloudfrontRoleB0CF141D": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "codebuild.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "Enables the pipeline provisioner CodeBuild projects to provision new CodePipelines",
+        "RoleName": "pipeline-provisioner-role-cdk",
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AppCloudfrontRoleDefaultPolicy14789CC7": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:us-east-1:123456:log-group:/aws/codebuild/",
+                      Object {
+                        "Ref": "AppCloudfrontProjectEE854E63",
+                      },
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:us-east-1:123456:log-group:/aws/codebuild/",
+                      Object {
+                        "Ref": "AppCloudfrontProjectEE854E63",
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "codebuild:CreateReportGroup",
+                "codebuild:CreateReport",
+                "codebuild:UpdateReport",
+                "codebuild:BatchPutTestCases",
+                "codebuild:BatchPutCodeCoverages",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":codebuild:us-east-1:123456:report-group/",
+                    Object {
+                      "Ref": "AppCloudfrontProjectEE854E63",
+                    },
+                    "-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AppCloudfrontRoleDefaultPolicy14789CC7",
+        "Roles": Array [
+          Object {
+            "Ref": "AppCloudfrontRoleB0CF141D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+  "Rules": Object {
+    "CheckBootstrapVersion": Object {
+      "Assertions": Array [
+        Object {
+          "Assert": Object {
+            "Fn::Not": Array [
+              Object {
+                "Fn::Contains": Array [
+                  Array [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  Object {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
