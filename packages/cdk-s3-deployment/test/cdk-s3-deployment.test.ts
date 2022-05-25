@@ -13,7 +13,6 @@ new CdkS3Deployment(stack, "CdkS3Deployment", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Bucket name",  () => {
     expect(stack).toHaveResourceLike("", {

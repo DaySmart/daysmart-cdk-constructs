@@ -17,7 +17,6 @@ new CdkEcsAlb(stack, "CdkEcsAlb", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("cert set", () => {
     expect(stack).toHaveProperty("", {

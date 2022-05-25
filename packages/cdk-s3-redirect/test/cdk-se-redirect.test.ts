@@ -17,7 +17,6 @@ new CdkS3Redirect(stack, "CdkS3Redirect", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Bucket name",  () => {
     expect(stack).toHaveResourceLike("", {

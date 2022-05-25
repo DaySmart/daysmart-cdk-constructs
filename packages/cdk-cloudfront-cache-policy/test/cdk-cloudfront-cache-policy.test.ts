@@ -12,7 +12,6 @@ new CdkCloudfrontCachePolicy(stack, "CdkCloudfrontCachePolicy", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Policy set", () => {
     expect(stack).toHaveResourceLike("AWS::CloudFront::CachePolicy", {

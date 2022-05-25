@@ -12,7 +12,6 @@ new CdkCloudfrontOriginRequestPolicy(stack, "CdkCloudfrontOriginRequestPolicy", 
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Cookie Behavior", () => {
     expect(stack).toHaveResourceLike("AWS::CloudFront::OriginRequestPolicy", {

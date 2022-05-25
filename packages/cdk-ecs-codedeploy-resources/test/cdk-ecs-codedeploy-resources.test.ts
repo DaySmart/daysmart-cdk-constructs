@@ -16,7 +16,6 @@ new CdkEcsCodedeployResources(stack, "CdkEcsCodedeployResources", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Bucket Name", () => {
     expect(stack).toHaveResource("Custom::CDKBucketDeployment", {

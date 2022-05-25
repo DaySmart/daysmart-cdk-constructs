@@ -17,7 +17,6 @@ test('App Cloudfront', () => {
     });
 
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2));
 
     template.hasResourceProperties('AWS::CertificateManager::Certificate', {
         DomainName: 'example'

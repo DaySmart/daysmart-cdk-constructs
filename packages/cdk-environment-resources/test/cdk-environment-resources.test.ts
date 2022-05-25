@@ -14,7 +14,6 @@ new CdkEnvironmentResources(stack, "CdkEnvironmentResources", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-console.log(JSON.stringify(template, null, 2))
 
 test("Valid Domain",  () => {
     expect(stack).toHaveResourceLike("", {

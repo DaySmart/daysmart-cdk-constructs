@@ -19,7 +19,6 @@ new CdkCloudfrontBehavior(stack, "CdkCloudFrontBehavior", {
 }) 
 
 const template = SynthUtils.toCloudFormation(stack)
-    console.log(JSON.stringify(template, null, 2))
 
 test("Validation Method", () => {
     expect(stack).toHaveResource("", {
