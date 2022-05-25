@@ -13,12 +13,43 @@ test('App Cloudfront', () => {
         baseEnv: 'test',
         componentName: 'name',
         defaultBehaviorOrigin: 'http',
-        domains: 'example.com',
-        httpOriginCachePolicyId: '',
-        httpOriginRequestPolicyId: '',
-        project: 'cdk'
+        defaultHttpOriginName: 'default',
+        domains: ['example.com, example.domain.com'],
+        httpOriginCachePolicyId: 'zxcvb',
+        httpOriginRequestPolicyId: 'asdfg',
+        project: 'cdk',
+        s3OriginCachePolicyId: '98765',
+        s3OriginRequestPolicyId: '12345'
     });
 
     const template = Template.fromStack(stack);
     console.log(JSON.stringify(template, null, 2));
+
+    template.hasResourceProperties('AWS::CertificateManager::Certificate', {
+        DomainName: 'test.cdk.example.com, example.domain.com'
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: {
+            Aliases: [
+                'name.test.cdk.example.com, example.domain.com',
+                'test-cdk.example.com, example.domain.com'
+            ],
+            Comment: 'test cdk'
+        }
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: {
+            DefaultCacheBehavior: {
+                CachePolicyId: 'zxcvb',
+                Compress: true,
+                OriginRequestPolicyId: 'asdfg'
+            }
+        }
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+        Name: 'name.test.cdk.example.com, example.domain.com.'
+    });
 })

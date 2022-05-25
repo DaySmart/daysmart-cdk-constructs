@@ -12,16 +12,22 @@ test('App Cloudfront', () => {
         }
     });
     new CdkRoute53Record(stack, 'AppCloudfront', {
-        dnsRecords: [],
-        hostedZoneDomainNames: [],
+        dnsRecords: ['www.example.com'],
+        hostedZoneDomainNames: ['example.com'],
         loadBalancerArn: keyArn,
-        targetType: 'target'
+        targetType: 'alb'
     });
 
     const template = Template.fromStack(stack);
     console.log(JSON.stringify(template, null, 2));
 
-    template.hasResourceProperties('AWS::', {
-        
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+        Name: 'www.example.com.'
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+        AliasTarget: {
+            DNSName: 'dualstack.my-load-balancer-1234567890.us-west-2.elb.amazonaws.com'
+        }
     });
 })

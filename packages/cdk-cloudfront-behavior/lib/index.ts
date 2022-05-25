@@ -3,7 +3,7 @@ import * as base from '@daysmart/cdk-base-cf-acm-r53';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import { Construct } from 'constructs'
+import { Construct } from 'constructs';
 
 export interface CdkCloudfrontBehaviorProps {
   defaultBehaviorOrigin: "http" | "s3"/* | "load-balancer"*/;

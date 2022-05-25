@@ -21,9 +21,9 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.24.1",
-    "constructs": "^10.1.12",
-    "@daysmart/cdk-base-cf-acm-r53": "^0.1.9"
+    "@daysmart/cdk-base-cf-acm-r53": "file:../cdk-base-cf-acm-r53/daysmart-cdk-base-cf-acm-r53-0.1.9.tgz",
+    "aws-cdk-lib": "^2.25.0",
+    "constructs": "^10.1.17"
   },
   "publishConfig": {
     "access": "public"
