@@ -27,4 +27,21 @@ test('App Cloudfront', () => {
     template.hasResourceProperties('AWS::ECS::TaskDefinition', {
         Family: 'temp-test-cdk-ecs-task-definition'
     });
+
+    template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+        GroupId: 'sg-12345'
+    });
+
+    template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+        VpcId: 'vpc-12345'
+    });
+
+    template.hasResourceProperties('AWS::ECS::Service', {
+        Cluster: 'cluster'
+    });
+
+    template.hasResourceProperties('AWS::ECS::Service', {
+        ServiceName: 'test-cdk',
+        TaskDefinition: 'asdf'
+    });
 })

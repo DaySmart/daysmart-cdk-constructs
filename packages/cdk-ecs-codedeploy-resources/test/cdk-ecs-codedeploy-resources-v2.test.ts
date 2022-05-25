@@ -23,6 +23,13 @@ test('App Cloudfront', () => {
     const template = Template.fromStack(stack);
     console.log(JSON.stringify(template, null, 2));
 
-    template.hasResourceProperties('', {
+    template.hasResourceProperties('Custom::CDKBucketDeployment', {
+        DestinationBucketName: 'bucket',
+        DestinationBucketKeyPrefix: 'test',
+    });
+    template.hasResourceProperties('Custom::CDKBucketDeployment', {
+        UserMetadata: {
+            commithash: '98765'
+        }
     });
 })

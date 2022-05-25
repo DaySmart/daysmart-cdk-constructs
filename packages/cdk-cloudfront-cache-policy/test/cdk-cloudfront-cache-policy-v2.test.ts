@@ -21,8 +21,18 @@ test('App Cloudfront', () => {
     console.log(JSON.stringify(template, null, 2));
 
     template.hasResourceProperties('AWS::CloudFront::CachePolicy', {
-        HeadersConfig: {
-            HeaderBehavior: 'none'
+        CachePolicyConfig: {
+            Name: 'test'
+        }
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::CachePolicy', {
+        CachePolicyConfig: {
+            ParametersInCacheKeyAndForwardedToOrigin: {
+                CookiesConfig: {
+                    CookieBehavior: 'all'
+                }
+            }
         }
     });
 })

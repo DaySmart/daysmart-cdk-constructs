@@ -14,7 +14,7 @@ test('App Cloudfront', () => {
         baseEnv: 'test',
         componentName: '',
         defaultBehaviorOptions: '',
-        domains: '',
+        domains: ['example.com, example.domain.com'],
         project: '',
         certificateArn: '',
     });

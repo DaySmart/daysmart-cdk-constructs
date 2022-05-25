@@ -1,6 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
-import { CdkCloudfrontBehavior } from '../lib/index'
+import { CdkRoute53Record } from '../lib/index'
+
+const keyArn = 'arn:aws:route53:us-west-2:123456:key/blah';
 
 test('App Cloudfront', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
@@ -9,16 +11,17 @@ test('App Cloudfront', () => {
             region: 'us-east-1'
         }
     });
-    new CdkCloudfrontBehavior(stack, 'AppCloudfront', {
-        baseEnv: 'test',
-        componentName: 'name',
-        defaultBehaviorOrigin: 'http',
-        domains: 'example.com',
-        httpOriginCachePolicyId: '',
-        httpOriginRequestPolicyId: '',
-        project: 'cdk'
+    new CdkRoute53Record(stack, 'AppCloudfront', {
+        dnsRecords: [],
+        hostedZoneDomainNames: [],
+        loadBalancerArn: keyArn,
+        targetType: 'target'
     });
 
     const template = Template.fromStack(stack);
     console.log(JSON.stringify(template, null, 2));
+
+    template.hasResourceProperties('AWS::', {
+        
+    });
 })

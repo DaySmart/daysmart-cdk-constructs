@@ -31,15 +31,11 @@ test('App Cloudfront', () => {
         }
     });
 
-    // template.hasResourceProperties('AWS::CloudFront::Distribution', {
-    //     ViewerCertificate: {
-    //         AcmCertificateArn: '12345'
-    //     }
-    // });
-
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
-        S3OriginConfig: {
-            OriginAccessIdentity: 'origin-access-identity/cloudfront/9876'
+        DistributionConfig: {
+            ViewerCertificate: {
+                AcmCertificateArn: '12345'
+            }
         }
     });
 })

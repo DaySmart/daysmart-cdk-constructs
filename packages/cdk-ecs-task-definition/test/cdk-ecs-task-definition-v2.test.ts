@@ -2,6 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
 import { CdkEcsTaskDefinition } from '../lib/index'
 
+const keyArn = 'arn:aws:ecs:us-west-2:123456:key/blah';
+
 test('App Cloudfront', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
         env: {
@@ -15,13 +17,20 @@ test('App Cloudfront', () => {
         memoryUnits: 'mem',
         repositoryName: 'cdk',
         stage: 'test',
-        taskRoleArn: 'arn:123456789'
+        taskRoleArn: keyArn
     });
 
     const template = Template.fromStack(stack);
     console.log(JSON.stringify(template, null, 2));
 
-    template.hasResourceProperties('', {
-        
+    template.hasResourceProperties('AWS::IAM::Policy', {
+        Roles: [
+            'blah'
+        ]
+    });
+
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+        ExecutionRoleArn: 'arn:aws:ecs:us-west-2:123456:key/blah',
+        Family: 'test-cdk'
     });
 })
