@@ -18,12 +18,16 @@
     "eslint-plugin-react": "^7.29.4",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
-    "typescript": "~3.9.7"
+    "typescript": "~3.9.7",
+    "aws-cdk-lib": "^2.25.0",
+    "constructs": "^10.1.18"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.25.0",
+    "constructs": "^10.1.18"
   },
   "dependencies": {
-    "@daysmart/cdk-base-cf-acm-r53": "file:../cdk-base-cf-acm-r53/daysmart-cdk-base-cf-acm-r53-0.1.9.tgz",
-    "aws-cdk-lib": "^2.25.0",
-    "constructs": "^10.1.17"
+    "@daysmart/cdk-base-cf-acm-r53": "file:../cdk-base-cf-acm-r53/daysmart-cdk-base-cf-acm-r53-0.1.9.tgz"
   },
   "publishConfig": {
     "access": "public"
