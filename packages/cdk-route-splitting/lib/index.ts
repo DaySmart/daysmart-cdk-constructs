@@ -6,6 +6,7 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 
 export interface CdkRouteSplittingProps {
   originSourceDomain: string;
+  cloudfrontDomain: string;
   appName: string;
   partitionKey: string;
   stage: string;
@@ -15,12 +16,6 @@ export class CdkRouteSplitting extends cdk.Construct {
 
   constructor(scope: cdk.Construct, id: string, props: CdkRouteSplittingProps) {
     super(scope, id);
-
-    let originSourceDomain = new HttpOrigin(props.originSourceDomain);
-
-      if (props.stage !== 'prod') {
-          originSourceDomain = new HttpOrigin(`${props.stage}-${props.originSourceDomain}`);
-      }
 
     new lambda.Function(this, `${props.stage}-${props.appName}-add-index`, {
       runtime: lambda.Runtime.NODEJS_14_X,
@@ -48,7 +43,7 @@ export class CdkRouteSplitting extends cdk.Construct {
 
     new cloudfront.Distribution(this, `${props.stage}-${props.appName}-distribution`, {
       defaultBehavior: {
-        origin: originSourceDomain,
+        origin: new HttpOrigin(props.originSourceDomain),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         edgeLambdas: [
           {
@@ -57,8 +52,9 @@ export class CdkRouteSplitting extends cdk.Construct {
           }
         ]
       },
+      // domainNames: [props.cloudfrontDomain],
       comment: `${props.stage} ${props.appName} route split Distribution`,
-    })
+    });
 
     new dynamodb.Table(this, `${props.stage}-${props.appName}-route-splitting-table`, {
       partitionKey: { name: props.partitionKey, type: dynamodb.AttributeType.STRING },
