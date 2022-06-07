@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-static-website",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -29,7 +29,7 @@
     "@aws-cdk/aws-route53-targets": "^1.128.0",
     "@aws-cdk/aws-s3": "^1.128.0",
     "@aws-cdk/core": "1.128.0",
-    "@daysmart/cdk-app-bucket": "^1.0.11"
+    "@daysmart/cdk-app-bucket": "^1.0.16"
   },
   "publishConfig": {
     "access": "public"
