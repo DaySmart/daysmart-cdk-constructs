@@ -9,14 +9,14 @@ export interface AppBucketProps {
     dynamicEnvName: string;
     projectName: string;
     sharedServicesAccountId?: string;
-    removeBucket?: string;
+    removeBucket?: boolean;
 }
 export class AppBucket extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, props: AppBucketProps) {
         super(scope, id);
         let bucket;
 
-        if(props.removeBucket == 'true'){
+        if(props.removeBucket){
             bucket = new s3.Bucket(this, 'Bucket', {
                 bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
                 versioned: true,
