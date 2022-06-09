@@ -1,9 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { CustomDomain } from "../lib/api-domain-name"
 import { Template } from "aws-cdk-lib/assertions"
-import { BasePathMapping } from 'aws-cdk-lib/aws-apigateway';
-import { Stack } from 'aws-cdk-lib';
-import { CdkApiGatewayDomain } from '../lib/api-gateway-domain';
 import exp = require('constants');
 
 test('Custom Domain created', () => {

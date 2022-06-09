@@ -1,4 +1,3 @@
-import * as cdk from 'aws-cdk-lib/core';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as route53_targets from 'aws-cdk-lib/aws-route53-targets'
