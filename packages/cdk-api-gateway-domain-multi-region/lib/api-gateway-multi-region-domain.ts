@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { getAliasTarget } from './alias-target';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface ApiGatewayDomainMultiRegionProps {
   companyDomainName: string;

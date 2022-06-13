@@ -59,6 +59,7 @@ export class CdkCloudfrontOriginRequestPolicy extends Construct {
     var originRequestPolicyId = new cdk.CfnOutput(this, "OriginRequestPolicyId", {
       value: originRequestPolicy.originRequestPolicyId
     })
+    
     originRequestPolicyId.overrideLogicalId("OriginRequestPolicyId");
   }
 }

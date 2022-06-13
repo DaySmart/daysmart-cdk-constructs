@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront'
 import * as route53 from 'aws-cdk-lib/aws-route53'
-import * as targets from 'aws-cdk-lib/aws-route53-targets'
+import * as targets from 'aws-cdk-lib/aws-route53-targets' 
 
 export interface CdkAppCloudfrontProps {
     s3BucketName: string;
