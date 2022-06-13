@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib/core';
 import * as route53 from 'aws-cdk-lib/aws-route53';
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 /**
  * Properties for a hosted zone to be delegated

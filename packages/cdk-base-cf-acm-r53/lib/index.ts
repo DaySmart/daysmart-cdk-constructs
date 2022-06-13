@@ -5,7 +5,7 @@ import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from 'constructs'; 
-
+ 
 export interface CdkBaseCfAcmR53Props {
   defaultBehaviorOptions: cloudfront.BehaviorOptions;
   errorResponses?: cloudfront.ErrorResponse[]

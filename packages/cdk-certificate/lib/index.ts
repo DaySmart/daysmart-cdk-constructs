@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import * as route53 from "aws-cdk-lib/aws-route53";
-import * as acm from "aws-cdk-lib/aws-certificatemanager"
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
 export interface CdkCertificateProps {
     companyDomainName: string;

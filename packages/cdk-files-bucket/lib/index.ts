@@ -3,7 +3,7 @@ import s3 = require('aws-cdk-lib/aws-s3');
 import cloudfront = require('aws-cdk-lib/aws-cloudfront');
 import iam = require('aws-cdk-lib/aws-iam');
 import { BucketPolicy } from 'aws-cdk-lib/aws-s3';
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface CdkFilesBucketProps {
   stage: string;

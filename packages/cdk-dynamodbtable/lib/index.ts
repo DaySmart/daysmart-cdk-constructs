@@ -6,7 +6,7 @@ export interface CdkDynamodbtableProps {
     replicationRegions?: string[];
     tableName: string;
     globalSecondaryIndexes?: [globalSecondaryIndex];
-}
+} 
 
 export interface globalSecondaryIndex {
   partitionKey: string;

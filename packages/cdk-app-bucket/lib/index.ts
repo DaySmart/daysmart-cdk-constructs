@@ -10,7 +10,7 @@ export interface AppBucketProps {
     dynamicEnvName: string;
     projectName: string;
     sharedServicesAccountId?: string;
-    removeBucket?: boolean;
+    removeBucket?: boolean; 
 }
 export class AppBucket extends Construct {
     constructor(scope: Construct, id: string, props: AppBucketProps) {

@@ -7,7 +7,7 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets'
 
 export interface CdkAppCloudfrontProps {
     s3BucketName: string;
-    originAccessIdentity: string;
+    originAccessIdentity: string; 
     loggingBucketName?: string;
     stage: string;
     project: string;

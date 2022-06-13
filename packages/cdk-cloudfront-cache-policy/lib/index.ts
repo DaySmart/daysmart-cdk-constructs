@@ -58,6 +58,6 @@ export class CdkCloudfrontCachePolicy extends Construct {
       value: cachePolicy.cachePolicyId
     })
     
-    cachePolicyId.overrideLogicalId("CachePolicyId");
+    cachePolicyId.overrideLogicalId("CachePolicyId"); 
   }
 }

@@ -61,5 +61,5 @@ export class CdkCloudfrontOriginRequestPolicy extends Construct {
     })
     
     originRequestPolicyId.overrideLogicalId("OriginRequestPolicyId");
-  }
+  } 
 }

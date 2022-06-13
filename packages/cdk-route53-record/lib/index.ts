@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib/core";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface CdkRoute53RecordProps {
   targetType: string;
