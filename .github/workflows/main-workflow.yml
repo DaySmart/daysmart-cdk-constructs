@@ -399,7 +399,7 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
   Slack-on-failure:
-    if: failure()
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
