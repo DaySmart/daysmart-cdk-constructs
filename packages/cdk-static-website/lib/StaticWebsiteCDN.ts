@@ -85,5 +85,14 @@ export class StaticWebsiteCDN extends Construct {
                 target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
             }) 
         })
+        const distributionIdOutput = new cdk.CfnOutput(this, 'DistributionId', {
+            value: distribution.distributionId
+        });
+        distributionIdOutput.overrideLogicalId('DistributionId');
+
+        const distributionDomainNameOutput = new cdk.CfnOutput(this, 'DistributionDomainName', {
+            value: distribution.distributionDomainName
+        });
+        distributionDomainNameOutput.overrideLogicalId('DistributionDomainName');
     }
 }

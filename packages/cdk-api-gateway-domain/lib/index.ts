@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as apigw from '@aws-cdk/aws-apigateway';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as route53 from '@aws-cdk/aws-route53';
+import { CfnUsagePlanKey } from '@aws-cdk/aws-apigateway';
 
 export interface CdkApiGatewayDomainProps {
   companyDomainName: string;
@@ -14,6 +15,7 @@ export interface CdkApiGatewayDomainProps {
   basePath: string;
   stageName?: string;
   appName?: string;
+  apiKeyIDs?: string[];
 }
 
 export class CdkApiGatewayDomain extends cdk.Construct {
@@ -79,6 +81,16 @@ export class CdkApiGatewayDomain extends cdk.Construct {
         restApiId: `${props.restApiId}`,
         stage: `${stageName}`
       });
+    }
+
+    if (props.apiKeyIDs && props.apiKeyIDs.length > 0) {
+      props.apiKeyIDs.forEach(apiKeyID => {
+        new CfnUsagePlanKey(this, `apiKey${apiKeyID}`, {
+          keyId: apiKeyID,
+          keyType: 'API_KEY',
+          usagePlanId: usagePlan.ref
+        })
+      })
     }
 
     const cloudformationRoute53Change = new route53.CfnRecordSet(this, "CloudformationAliasRecordRoute53", {
