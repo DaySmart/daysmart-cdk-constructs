@@ -44,12 +44,12 @@ jobs:
           filters: |
             cdk-certificate:
               - '/packages/cdk-certificate/**'
-      - uses: dorny/paths-filter@v2
-        id: cloudfront-behavior
-        with:
-          filters: |
-            cdk-cloudfront-behavior:
-              - '/packages/cdk-cloudfront-behavior/**'
+      # - uses: dorny/paths-filter@v2
+      #   id: cloudfront-behavior
+      #   with:
+      #     filters: |
+      #       cdk-cloudfront-behavior:
+      #         - '/packages/cdk-cloudfront-behavior/**'
       - uses: dorny/paths-filter@v2
         id: cloudfront-cache-policy
         with:
@@ -217,16 +217,16 @@ jobs:
         working-directory: packages/cdk-certificate
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.cloudfront-behavior.outputs.cdk-cloudfront-behavior == 'true'
-        run: | 
-          npm install
-          npm run build
-          npm run lint
-          npm run test           
-          npm publish 
-        working-directory: packages/cdk-cloudfront-behavior
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - if: steps.cloudfront-behavior.outputs.cdk-cloudfront-behavior == 'true'
+      #   run: | 
+      #     npm install
+      #     npm run build
+      #     npm run lint
+      #     npm run test           
+      #     npm publish 
+      #   working-directory: packages/cdk-cloudfront-behavior
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - if: steps.cloudfront-cache-policy.outputs.cdk-cloudfront-cache-policy == 'true'
         run: | 
           npm install
