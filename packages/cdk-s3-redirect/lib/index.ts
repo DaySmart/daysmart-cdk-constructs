@@ -1,8 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as origins from "@aws-cdk/aws-cloudfront-origins";
-import * as acm from "@aws-cdk/aws-certificatemanager";
+import * as cdk from "aws-cdk-lib/core";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { Construct } from 'constructs';
 
 export interface CdkS3RedirectProps {
 	oldEndpoint: string;
@@ -19,10 +20,10 @@ export interface CdkS3RedirectProps {
 	cname: string;
 }
 
-export class CdkS3Redirect extends cdk.Construct {
+export class CdkS3Redirect extends Construct {
 	public distribution: cloudfront.Distribution;
 
-	constructor(scope: cdk.Construct, id: string, props: CdkS3RedirectProps) {
+	constructor(scope: Construct, id: string, props: CdkS3RedirectProps) {
 		super(scope, id);
 
 		let logFilePrefix: string | undefined = undefined;

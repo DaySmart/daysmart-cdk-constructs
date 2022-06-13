@@ -1,9 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import * as customresource from "@aws-cdk/custom-resources";
-import * as iam from "@aws-cdk/aws-iam";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cdk from "aws-cdk-lib/core";
+import * as customresource from "aws-cdk-lib/custom-resources";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import { Construct } from 'constructs';
 const fs = require('fs');
 const yaml = require('js-yaml');
 
@@ -23,9 +23,9 @@ export interface CdkEcsCodedeployResourcesProps {
   containerPort?: string;
 }
 
-export class CdkEcsCodedeployResources extends cdk.Construct {
+export class CdkEcsCodedeployResources extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
+  constructor(scope: Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
     super(scope, id);
 
     const codeDeployServiceRole = new iam.Role(this, "CodeDeployServiceRole", {

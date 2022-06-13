@@ -1,7 +1,8 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib/core';
 import { getAliasTarget } from './alias-target';
-import * as apigw from '@aws-cdk/aws-apigateway';
-import * as acm from '@aws-cdk/aws-certificatemanager';
+import * as apigw from 'aws-cdk-lib/aws-apigateway';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import { Construct } from 'constructs';
 
 export interface ApiGatewayDomainMultiRegionProps {
   companyDomainName: string;
@@ -15,9 +16,9 @@ export interface ApiGatewayDomainMultiRegionProps {
   endpointType?: apigw.EndpointType;
 }
 
-export class ApiGatewayDomainMultiRegion extends cdk.Construct {
+export class ApiGatewayDomainMultiRegion extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: ApiGatewayDomainMultiRegionProps) {
+  constructor(scope: Construct, id: string, props: ApiGatewayDomainMultiRegionProps) {
     super(scope, id);
 
     const api = apigw.RestApi.fromRestApiAttributes(this, "RestApi", {

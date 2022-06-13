@@ -1,6 +1,7 @@
-import * as cdk from '@aws-cdk/core';
-import * as acm from '@aws-cdk/aws-certificatemanager';
-import * as route53 from '@aws-cdk/aws-route53';
+import * as cdk from 'aws-cdk-lib/core';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import { Construct } from 'constructs';
 
 /**
  * Properties for a ACM certificate for a hosted zone
@@ -18,8 +19,8 @@ export interface HostedZoneCertificateProps {
  *  - example.domain.com
  *  - *.example.domain.com
  */
-export class HostedZoneCertificate extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: HostedZoneCertificateProps) {
+export class HostedZoneCertificate extends Construct {
+    constructor(scope: Construct, id: string, props: HostedZoneCertificateProps) {
         super(scope, id);
 
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {

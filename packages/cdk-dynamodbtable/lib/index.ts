@@ -1,7 +1,6 @@
-import * as cdk from '@aws-cdk/core';
-import * as aws_dynamodb from '@aws-cdk/aws-dynamodb';
-import { CfnOutput, RemovalPolicy } from '@aws-cdk/core';
-import { ProjectionType } from '@aws-cdk/aws-dynamodb';
+import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib/core';
+import { Construct } from 'constructs';
 
 export interface CdkDynamodbtableProps {
     replicationRegions?: string[];
@@ -16,11 +15,11 @@ export interface globalSecondaryIndex {
   attributes?: string[];
 }
 
-export class CdkDynamodbtable extends cdk.Construct {
+export class CdkDynamodbtable extends Construct {
 
   public globalTable: aws_dynamodb.Table;
   
-  constructor(scope: cdk.Construct, id: string, props: CdkDynamodbtableProps) {
+  constructor(scope: Construct, id: string, props: CdkDynamodbtableProps) {
     super(scope, id);
 
     this.globalTable = new aws_dynamodb.Table(this, 'Table', {

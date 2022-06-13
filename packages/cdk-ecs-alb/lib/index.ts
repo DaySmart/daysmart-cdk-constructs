@@ -1,12 +1,13 @@
-import * as cdk from "@aws-cdk/core";
-import * as acm from "@aws-cdk/aws-certificatemanager";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as ecr from "@aws-cdk/aws-ecr";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
-import * as route53 from "@aws-cdk/aws-route53";
-import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as cdk from "aws-cdk-lib/core";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as ecspattern from "aws-cdk-lib/aws-ecs-patterns";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import { SslPolicy } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { Construct } from 'constructs';
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -29,8 +30,8 @@ export interface CdkEcsAlbProps {
     securityGroupIngressPort?: string;
 }
 
-export class CdkEcsAlb extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: CdkEcsAlbProps) {
+export class CdkEcsAlb extends Construct {
+    constructor(scope: Construct, id: string, props: CdkEcsAlbProps) {
         super(scope, id);
 
         let applicationLoadBalancedService: ecspattern.ApplicationLoadBalancedEc2Service | ecspattern.ApplicationLoadBalancedFargateService;

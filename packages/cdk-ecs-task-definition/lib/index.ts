@@ -1,8 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as ecr from "@aws-cdk/aws-ecr";
-import * as iam from "@aws-cdk/aws-iam";
-import * as logs from "@aws-cdk/aws-logs";
+import * as cdk from "aws-cdk-lib/core";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as logs from "aws-cdk-lib/aws-logs";
+import { Construct } from 'constructs'
 
 export interface CdkEcsTaskDefinitionProps {
   appName: string;
@@ -16,9 +17,9 @@ export interface CdkEcsTaskDefinitionProps {
   containerPort?: string;
 }
 
-export class CdkEcsTaskDefinition extends cdk.Construct {
+export class CdkEcsTaskDefinition extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsTaskDefinitionProps) {
+  constructor(scope: Construct, id: string, props: CdkEcsTaskDefinitionProps) {
     super(scope, id);
 
     let taskDefinition: ecs.TaskDefinition;

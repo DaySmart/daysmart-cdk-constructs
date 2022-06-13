@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-app-bucket",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
   "scripts": {
@@ -10,28 +10,29 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.159.0",
-    "@types/jest": "^26.0.20",
-    "@types/node": "14.14.31",
-    "@typescript-eslint/eslint-plugin": "^5.17.0",
-    "@typescript-eslint/parser": "^5.17.0",
-    "eslint": "^8.12.0",
+    "@types/jest": "^27.5.0",
+    "@types/node": "17.0.25",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "aws-cdk-lib": "^2.27.0",
+    "constructs": "^10.1.37",
+    "eslint": "^8.13.0",
     "eslint-plugin-react": "^7.29.4",
-    "jest": "^26.6.3",
-    "ts-jest": "^26.5.2",
-    "typescript": "~4.2.2"
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.7.3"
   },
   "peerDependencies": {
-    "@aws-cdk/core": "^1.159.0"
-  },
-  "dependencies": {
-    "@aws-cdk/aws-cloudfront": "^1.159.0",
-    "@aws-cdk/aws-iam": "^1.159.0",
-    "@aws-cdk/aws-s3": "^1.159.0",
-    "@aws-cdk/core": "^1.159.0"
+    "aws-cdk-lib": "^2.27.0",
+    "constructs": "^10.1.37"
   },
   "gitHead": "ee505163f0cbd67206dfe03fe5840b7a5e949efe",
   "publishConfig": {
     "access": "public"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js"
+    ]
   }
 }

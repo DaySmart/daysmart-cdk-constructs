@@ -1,8 +1,8 @@
-import * as cdk from '@aws-cdk/core';
-import * as route53 from '@aws-cdk/aws-route53';
-import * as apigw from '@aws-cdk/aws-apigateway';
-import * as route53_targets from '@aws-cdk/aws-route53-targets'
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as apigw from 'aws-cdk-lib/aws-apigateway';
+import * as route53_targets from 'aws-cdk-lib/aws-route53-targets'
 import { getAliasTarget } from './alias-target';
+import { Construct } from 'constructs';
 
 export interface ApiGatewayDomainRoute53AliasProps {
     companyDomainName: string;
@@ -13,8 +13,8 @@ export interface ApiGatewayDomainRoute53AliasProps {
     dynamicEnv?: string;
 }
 
-export class ApiGatewayDomainRoute53Alias extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: ApiGatewayDomainRoute53AliasProps) {
+export class ApiGatewayDomainRoute53Alias extends Construct {
+    constructor(scope: Construct, id: string, props: ApiGatewayDomainRoute53AliasProps) {
         super(scope, id);
 
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {

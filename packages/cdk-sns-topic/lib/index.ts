@@ -1,13 +1,14 @@
-import * as cdk from '@aws-cdk/core';
-import * as sns from '@aws-cdk/aws-sns';
+import * as cdk from 'aws-cdk-lib/core';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import { Construct } from 'constructs';
 
 export interface CdkSnsTopicProps {
   stage: string;
   project: string;
 }
 
-export class CdkSnsTopic extends cdk.Construct {
-  constructor(scope: cdk.Construct, id: string, props: CdkSnsTopicProps) {
+export class CdkSnsTopic extends Construct {
+  constructor(scope: Construct, id: string, props: CdkSnsTopicProps) {
     super(scope, id);
 
     const snsTopic = new sns.Topic(this, "SnsTopic", {
