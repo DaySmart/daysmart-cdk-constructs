@@ -79,7 +79,7 @@ export class CdkApiGatewayDomain extends Construct {
         basePath: `${props.basePath}`,
         domainName: customDomain.domainName,
         restApiId: `${props.restApiId}`,
-        stage: `${stageName}`
+        stage: `${stageName}` 
       });
     }
 
