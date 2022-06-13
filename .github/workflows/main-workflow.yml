@@ -146,12 +146,12 @@ jobs:
           filters: |
             cdk-sns-topic:
               - '/packages/cdk-sns-topic/**'
-      - uses: dorny/paths-filter@v2
-        id: static-website
-        with:
-          filters: |
-            cdk-static-website:
-              - '/packages/cdk-static-website/**'
+      # - uses: dorny/paths-filter@v2
+      #   id: static-website
+      #   with:
+      #     filters: |
+      #       cdk-static-website:
+      #         - '/packages/cdk-static-website/**'
   
   Build-test-and-publish:
     needs: get-file-changes
@@ -387,16 +387,16 @@ jobs:
         working-directory: packages/cdk-sns-topic
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.static-website.outputs.cdk-static-website == 'true'
-        run: | 
-          npm install
-          npm run build
-          npm run lint
-          npm run test          
-          npm publish 
-        working-directory: packages/cdk-static-website
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - if: steps.static-website.outputs.cdk-static-website == 'true'
+      #   run: | 
+      #     npm install
+      #     npm run build
+      #     npm run lint
+      #     npm run test          
+      #     npm publish 
+      #   working-directory: packages/cdk-static-website
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
   Slack-on-failure:
     if: failure()
