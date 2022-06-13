@@ -15,7 +15,7 @@ export interface CdkApiGatewayDomainProps {
   basePath: string;
   stageName?: string;
   appName?: string;
-  apiKeyIDs?: string[];
+  apiKeyIDs?: string[]; 
 }
 
 export class CdkApiGatewayDomain extends Construct {
