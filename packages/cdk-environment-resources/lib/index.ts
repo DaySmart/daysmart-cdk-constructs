@@ -4,7 +4,7 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface CdkEnvironmentResourcesProps {
     vpcId: string;

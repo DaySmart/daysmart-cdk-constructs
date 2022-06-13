@@ -68,7 +68,6 @@ export class CdkCertificate extends Construct {
     let output = new cdk.CfnOutput(this, "CertificateArn",{
         value: cert.certificateArn
     });
-
     output.overrideLogicalId("CertificateArn");
   }
 }
