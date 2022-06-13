@@ -307,7 +307,7 @@ jobs:
         working-directory: packages/cdk-environment-resources
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: files-bucket.outputs.cdk-files-bucket == 'true'
+      - if: steps.files-bucket.outputs.cdk-files-bucket == 'true'
         run: | 
           npm install
           npm run build
