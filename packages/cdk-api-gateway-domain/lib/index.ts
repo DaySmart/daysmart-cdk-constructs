@@ -57,6 +57,7 @@ export class CdkApiGatewayDomain extends Construct {
         restApiId: `${props.restApiId}`,
         stage: `${stageName}`
       });
+      
     } else {
       customDomain = new apigw.DomainName(this, 'Custom Domain', {
         domainName: (props.baseEnv == "prod") ? `${appName}.${props.project}.${props.companyDomainName}` : `${appName}.${props.baseEnv}.${props.project}.${props.companyDomainName}`,
