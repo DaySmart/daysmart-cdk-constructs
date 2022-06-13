@@ -158,6 +158,7 @@ jobs:
     needs: get-file-changes
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - if: steps.api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
         run: | 
           npm install
