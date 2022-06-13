@@ -1,8 +1,8 @@
-import * as cdk from '@aws-cdk/core';
-import * as apigw from '@aws-cdk/aws-apigateway';
-import * as acm from '@aws-cdk/aws-certificatemanager';
-import * as route53 from '@aws-cdk/aws-route53';
-import { CfnUsagePlanKey } from '@aws-cdk/aws-apigateway';
+import * as apigw from 'aws-cdk-lib/aws-apigateway';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import { CfnUsagePlanKey } from 'aws-cdk-lib/aws-apigateway';
+import { Construct } from 'constructs';
 
 export interface CdkApiGatewayDomainProps {
   companyDomainName: string;
@@ -18,9 +18,9 @@ export interface CdkApiGatewayDomainProps {
   apiKeyIDs?: string[];
 }
 
-export class CdkApiGatewayDomain extends cdk.Construct {
+export class CdkApiGatewayDomain extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkApiGatewayDomainProps) {
+  constructor(scope: Construct, id: string, props: CdkApiGatewayDomainProps) {
     super(scope, id);
 
     const api = apigw.RestApi.fromRestApiId(this, "Rest API", `${props.restApiId}`);
