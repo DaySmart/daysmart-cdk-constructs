@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
       - uses: dorny/paths-filter@v2
         id: api-gateway-domain
         with:
@@ -153,6 +154,9 @@ jobs:
       #     filters: |
       #       cdk-static-website:
       #         - 'packages/cdk-static-website/**'
+
+
+
   
       - if: steps.api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
         run: | 
@@ -406,7 +410,7 @@ jobs:
         working-directory: packages/cdk-sns-topic
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       # - if: steps.static-website.outputs.cdk-static-website == 'true'
       #   run: | 
       #     npm install

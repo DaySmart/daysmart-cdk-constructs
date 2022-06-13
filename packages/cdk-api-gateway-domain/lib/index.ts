@@ -89,7 +89,7 @@ export class CdkApiGatewayDomain extends Construct {
           keyId: apiKeyID,
           keyType: 'API_KEY',
           usagePlanId: usagePlan.ref
-        }) 
+        })
       })
     }
 
