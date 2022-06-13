@@ -2,7 +2,7 @@ name: CDK Publishing
 on:
   push:
     branches:
-      - main
+      - PLATFORM-v2-constructs
   
 jobs:
   get-file-changes:
@@ -13,152 +13,152 @@ jobs:
         id: api-gateway-domain
         with:
           filters: |
-            cdk-api-gateway-domain:
+            packages/cdk-api-gateway-domain:
               - '/packages/cdk-api-gateway-domain/**'
       - uses: dorny/paths-filter@v2
         id: api-gateway-domain-multi-region
         with:
           filters: |
-            cdk-api-gateway-domain-multi-region:
+            packages/cdk-api-gateway-domain-multi-region:
               - '/packages/cdk-api-gateway-domain-multi-region/**'
       - uses: dorny/paths-filter@v2
         id: app-bucket
         with:
           filters: |
-            cdk-app-bucket:
+            packages/cdk-app-bucket:
               - '/packages/cdk-app-bucket/**'
       - uses: dorny/paths-filter@v2
         id: app-cloudfront
         with:
           filters: |
-            cdk-app-cloudfront:
+            packages/cdk-app-cloudfront:
               - '/packages/cdk-app-cloudfront/**'
       - uses: dorny/paths-filter@v2
         id: base-cf-acm-r53
         with:
           filters: |
-            cdk-base-cf-acm-r53:
+            packages/cdk-base-cf-acm-r53:
               - '/packages/cdk-base-cf-acm-r53/**'
       - uses: dorny/paths-filter@v2
         id: certificate
         with:
           filters: |
-            cdk-certificate:
+            packages/cdk-certificate:
               - '/packages/cdk-certificate/**'
       # - uses: dorny/paths-filter@v2
       #   id: cloudfront-behavior
       #   with:
       #     filters: |
-      #       cdk-cloudfront-behavior:
+      #       packages/cdk-cloudfront-behavior:
       #         - '/packages/cdk-cloudfront-behavior/**'
       - uses: dorny/paths-filter@v2
         id: cloudfront-cache-policy
         with:
           filters: |
-            cdk-cloudfront-cache-policy:
+            packages/cdk-cloudfront-cache-policy:
               - '/packages/cdk-cloudfront-cache-policy/**'
       - uses: dorny/paths-filter@v2
         id: cloudfront-origin-request-policy
         with:
           filters: |
-            cdk-cloudfront-origin-request-policy:
+            packages/cdk-cloudfront-origin-request-policy:
               - '/packages/cdk-cloudfront-origin-request-policy/**'
       - uses: dorny/paths-filter@v2
         id: dynamodbtable
         with:
           filters: |
-            cdk-dynamodbtable:
+            packages/cdk-dynamodbtable:
               - '/packages/cdk-dynamodbtable/**'
       - uses: dorny/paths-filter@v2
         id: ecs-alb
         with:
           filters: |
-            cdk-ecs-alb:
+            packages/cdk-ecs-alb:
               - '/packages/cdk-ecs-alb/**'
       - uses: dorny/paths-filter@v2
         id: ecs-codedeploy-resources
         with:
           filters: |
-            cdk-ecs-codedeploy-resources:
+            packages/cdk-ecs-codedeploy-resources:
               - '/packages/cdk-ecs-codedeploy-resources/**'
       - uses: dorny/paths-filter@v2
         id: ecs-nlb
         with:
           filters: |
-            cdk-ecs-nlb:
+            packages/cdk-ecs-nlb:
               - '/packages/cdk-ecs-nlb/**'
       - uses: dorny/paths-filter@v2
         id: ecs-task-definition
         with:
           filters: |
-            cdk-ecs-task-definition:
+            packages/cdk-ecs-task-definition:
               - '/packages/cdk-ecs-task-definition/**'
       - uses: dorny/paths-filter@v2
         id: environment-resources
         with:
           filters: |
-            cdk-environment-resources:
+            packages/cdk-environment-resources:
               - '/packages/cdk-environment-resources/**'
       - uses: dorny/paths-filter@v2
         id: files-bucket
         with:
           filters: |
-            cdk-files-bucket:
+            packages/cdk-files-bucket:
               - '/packages/cdk-files-bucket/**'
       - uses: dorny/paths-filter@v2
         id: multi-account-dns
         with:
           filters: |
-            cdk-multi-account-dns:
+            packages/cdk-multi-account-dns:
               - '/packages/cdk-multi-account-dns/**'
       - uses: dorny/paths-filter@v2
         id: pipeline
         with:
           filters: |
-            cdk-pipeline:
+            packages/cdk-pipeline:
               - '/packages/cdk-pipeline/**'
       - uses: dorny/paths-filter@v2
         id: route53-record
         with:
           filters: |
-            cdk-route53-record:
+            packages/cdk-route53-record:
               - '/packages/cdk-route53-record/**'
       - uses: dorny/paths-filter@v2
         id: s3-deployment
         with:
           filters: |
-            cdk-s3-deployment:
+            packages/cdk-s3-deployment:
               - '/packages/cdk-s3-deployment/**'
       - uses: dorny/paths-filter@v2
         id: s3-redirect
         with:
           filters: |
-            cdk-s3-redirect:
+            packages/cdk-s3-redirect:
               - '/packages/cdk-s3-redirect/**'
       - uses: dorny/paths-filter@v2
         id: shared-services-resources
         with:
           filters: |
-            cdk-shared-services-resources:
+            packages/cdk-shared-services-resources:
               - '/packages/cdk-shared-services-resources/**'
       - uses: dorny/paths-filter@v2
         id: sns-topic
         with:
           filters: |
-            cdk-sns-topic:
+            packages/cdk-sns-topic:
               - '/packages/cdk-sns-topic/**'
       # - uses: dorny/paths-filter@v2
       #   id: static-website
       #   with:
       #     filters: |
-      #       cdk-static-website:
+      #       packages/cdk-static-website:
       #         - '/packages/cdk-static-website/**'
   
   Build-test-and-publish:
     needs: get-file-changes
     runs-on: ubuntu-latest
     steps:
-      - if: steps.api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
+      - if: steps.api-gateway-domain.outputs.packages/cdk-api-gateway-domain == 'true'
         run: | 
           npm install
           npm run build
@@ -168,7 +168,7 @@ jobs:
         working-directory: packages/cdk-api-gateway-domain
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.api-gateway-domain-multi-region.outputs.cdk-api-gateway-domain-multi-region == 'true'
+      - if: steps.api-gateway-domain-multi-region.outputs.packages/cdk-api-gateway-domain-multi-region == 'true'
         run: | 
           npm install
           npm run build
@@ -178,7 +178,7 @@ jobs:
         working-directory: packages/cdk-api-gateway-domain-multi-region
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.app-bucket.outputs.cdk-app-bucket == 'true'
+      - if: steps.app-bucket.outputs.packages/cdk-app-bucket == 'true'
         run: | 
           npm install
           npm run build
@@ -188,7 +188,7 @@ jobs:
         working-directory: packages/cdk-app-bucket
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.app-cloudfront.outputs.cdk-app-cloudfront == 'true'
+      - if: steps.app-cloudfront.outputs.packages/cdk-app-cloudfront == 'true'
         run: | 
           npm install
           npm run build
@@ -198,7 +198,7 @@ jobs:
         working-directory: packages/cdk-app-cloudfront
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.base-cf-acm-r53.outputs.cdk-base-cf-acm-r53 == 'true'
+      - if: steps.base-cf-acm-r53.outputs.packages/cdk-base-cf-acm-r53 == 'true'
         run: | 
           npm install
           npm run build
@@ -208,7 +208,7 @@ jobs:
         working-directory: packages/cdk-base-cf-acm-r53
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.certificate.outputs.cdk-certificate == 'true'
+      - if: steps.certificate.outputs.packages/cdk-certificate == 'true'
         run: | 
           npm install
           npm run build
@@ -218,7 +218,7 @@ jobs:
         working-directory: packages/cdk-certificate
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      # - if: steps.cloudfront-behavior.outputs.cdk-cloudfront-behavior == 'true'
+      # - if: steps.cloudfront-behavior.outputs.packages/cdk-cloudfront-behavior == 'true'
       #   run: | 
       #     npm install
       #     npm run build
@@ -228,7 +228,7 @@ jobs:
       #   working-directory: packages/cdk-cloudfront-behavior
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.cloudfront-cache-policy.outputs.cdk-cloudfront-cache-policy == 'true'
+      - if: steps.cloudfront-cache-policy.outputs.packages/cdk-cloudfront-cache-policy == 'true'
         run: | 
           npm install
           npm run build
@@ -238,7 +238,7 @@ jobs:
         working-directory: packages/cdk-cloudfront-cache-policy
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.cloudfront-origin-request-policy.outputs.cdk-cloudfront-origin-request-policy == 'true'
+      - if: steps.cloudfront-origin-request-policy.outputs.packages/cdk-cloudfront-origin-request-policy == 'true'
         run: | 
           npm install
           npm run build
@@ -248,7 +248,7 @@ jobs:
         working-directory: packages/cdk-cloudfront-origin-request-policy
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.dynamodbtable.outputs.cdk-dynamodbtable == 'true'
+      - if: steps.dynamodbtable.outputs.packages/cdk-dynamodbtable == 'true'
         run: | 
           npm install
           npm run build
@@ -258,7 +258,7 @@ jobs:
         working-directory: packages/cdk-dynamodbtable
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.ecs-alb.outputs.cdk-ecs-alb == 'true'
+      - if: steps.ecs-alb.outputs.packages/cdk-ecs-alb == 'true'
         run: | 
           npm install
           npm run build
@@ -268,7 +268,7 @@ jobs:
         working-directory: packages/cdk-ecs-alb
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.ecs-codedeploy-resources.outputs.cdk-ecs-codedeploy-resources == 'true'
+      - if: steps.ecs-codedeploy-resources.outputs.packages/cdk-ecs-codedeploy-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -278,7 +278,7 @@ jobs:
         working-directory: packages/cdk-ecs-codedeploy-resources
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.ecs-nlb.outputs.cdk-ecs-nlb == 'true'
+      - if: steps.ecs-nlb.outputs.packages/cdk-ecs-nlb == 'true'
         run: | 
           npm install
           npm run build
@@ -288,7 +288,7 @@ jobs:
         working-directory: packages/cdk-ecs-nlb
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.ecs-task-definition.outputs.cdk-ecs-task-definition == 'true'
+      - if: steps.ecs-task-definition.outputs.packages/cdk-ecs-task-definition == 'true'
         run: | 
           npm install
           npm run build
@@ -298,7 +298,7 @@ jobs:
         working-directory: packages/cdk-ecs-task-definition
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.environment-resources.outputs.cdk-environment-resources == 'true'
+      - if: steps.environment-resources.outputs.packages/cdk-environment-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -308,7 +308,7 @@ jobs:
         working-directory: packages/cdk-environment-resources
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.files-bucket.outputs.cdk-files-bucket == 'true'
+      - if: steps.files-bucket.outputs.packages/cdk-files-bucket == 'true'
         run: | 
           npm install
           npm run build
@@ -318,7 +318,7 @@ jobs:
         working-directory: packages/cdk-files-bucket
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.multi-account-dns.outputs.cdk-multi-account-dns == 'true'
+      - if: steps.multi-account-dns.outputs.packages/cdk-multi-account-dns == 'true'
         run: | 
           npm install
           npm run build
@@ -328,7 +328,7 @@ jobs:
         working-directory: packages/cdk-multi-account-dns
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.pipeline.outputs.cdk-pipeline == 'true'
+      - if: steps.pipeline.outputs.packages/cdk-pipeline == 'true'
         run: | 
           npm install
           npm run build
@@ -338,7 +338,7 @@ jobs:
         working-directory: packages/cdk-pipelin
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.route53-record.outputs.cdk-route53-record == 'true'
+      - if: steps.route53-record.outputs.packages/cdk-route53-record == 'true'
         run: | 
           npm install
           npm run build
@@ -348,7 +348,7 @@ jobs:
         working-directory: packages/cdk-route53-record
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.s3-deployment.outputs.cdk-s3-deployment == 'true'
+      - if: steps.s3-deployment.outputs.packages/cdk-s3-deployment == 'true'
         run: | 
           npm install
           npm run build
@@ -358,7 +358,7 @@ jobs:
         working-directory: packages/cdk-s3-deployment
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.s3-redirect.outputs.cdk-s3-redirect == 'true'
+      - if: steps.s3-redirect.outputs.packages/cdk-s3-redirect == 'true'
         run: | 
           npm install
           npm run build
@@ -368,7 +368,7 @@ jobs:
         working-directory: packages/cdk-s3-redirect
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.shared-services-resources.outputs.cdk-shared-services-resources == 'true'
+      - if: steps.shared-services-resources.outputs.packages/cdk-shared-services-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -378,7 +378,7 @@ jobs:
         working-directory: packages/cdk-shared-services-resources
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.sns-topic.outputs.cdk-sns-topic == 'true'
+      - if: steps.sns-topic.outputs.packages/cdk-sns-topic == 'true'
         run: | 
           npm install
           npm run build
