@@ -9,7 +9,7 @@ export interface DelegatedHostedZoneProps {
     /**
      * Name of the hosted zone. i.e. example.domain.com
      */
-    zoneName: string;
+    zoneName: string; 
 }
 
 /**

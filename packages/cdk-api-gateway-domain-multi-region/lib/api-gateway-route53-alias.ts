@@ -20,7 +20,6 @@ export class ApiGatewayDomainRoute53Alias extends Construct {
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
             domainName: props.companyDomainName
         });
-
         const aliasTarget = getAliasTarget({
             baseEnv: props.baseEnv,
             project: props.project,

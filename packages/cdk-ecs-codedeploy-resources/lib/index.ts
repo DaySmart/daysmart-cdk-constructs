@@ -5,7 +5,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from 'constructs';
 const fs = require('fs');
-const yaml = require('js-yaml');
+const yaml = require('js-yaml'); 
 
 export interface CdkEcsCodedeployResourcesProps {
   stage: string;

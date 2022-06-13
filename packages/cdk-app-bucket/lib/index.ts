@@ -16,7 +16,6 @@ export class AppBucket extends Construct {
     constructor(scope: Construct, id: string, props: AppBucketProps) {
         super(scope, id);
         let bucket;
-
         if(props.removeBucket){
             bucket = new s3.Bucket(this, 'Bucket', {
                 bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,

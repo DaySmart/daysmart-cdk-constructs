@@ -146,7 +146,6 @@ export class CdkBaseCfAcmR53 extends Construct {
         );
       }
     });
-
     return aliases;
   }
 }

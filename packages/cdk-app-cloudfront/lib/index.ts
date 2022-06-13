@@ -21,7 +21,6 @@ export interface CdkAppCloudfrontProps {
 }
 
 export class CdkAppCloudfront extends Construct {
-
   constructor(scope: Construct, id: string, props: CdkAppCloudfrontProps) {
     super(scope, id);
 

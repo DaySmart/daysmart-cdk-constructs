@@ -13,7 +13,7 @@ export interface globalSecondaryIndex {
   sortKey: string;
   projection?: aws_dynamodb.ProjectionType;
   attributes?: string[];
-}
+} 
 
 export class CdkDynamodbtable extends Construct {
 

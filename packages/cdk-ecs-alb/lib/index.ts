@@ -7,7 +7,7 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as ecspattern from "aws-cdk-lib/aws-ecs-patterns";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import { SslPolicy } from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface CdkEcsAlbProps {
     clusterName: string;
