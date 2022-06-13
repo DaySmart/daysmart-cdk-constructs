@@ -13,145 +13,145 @@ jobs:
         with:
           filters: |
             cdk-api-gateway-domain:
-              - '/packages/cdk-api-gateway-domain/**'
+              - '/cdk-api-gateway-domain/**'
       - uses: dorny/paths-filter@v2
         id: api-gateway-domain-multi-region
         with:
           filters: |
             cdk-api-gateway-domain-multi-region:
-              - '/packages/cdk-api-gateway-domain-multi-region/**'
+              - '/cdk-api-gateway-domain-multi-region/**'
       - uses: dorny/paths-filter@v2
         id: app-bucket
         with:
           filters: |
             cdk-app-bucket:
-              - '/packages/cdk-app-bucket/**'
+              - '/cdk-app-bucket/**'
       - uses: dorny/paths-filter@v2
         id: app-cloudfront
         with:
           filters: |
             cdk-app-cloudfront:
-              - '/packages/cdk-app-cloudfront/**'
+              - '/cdk-app-cloudfront/**'
       - uses: dorny/paths-filter@v2
         id: base-cf-acm-r53
         with:
           filters: |
             cdk-base-cf-acm-r53:
-              - '/packages/cdk-base-cf-acm-r53/**'
+              - '/cdk-base-cf-acm-r53/**'
       - uses: dorny/paths-filter@v2
         id: certificate
         with:
           filters: |
             cdk-certificate:
-              - '/packages/cdk-certificate/**'
+              - '/cdk-certificate/**'
       # - uses: dorny/paths-filter@v2
       #   id: cloudfront-behavior
       #   with:
       #     filters: |
       #       cdk-cloudfront-behavior:
-      #         - '/packages/cdk-cloudfront-behavior/**'
+      #         - '/cdk-cloudfront-behavior/**'
       - uses: dorny/paths-filter@v2
         id: cloudfront-cache-policy
         with:
           filters: |
             cdk-cloudfront-cache-policy:
-              - '/packages/cdk-cloudfront-cache-policy/**'
+              - '/cdk-cloudfront-cache-policy/**'
       - uses: dorny/paths-filter@v2
         id: cloudfront-origin-request-policy
         with:
           filters: |
             cdk-cloudfront-origin-request-policy:
-              - '/packages/cdk-cloudfront-origin-request-policy/**'
+              - '/cdk-cloudfront-origin-request-policy/**'
       - uses: dorny/paths-filter@v2
         id: dynamodbtable
         with:
           filters: |
             cdk-dynamodbtable:
-              - '/packages/cdk-dynamodbtable/**'
+              - '/cdk-dynamodbtable/**'
       - uses: dorny/paths-filter@v2
         id: ecs-alb
         with:
           filters: |
             cdk-ecs-alb:
-              - '/packages/cdk-ecs-alb/**'
+              - '/cdk-ecs-alb/**'
       - uses: dorny/paths-filter@v2
         id: ecs-codedeploy-resources
         with:
           filters: |
             cdk-ecs-codedeploy-resources:
-              - '/packages/cdk-ecs-codedeploy-resources/**'
+              - '/cdk-ecs-codedeploy-resources/**'
       - uses: dorny/paths-filter@v2
         id: ecs-nlb
         with:
           filters: |
             cdk-ecs-nlb:
-              - '/packages/cdk-ecs-nlb/**'
+              - '/cdk-ecs-nlb/**'
       - uses: dorny/paths-filter@v2
         id: ecs-task-definition
         with:
           filters: |
             cdk-ecs-task-definition:
-              - '/packages/cdk-ecs-task-definition/**'
+              - '/cdk-ecs-task-definition/**'
       - uses: dorny/paths-filter@v2
         id: environment-resources
         with:
           filters: |
             cdk-environment-resources:
-              - '/packages/cdk-environment-resources/**'
+              - '/cdk-environment-resources/**'
       - uses: dorny/paths-filter@v2
         id: files-bucket
         with:
           filters: |
             cdk-files-bucket:
-              - '/packages/cdk-files-bucket/**'
+              - '/cdk-files-bucket/**'
       - uses: dorny/paths-filter@v2
         id: multi-account-dns
         with:
           filters: |
             cdk-multi-account-dns:
-              - '/packages/cdk-multi-account-dns/**'
+              - '/cdk-multi-account-dns/**'
       - uses: dorny/paths-filter@v2
         id: pipeline
         with:
           filters: |
             cdk-pipeline:
-              - '/packages/cdk-pipeline/**'
+              - '/cdk-pipeline/**'
       - uses: dorny/paths-filter@v2
         id: route53-record
         with:
           filters: |
             cdk-route53-record:
-              - '/packages/cdk-route53-record/**'
+              - '/cdk-route53-record/**'
       - uses: dorny/paths-filter@v2
         id: s3-deployment
         with:
           filters: |
             cdk-s3-deployment:
-              - '/packages/cdk-s3-deployment/**'
+              - '/cdk-s3-deployment/**'
       - uses: dorny/paths-filter@v2
         id: s3-redirect
         with:
           filters: |
             cdk-s3-redirect:
-              - '/packages/cdk-s3-redirect/**'
+              - '/cdk-s3-redirect/**'
       - uses: dorny/paths-filter@v2
         id: shared-services-resources
         with:
           filters: |
             cdk-shared-services-resources:
-              - '/packages/cdk-shared-services-resources/**'
+              - '/cdk-shared-services-resources/**'
       - uses: dorny/paths-filter@v2
         id: sns-topic
         with:
           filters: |
             cdk-sns-topic:
-              - '/packages/cdk-sns-topic/**'
+              - '/cdk-sns-topic/**'
       # - uses: dorny/paths-filter@v2
       #   id: static-website
       #   with:
       #     filters: |
       #       cdk-static-website:
-      #         - '/packages/cdk-static-website/**'
+      #         - '/cdk-static-website/**'
   
   Build-test-and-publish:
     needs: get-file-changes
@@ -398,15 +398,15 @@ jobs:
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
-  Slack-on-failure:
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Send slack message
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: platform-alerts
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_MESSAGE: 'Workflow was, ${{ job.status }}' 
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  # Slack-on-failure:
+  #   if: always()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Send slack message
+  #       uses: rtCamp/action-slack-notify@v2
+  #       env:
+  #         SLACK_CHANNEL: platform-alerts
+  #         SLACK_COLOR: ${{ job.status }}
+  #         SLACK_MESSAGE: 'Workflow was, ${{ job.status }}' 
+  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
