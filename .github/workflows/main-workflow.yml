@@ -2,7 +2,7 @@ name: CDK Publishing
 on:
   push:
     branches:
-      - do-not-publish-yet
+      - main
   
 jobs:
   get-file-changes:

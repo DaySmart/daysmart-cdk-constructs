@@ -1,6 +1,6 @@
 {
     "name": "@daysmart/cdk-environment-resources",
-    "version": "0.3.5",
+    "version": "1.0.0",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -18,13 +18,13 @@
         "eslint-plugin-react": "^7.29.4",
         "jest": "^26.4.2",
         "ts-jest": "^26.2.0",
-        "typescript": "~3.9.7",
-        "aws-cdk-lib": "^2.25.0",
-        "constructs": "^10.1.18"
+        "typescript": "^4.7.3",
+        "aws-cdk-lib": "^2.27.0",
+        "constructs": "^10.1.37"
     },
     "peerDependencies": {
-        "aws-cdk-lib": "^2.25.0",
-        "constructs": "^10.1.18"
+        "aws-cdk-lib": "^2.27.0",
+        "constructs": "^10.1.37"
     },
     "dependencies": {
 
