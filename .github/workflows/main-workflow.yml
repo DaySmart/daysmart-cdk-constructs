@@ -14,7 +14,7 @@ jobs:
           node-version: 16
           registry-url: https://registry.npmjs.org/
       - uses: dorny/paths-filter@v2
-        id: api-gateway-domain
+        id: cdk
         with:
           filters: |
             cdk-api-gateway-domain:
@@ -168,10 +168,8 @@ jobs:
       #       cdk-static-website:
       #         - 'packages/cdk-static-website/**'
 
-
-
   
-      - if: steps.cdk-api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
+      - if: steps.cdk.outputs.cdk-api-gateway-domain == 'true'
         run: | 
           npm install
           npm run build
@@ -182,7 +180,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cdk-api-gateway-domain-multi-region.outputs.cdk-api-gateway-domain-multi-region == 'true'
+      - if: steps.cdk.outputs.cdk-api-gateway-domain-multi-region == 'true'
         run: | 
           npm install
           npm run build
@@ -193,7 +191,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cdk-app-bucket.outputs.cdk-app-bucket == 'true'
+      - if: steps.cdk.outputs.cdk-app-bucket == 'true'
         run: | 
           npm install
           npm run build
@@ -204,7 +202,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cdk-app-cloudfront.outputs.cdk-app-cloudfront == 'true'
+      - if: steps.cdk.outputs.cdk-app-cloudfront == 'true'
         run: | 
           npm install
           npm run build
@@ -215,7 +213,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cdk-base-cf-acm-r53.outputs.cdk-base-cf-acm-r53 == 'true'
+      - if: steps.cdk.outputs.cdk-base-cf-acm-r53 == 'true'
         run: | 
           npm install
           npm run build
