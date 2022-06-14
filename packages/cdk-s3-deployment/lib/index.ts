@@ -1,11 +1,12 @@
-import * as path from 'path';
-import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import { Source, SourceConfig, ISource } from '@aws-cdk/aws-s3-deployment';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
-import * as iam from '@aws-cdk/aws-iam';
-import { AwsCliLayer } from '@aws-cdk/lambda-layer-awscli';
+import * as path from 'path'; 
+import * as cdk from 'aws-cdk-lib/core';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { Source, SourceConfig, ISource } from 'aws-cdk-lib/aws-s3-deployment';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { AwsCliLayer } from 'aws-cdk-lib/lambda-layer-awscli';
+import { Construct } from 'constructs';
 
 export interface CdkS3DeploymentProps {
   bucketName: string;
@@ -18,9 +19,9 @@ export interface CdkS3DeploymentProps {
   snsTopicArn: string;
 }
 
-export class CdkS3Deployment extends cdk.Construct {
+export class CdkS3Deployment extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkS3DeploymentProps) {
+  constructor(scope: Construct, id: string, props: CdkS3DeploymentProps) {
     super(scope, id);
 
     const bucket = s3.Bucket.fromBucketName(this, 'Bucket', props.bucketName);

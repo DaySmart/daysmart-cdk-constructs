@@ -1,7 +1,8 @@
-import cdk = require('@aws-cdk/core');
-import s3 = require('@aws-cdk/aws-s3');
-import cloudfront = require('@aws-cdk/aws-cloudfront');
-import iam = require('@aws-cdk/aws-iam');
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { aws_s3 as s3 } from 'aws-cdk-lib';
+import { aws_cloudfront as cloudfront } from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
 
 export interface AppBucketProps {
     stage: string;
@@ -9,17 +10,29 @@ export interface AppBucketProps {
     dynamicEnvName: string;
     projectName: string;
     sharedServicesAccountId?: string;
+    removeBucket?: boolean;
 }
-export class AppBucket extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: AppBucketProps) {
+export class AppBucket extends Construct {
+    constructor(scope: Construct, id: string, props: AppBucketProps) {
         super(scope, id);
-
-        const bucket = new s3.Bucket(this, 'Bucket', {
-            bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
-            versioned: true,
-            objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
-            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
-        });
+        let bucket;
+        if(props.removeBucket){
+            bucket = new s3.Bucket(this, 'Bucket', {
+                bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
+                versioned: true,
+                objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+                blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+                removalPolicy: cdk.RemovalPolicy.DESTROY,
+                autoDeleteObjects: true
+            });
+        } else{
+            bucket = new s3.Bucket(this, 'Bucket', {
+                bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
+                versioned: true,
+                objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+                blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+            });
+        }
 
         const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAcessIdentity', {
             comment: `OriginAccessIdentity for ${bucket.bucketName}.`

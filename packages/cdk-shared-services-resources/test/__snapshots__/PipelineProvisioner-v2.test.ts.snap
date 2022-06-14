@@ -1,9 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`pipeline provisioner template 1`] = `
+exports[`App Cloudfront 1`] = `
 Object {
+  "Parameters": Object {
+    "BootstrapVersion": Object {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
   "Resources": Object {
-    "PipelineProvisionerPolicyD672C756": Object {
+    "AppCloudfrontPolicy6835BCDC": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
@@ -32,21 +39,24 @@ Object {
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "PipelineProvisionerPolicyD672C756",
+        "PolicyName": "AppCloudfrontPolicy6835BCDC",
         "Roles": Array [
           Object {
-            "Ref": "PipelineProvisionerRoleB8C40D93",
+            "Ref": "AppCloudfrontRoleB0CF141D",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "PipelineProvisionerProject812B4DD6": Object {
+    "AppCloudfrontProjectEE854E63": Object {
       "Properties": Object {
         "Artifacts": Object {
           "Type": "NO_ARTIFACTS",
         },
         "BadgeEnabled": false,
+        "Cache": Object {
+          "Type": "NO_CACHE",
+        },
         "ConcurrentBuildLimit": 1,
         "EncryptionKey": "alias/aws/s3",
         "Environment": Object {
@@ -56,10 +66,10 @@ Object {
           "PrivilegedMode": false,
           "Type": "LINUX_CONTAINER",
         },
-        "Name": "my-code-pipeline-provisioner",
+        "Name": "cdk-pipeline-provisioner",
         "ServiceRole": Object {
           "Fn::GetAtt": Array [
-            "PipelineProvisionerRoleB8C40D93",
+            "AppCloudfrontRoleB0CF141D",
             "Arn",
           ],
         },
@@ -83,7 +93,7 @@ Object {
     }
   }
 }",
-          "Location": "https://bitbucket.org/you/my-code.git",
+          "Location": "https://bitbucket.org/tester/cdk.git",
           "ReportBuildStatus": true,
           "Type": "BITBUCKET",
         },
@@ -101,7 +111,7 @@ Object {
       },
       "Type": "AWS::CodeBuild::Project",
     },
-    "PipelineProvisionerRoleB8C40D93": Object {
+    "AppCloudfrontRoleB0CF141D": Object {
       "Properties": Object {
         "AssumeRolePolicyDocument": Object {
           "Statement": Array [
@@ -116,11 +126,11 @@ Object {
           "Version": "2012-10-17",
         },
         "Description": "Enables the pipeline provisioner CodeBuild projects to provision new CodePipelines",
-        "RoleName": "pipeline-provisioner-role-my-code",
+        "RoleName": "pipeline-provisioner-role-cdk",
       },
       "Type": "AWS::IAM::Role",
     },
-    "PipelineProvisionerRoleDefaultPolicy937EBC29": Object {
+    "AppCloudfrontRoleDefaultPolicy14789CC7": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
@@ -140,17 +150,9 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
+                      ":logs:us-east-1:123456:log-group:/aws/codebuild/",
                       Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
-                      Object {
-                        "Ref": "PipelineProvisionerProject812B4DD6",
+                        "Ref": "AppCloudfrontProjectEE854E63",
                       },
                     ],
                   ],
@@ -163,17 +165,9 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
+                      ":logs:us-east-1:123456:log-group:/aws/codebuild/",
                       Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
-                      Object {
-                        "Ref": "PipelineProvisionerProject812B4DD6",
+                        "Ref": "AppCloudfrontProjectEE854E63",
                       },
                       ":*",
                     ],
@@ -198,17 +192,9 @@ Object {
                     Object {
                       "Ref": "AWS::Partition",
                     },
-                    ":codebuild:",
+                    ":codebuild:us-east-1:123456:report-group/",
                     Object {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    Object {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":report-group/",
-                    Object {
-                      "Ref": "PipelineProvisionerProject812B4DD6",
+                      "Ref": "AppCloudfrontProjectEE854E63",
                     },
                     "-*",
                   ],
@@ -218,14 +204,41 @@ Object {
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "PipelineProvisionerRoleDefaultPolicy937EBC29",
+        "PolicyName": "AppCloudfrontRoleDefaultPolicy14789CC7",
         "Roles": Array [
           Object {
-            "Ref": "PipelineProvisionerRoleB8C40D93",
+            "Ref": "AppCloudfrontRoleB0CF141D",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+  },
+  "Rules": Object {
+    "CheckBootstrapVersion": Object {
+      "Assertions": Array [
+        Object {
+          "Assert": Object {
+            "Fn::Not": Array [
+              Object {
+                "Fn::Contains": Array [
+                  Array [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  Object {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
     },
   },
 }

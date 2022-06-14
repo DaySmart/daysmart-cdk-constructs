@@ -1,7 +1,8 @@
-import * as cdk from "@aws-cdk/core";
-import * as route53 from "@aws-cdk/aws-route53";
-import * as targets from "@aws-cdk/aws-route53-targets";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as cdk from "aws-cdk-lib/core";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { Construct } from 'constructs'; 
 
 export interface CdkRoute53RecordProps {
   targetType: string;
@@ -10,9 +11,9 @@ export interface CdkRoute53RecordProps {
   dnsRecords: string[];
 }
 
-export class CdkRoute53Record extends cdk.Construct {
+export class CdkRoute53Record extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkRoute53RecordProps) {
+  constructor(scope: Construct, id: string, props: CdkRoute53RecordProps) {
     super(scope, id);
 
     if (props.dnsRecords.length == props.hostedZoneDomainNames.length) {

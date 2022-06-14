@@ -1,12 +1,13 @@
-import * as cdk from "@aws-cdk/core";
-import * as acm from "@aws-cdk/aws-certificatemanager";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as ecr from "@aws-cdk/aws-ecr";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as ecspattern from "@aws-cdk/aws-ecs-patterns";
-import * as route53 from "@aws-cdk/aws-route53";
-import { SslPolicy } from "@aws-cdk/aws-elasticloadbalancingv2";
+import * as cdk from "aws-cdk-lib/core";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as ecspattern from "aws-cdk-lib/aws-ecs-patterns";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import { SslPolicy } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { Construct } from 'constructs'; 
 
 export interface CdkEcsAlbProps {
     clusterName: string;
@@ -24,10 +25,13 @@ export interface CdkEcsAlbProps {
     isFargate?: string;
     legacyTargetGroupName?: string;
     legacyLoadBalancerName?: string;
+    publicFacing?: "true" | "false";    
+    redirectHTTP?: "true" | "false";
+    securityGroupIngressPort?: string;
 }
 
-export class CdkEcsAlb extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: CdkEcsAlbProps) {
+export class CdkEcsAlb extends Construct {
+    constructor(scope: Construct, id: string, props: CdkEcsAlbProps) {
         super(scope, id);
 
         let applicationLoadBalancedService: ecspattern.ApplicationLoadBalancedEc2Service | ecspattern.ApplicationLoadBalancedFargateService;
@@ -55,7 +59,14 @@ export class CdkEcsAlb extends cdk.Construct {
             vpc: vpc,
             securityGroups: [securityGroup],
         });
-
+       
+        if (props.redirectHTTP === undefined) {            
+            props.redirectHTTP = "true"
+        }
+                
+        if (props.publicFacing === undefined) {             
+            props.publicFacing  = "true";
+        }
 
         if (props.isFargate) {
             portMappings = [
@@ -104,7 +115,7 @@ export class CdkEcsAlb extends cdk.Construct {
                 "TaskDefinition",
                 {
                     networkMode: ecs.NetworkMode.NAT,
-                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`
+                    family: `temp-${props.stage}-${props.appName}-ecs-task-definition`                    
                 }
             );
             //---------------------------------------------------------------------------------------------------
@@ -154,8 +165,8 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainName: props.serviceDnsRecord,
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-                    redirectHTTP: true,
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
+                    redirectHTTP: true,                    
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined                    
                 });
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
@@ -172,7 +183,7 @@ export class CdkEcsAlb extends cdk.Construct {
                     domainName: props.serviceDnsRecord,
                     domainZone: domainHostedZone,
                     recordType: ecspattern.ApplicationLoadBalancedServiceRecordType.ALIAS,
-                    redirectHTTP: true,
+                    redirectHTTP: true,                    
                     loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
                 });
             }
@@ -183,18 +194,40 @@ export class CdkEcsAlb extends cdk.Construct {
 
             listenerOutput.overrideLogicalId("ListenerARN");
         }
-        else {
-            if(props.isFargate){
-                applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
+        else {                                
+            let alb: elbv2.ApplicationLoadBalancer            
+            
+            if (props.publicFacing === "true") {                               
+                alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+                    vpc: vpc,
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
+                    internetFacing: true,              
+                    vpcSubnets: { 
+                        subnetType: ec2.SubnetType.PUBLIC, 
+                    }                
+                }); 
+            } else {                
+                alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+                    vpc: vpc,
+                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined,
+                    internetFacing: false,              
+                    vpcSubnets: { 
+                        subnetType: ec2.SubnetType.PRIVATE_WITH_NAT, 
+                    }                
+                }); 
+            }
+
+            if(props.isFargate) {     
+                    applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedFargateService(this, "ApplicationLB Fargate Service", {
                     cluster,
                     serviceName: `${props.stage}-${props.appName}`,
                     desiredCount: 1,
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
-                    },
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
-                });
+                    },                                         
+                    loadBalancer: alb
+                });                
             } else {
                 applicationLoadBalancedService = new ecspattern.ApplicationLoadBalancedEc2Service(this, "ApplicationLB EC2 Service", {
                     cluster,
@@ -203,41 +236,53 @@ export class CdkEcsAlb extends cdk.Construct {
                     taskDefinition: taskDefinition,
                     deploymentController: {
                         type: ecs.DeploymentControllerType.CODE_DEPLOY
-                    },
-                    loadBalancerName: (props.legacyLoadBalancerName) ? `${props.stage}-${props.appName}-ecs-alb` : undefined
+                    },                                                                           
+                    loadBalancer: alb
+                });
+            }
+            
+            if (!props.redirectHTTP) {
+                const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
+
+                const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
+                    protocol: elbv2.ApplicationProtocol.HTTPS,
+                    sslPolicy: SslPolicy.TLS12,
+                    port: 443,
+                    certificates: [
+                        httpsListenerCertificate
+                    ],
+                    defaultTargetGroups: [
+                        applicationLoadBalancedService.targetGroup
+                    ]
+                });
+                applicationLoadBalancedService.listener.addAction("HttpsRedirect", {
+                    action: elbv2.ListenerAction.redirect({
+                        protocol: "HTTPS",
+                        host: "#{host}",
+                        port: "443",
+                        path: "/#{path}",
+                        query: "#{query}"
+                    })
+                });
+                listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
+                    value: httpsListener.listenerArn
+                });
+            } else {
+                listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
+                    value: applicationLoadBalancedService.listener.listenerArn
                 });
             }
 
-            const httpsListenerCertificate = elbv2.ListenerCertificate.fromArn(props.certificateArn)
-
-            const httpsListener = applicationLoadBalancedService.loadBalancer.addListener("HttpsListener", {
-                protocol: elbv2.ApplicationProtocol.HTTPS,
-                sslPolicy: SslPolicy.TLS12,
-                port: 443,
-                certificates: [
-                    httpsListenerCertificate
-                ],
-                defaultTargetGroups: [
-                    applicationLoadBalancedService.targetGroup
-                ]
-            });
-
-            applicationLoadBalancedService.listener.addAction("HttpsRedirect", {
-                action: elbv2.ListenerAction.redirect({
-                    protocol: "HTTPS",
-                    host: "#{host}",
-                    port: "443",
-                    path: "/#{path}",
-                    query: "#{query}"
-                })
-            });
-
-            listenerOutput = new cdk.CfnOutput(this, "ListenerARN", {
-                value: httpsListener.listenerArn
-            });
-
             listenerOutput.overrideLogicalId("ListenerARN");
         }
+
+        if (props.securityGroupIngressPort) {
+            applicationLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(parseInt(props.securityGroupIngressPort)));  
+        }
+
+        applicationLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
+        applicationLoadBalancedService.service.connections.securityGroups[0].addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
+
 
         applicationLoadBalancedService.targetGroup.configureHealthCheck({
             path: props.healthCheckPath,

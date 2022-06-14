@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-multi-accont-dns",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -10,7 +10,6 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.128.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
@@ -19,12 +18,15 @@
     "eslint-plugin-react": "^7.29.4",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
-    "typescript": "~3.9.7"
+    "typescript": "^4.7.3",
+    "aws-cdk-lib": "^2.27.0",
+    "constructs": "^10.1.37"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.27.0",
+    "constructs": "^10.1.37"
   },
   "dependencies": {
-    "@aws-cdk/aws-certificatemanager": "^1.128.0",
-    "@aws-cdk/aws-route53": "^1.128.0",
-    "@aws-cdk/core": "1.128.0"
   },
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,7 @@
-import * as cdk from '@aws-cdk/core';
-import * as kms from '@aws-cdk/aws-kms';
-import * as iam from '@aws-cdk/aws-iam';
+import * as cdk from 'aws-cdk-lib/core';
+import * as kms from 'aws-cdk-lib/aws-kms';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { Construct } from 'constructs';
 
 /**
  * Properties for the shared KMS key
@@ -26,10 +27,10 @@ export interface SharedKMSKeyProps {
 /**
  * KMS key designed to be shared accross an organization
  */
-export class SharedKMSKey extends cdk.Construct {
+export class SharedKMSKey extends Construct {
     readonly key: kms.IKey;
 
-    constructor(scope: cdk.Construct, id: string, props: SharedKMSKeyProps) {
+    constructor(scope: Construct, id: string, props: SharedKMSKeyProps) {
         super(scope, id);
 
         this.key = new kms.Key(this, 'Key', {

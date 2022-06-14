@@ -1,10 +1,10 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as autoscaling from "@aws-cdk/aws-autoscaling";
-import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as iam from "@aws-cdk/aws-iam";
+import * as cdk from "aws-cdk-lib/core";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
+import { Construct } from 'constructs'; 
 
 export interface CdkEnvironmentResourcesProps {
     vpcId: string;
@@ -20,9 +20,9 @@ export interface CdkEnvironmentResourcesProps {
     maxCapacity?: string;
 }
 
-export class CdkEnvironmentResources extends cdk.Construct {
+export class CdkEnvironmentResources extends Construct {
     constructor(
-        scope: cdk.Construct,
+        scope: Construct,
         id: string,
         props: CdkEnvironmentResourcesProps
     ) {

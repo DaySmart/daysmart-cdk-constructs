@@ -1,7 +1,9 @@
-import * as cdk from '@aws-cdk/core';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as kms from '@aws-cdk/aws-kms';
-import * as iam from '@aws-cdk/aws-iam';
+import * as cdk from 'aws-cdk-lib'
+import { Construct } from 'constructs'
+import { aws_s3 as s3 } from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
+import { aws_kms as kms } from 'aws-cdk-lib';
+
 
 /**
  * Properties for shared S3 bucket for pipeline artifacts
@@ -36,10 +38,10 @@ export interface PipelineArtifactsBucketProps {
 /**
  * A shared S3 bucket for storing artifacts from CodePipeline
  */
-export class PipelineArtifactsBucket extends cdk.Construct {
+export class PipelineArtifactsBucket extends Construct {
     readonly artifactBucket: s3.IBucket;
 
-    constructor(scope: cdk.Construct, id: string, props: PipelineArtifactsBucketProps) {
+    constructor(scope: Construct, id: string, props: PipelineArtifactsBucketProps) {
         super(scope, id);
 
         this.artifactBucket = new s3.Bucket(this, 'ArtifactBucket', {
