@@ -2,7 +2,7 @@ interface GetAliasTargetProps {
     companyDomainName: string;
     project: string;
     baseEnv: string;
-    dynamicEnv?: string; 
+    dynamicEnv?: string;
 }
 export function getAliasTarget(props: GetAliasTargetProps) {
     return  props.dynamicEnv ? `${props.dynamicEnv}-api.${props.baseEnv}.${props.project}.${props.companyDomainName}` :
