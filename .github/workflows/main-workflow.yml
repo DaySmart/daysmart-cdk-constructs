@@ -2,7 +2,7 @@ name: CDK Publishing
 on:
   push:
     branches:
-      - platform-publish-actions
+      - main
   
 jobs:
   get-file-changes-and-publish:
@@ -44,15 +44,13 @@ jobs:
             cdk-ecs-nlb:
               - 'packages/cdk-ecs-nlb/**'
             cdk-ecs-task-definition:
-              - 'packages/cdk-task-definition/**'  
+              - 'packages/cdk-ecs-task-definition/**'  
             cdk-environment-resources:
               - 'packages/cdk-environment-resources/**'
             cdk-files-bucket:
               - 'packages/cdk-files-bucket/**'
-            cdk-multi-account-dns:
-              'packages/cdk-multi-account-dns/**'
-            cdk-route53-record:
-              'packages/cdk-route53-record/**'
+            cdk-multi-accont-dns:
+              'packages/cdk-multi-accont-dns/**'
             cdk-s3-deployment:
               'packages/cdk-s3-deployment/**'
             cdk-s3-redirect:
@@ -130,16 +128,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # - if: steps.cdk.outputs.cdk-cloudfront-behavior == 'true'
-      #   run: | 
-      #     npm install
-      #     npm run build
-      #     npm run lint
-      #     npm run test           
-      #     npm publish 
-      #   working-directory: packages/cdk-cloudfront-behavior
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - if: steps.cdk.outputs.cdk-cloudfront-behavior == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-cloudfront-behavior
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - if: steps.cdk.outputs.cdk-cloudfront-cache-policy == 'true'
         run: | 
@@ -240,25 +238,14 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cdk.outputs.cdk-multi-account-dns == 'true'
+      - if: steps.cdk.outputs.cdk-multi-accont-dns == 'true'
         run: | 
           npm install
           npm run build
           npm run lint
           npm run test           
           npm publish 
-        working-directory: packages/cdk-multi-account-dns
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - if: steps.cdk.outputs.cdk-route53-record == 'true'
-        run: | 
-          npm install
-          npm run build
-          npm run lint
-          npm run test           
-          npm publish 
-        working-directory: packages/cdk-route53-record
+        working-directory: packages/cdk-multi-accont-dns
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -306,16 +293,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # - if: steps.cdk.outputs.cdk-static-website == 'true'
-      #   run: | 
-      #     npm install
-      #     npm run build
-      #     npm run lint
-      #     npm run test          
-      #     npm publish 
-      #   working-directory: packages/cdk-static-website
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - if: steps.cdk.outputs.cdk-static-website == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test          
+          npm publish 
+        working-directory: packages/cdk-static-website
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
   # Slack-on-failure:
   #   if: always()
