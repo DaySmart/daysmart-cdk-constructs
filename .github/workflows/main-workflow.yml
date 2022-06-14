@@ -2,7 +2,7 @@ name: CDK Publishing
 on:
   push:
     branches:
-      - platform-debug-actions
+      - platform-publish-actions
   
 jobs:
   get-file-changes-and-publish:
