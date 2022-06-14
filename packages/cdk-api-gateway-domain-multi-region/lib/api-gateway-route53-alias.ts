@@ -2,7 +2,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as route53_targets from 'aws-cdk-lib/aws-route53-targets'
 import { getAliasTarget } from './alias-target';
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface ApiGatewayDomainRoute53AliasProps {
     companyDomainName: string;
