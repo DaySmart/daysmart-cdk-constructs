@@ -171,7 +171,7 @@ jobs:
 
 
   
-      - if: steps.api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
+      - if: steps.cdk-api-gateway-domain.outputs.cdk-api-gateway-domain == 'true'
         run: | 
           npm install
           npm run build
@@ -182,7 +182,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.api-gateway-domain-multi-region.outputs.cdk-api-gateway-domain-multi-region == 'true'
+      - if: steps.cdk-api-gateway-domain-multi-region.outputs.cdk-api-gateway-domain-multi-region == 'true'
         run: | 
           npm install
           npm run build
@@ -193,7 +193,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.app-bucket.outputs.cdk-app-bucket == 'true'
+      - if: steps.cdk-app-bucket.outputs.cdk-app-bucket == 'true'
         run: | 
           npm install
           npm run build
@@ -204,7 +204,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.app-cloudfront.outputs.cdk-app-cloudfront == 'true'
+      - if: steps.cdk-app-cloudfront.outputs.cdk-app-cloudfront == 'true'
         run: | 
           npm install
           npm run build
@@ -215,7 +215,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.base-cf-acm-r53.outputs.cdk-base-cf-acm-r53 == 'true'
+      - if: steps.cdk-base-cf-acm-r53.outputs.cdk-base-cf-acm-r53 == 'true'
         run: | 
           npm install
           npm run build
@@ -226,7 +226,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.certificate.outputs.cdk-certificate == 'true'
+      - if: steps.cdk-certificate.outputs.cdk-certificate == 'true'
         run: | 
           npm install
           npm run build
@@ -237,7 +237,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # - if: steps.cloudfront-behavior.outputs.cdk-cloudfront-behavior == 'true'
+      # - if: steps.cdk-cloudfront-behavior.outputs.cdk-cloudfront-behavior == 'true'
       #   run: | 
       #     npm install
       #     npm run build
@@ -248,7 +248,7 @@ jobs:
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cloudfront-cache-policy.outputs.cdk-cloudfront-cache-policy == 'true'
+      - if: steps.cdk-cloudfront-cache-policy.outputs.cdk-cloudfront-cache-policy == 'true'
         run: | 
           npm install
           npm run build
@@ -259,7 +259,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.cloudfront-origin-request-policy.outputs.cdk-cloudfront-origin-request-policy == 'true'
+      - if: steps.cdk-cloudfront-origin-request-policy.outputs.cdk-cloudfront-origin-request-policy == 'true'
         run: | 
           npm install
           npm run build
@@ -270,7 +270,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.dynamodbtable.outputs.cdk-dynamodbtable == 'true'
+      - if: steps.cdk-dynamodbtable.outputs.cdk-dynamodbtable == 'true'
         run: | 
           npm install
           npm run build
@@ -281,7 +281,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.ecs-alb.outputs.cdk-ecs-alb == 'true'
+      - if: steps.cdk-ecs-alb.outputs.cdk-ecs-alb == 'true'
         run: | 
           npm install
           npm run build
@@ -292,7 +292,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.ecs-codedeploy-resources.outputs.cdk-ecs-codedeploy-resources == 'true'
+      - if: steps.cdk-ecs-codedeploy-resources.outputs.cdk-ecs-codedeploy-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -303,7 +303,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.ecs-nlb.outputs.cdk-ecs-nlb == 'true'
+      - if: steps.cdk-ecs-nlb.outputs.cdk-ecs-nlb == 'true'
         run: | 
           npm install
           npm run build
@@ -314,7 +314,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.ecs-task-definition.outputs.cdk-ecs-task-definition == 'true'
+      - if: steps.cdk-ecs-task-definition.outputs.cdk-ecs-task-definition == 'true'
         run: | 
           npm install
           npm run build
@@ -325,7 +325,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.environment-resources.outputs.cdk-environment-resources == 'true'
+      - if: steps.cdk-environment-resources.outputs.cdk-environment-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -336,7 +336,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.files-bucket.outputs.cdk-files-bucket == 'true'
+      - if: steps.cdk-files-bucket.outputs.cdk-files-bucket == 'true'
         run: | 
           npm install
           npm run build
@@ -347,7 +347,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.multi-account-dns.outputs.cdk-multi-account-dns == 'true'
+      - if: steps.cdk-multi-account-dns.outputs.cdk-multi-account-dns == 'true'
         run: | 
           npm install
           npm run build
@@ -358,7 +358,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.pipeline.outputs.cdk-pipeline == 'true'
+      - if: steps.cdk-pipeline.outputs.cdk-pipeline == 'true'
         run: | 
           npm install
           npm run build
@@ -369,7 +369,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.route53-record.outputs.cdk-route53-record == 'true'
+      - if: steps.cdk-route53-record.outputs.cdk-route53-record == 'true'
         run: | 
           npm install
           npm run build
@@ -380,7 +380,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.s3-deployment.outputs.cdk-s3-deployment == 'true'
+      - if: steps.cdk-s3-deployment.outputs.cdk-s3-deployment == 'true'
         run: | 
           npm install
           npm run build
@@ -391,7 +391,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.s3-redirect.outputs.cdk-s3-redirect == 'true'
+      - if: steps.cdk-s3-redirect.outputs.cdk-s3-redirect == 'true'
         run: | 
           npm install
           npm run build
@@ -402,7 +402,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.shared-services-resources.outputs.cdk-shared-services-resources == 'true'
+      - if: steps.cdk-shared-services-resources.outputs.cdk-shared-services-resources == 'true'
         run: | 
           npm install
           npm run build
@@ -413,7 +413,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.sns-topic.outputs.cdk-sns-topic == 'true'
+      - if: steps.cdk-sns-topic.outputs.cdk-sns-topic == 'true'
         run: | 
           npm install
           npm run build
@@ -424,7 +424,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # - if: steps.static-website.outputs.cdk-static-website == 'true'
+      # - if: steps.cdk-static-website.outputs.cdk-static-website == 'true'
       #   run: | 
       #     npm install
       #     npm run build
