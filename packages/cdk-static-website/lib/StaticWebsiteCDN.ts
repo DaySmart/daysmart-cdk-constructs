@@ -5,6 +5,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as alias from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
+import { CfnOutput } from 'aws-cdk-lib';
 
 
 /**
@@ -85,12 +86,12 @@ export class StaticWebsiteCDN extends Construct {
                 target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
             }) 
         })
-        const distributionIdOutput = new cdk.CfnOutput(this, 'DistributionId', {
+        const distributionIdOutput = new CfnOutput(this, 'DistributionId', {
             value: distribution.distributionId
         });
         distributionIdOutput.overrideLogicalId('DistributionId');
 
-        const distributionDomainNameOutput = new cdk.CfnOutput(this, 'DistributionDomainName', {
+        const distributionDomainNameOutput = new CfnOutput(this, 'DistributionDomainName', {
             value: distribution.distributionDomainName
         });
         distributionDomainNameOutput.overrideLogicalId('DistributionDomainName');
