@@ -2,8 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
 import { StaticWebsiteCDN } from '../lib/index'
 
-const keyArn = 'arn:aws:kms:us-west-2:123456:key/blah';
-
 test('App Cloudfront', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
         env: {
@@ -20,6 +18,25 @@ test('App Cloudfront', () => {
     });
 
     const template = Template.fromStack(stack);
+    console.log(JSON.stringify(template, null, 2))
 
-    expect(Template.fromStack(stack)).toMatchSnapshot();
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: {
+            Aliases: [
+                'example.domain.com'
+            ]
+        }
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: {
+            ViewerCertificate: {
+                AcmCertificateArn: "arn:aws:acm:us-east-1:123456:certificate/blah"
+            }
+        }
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+        Name: "example.domain.com.example.com."
+    });
 })
