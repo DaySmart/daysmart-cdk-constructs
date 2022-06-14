@@ -27,7 +27,7 @@
     "constructs": "^10.1.37"
   },
   "dependencies": {
-    "@daysmart/cdk-app-bucket": "2.0.0"
+    "@daysmart/cdk-app-bucket": "2.0.1"
   },
   "publishConfig": {
     "access": "public"
