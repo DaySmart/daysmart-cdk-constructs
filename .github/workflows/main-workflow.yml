@@ -16,31 +16,31 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: api-gateway-domain
         with:
-          working-directory: |
+          filters: |
             cdk-api-gateway-domain:
               - 'packages/cdk-api-gateway-domain/**'
       - uses: dorny/paths-filter@v2
         id: api-gateway-domain-multi-region
         with:
-          working-directory: |
+          filters: |
             cdk-api-gateway-domain-multi-region:
               - 'packages/cdk-api-gateway-domain-multi-region/**'
       - uses: dorny/paths-filter@v2
         id: app-bucket
         with:
-          working-directory: |
+          filters: |
             cdk-app-bucket:
               - 'packages/cdk-app-bucket/**'
       - uses: dorny/paths-filter@v2
         id: app-cloudfront
         with:
-          working-directory: |
+          filters: |
             cdk-app-cloudfront:
               - 'packages/cdk-app-cloudfront/**'
       - uses: dorny/paths-filter@v2
         id: base-cf-acm-r53
         with:
-          working-directory: |
+          filters: |
             cdk-base-cf-acm-r53:
               - 'packages/cdk-base-cf-acm-r53/**'
       - uses: dorny/paths-filter@v2
