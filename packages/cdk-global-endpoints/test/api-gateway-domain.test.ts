@@ -1,4 +1,4 @@
-import { CdkApiGatewayDomain } from "../lib/index"
+import { CdkApiGatewayDomain } from "../lib/api-gateway-domain"
 import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
 import { CfnBasePathMapping } from "aws-cdk-lib/aws-apigateway";

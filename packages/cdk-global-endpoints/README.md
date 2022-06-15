@@ -1,11 +1,14 @@
 # Welcome to the Open Source Construct for an Api Gateway Custom Domain!
 
-This CDK Construct Library includes a construct (`CdkApiGatewayDomain`)
-which creates a custom domain for the specified API Gateway api, along with a base path mapping and route53 alias record to the endpoint cloudfront distribution
+This CDK Construct Library includes a construct three constructs together
+1. (`CdkApiGatewayDomain`) which creates a custom domain for the specified API Gateway api, along with a base path mapping and route53 alias record to the endpoint cloudfront distribution
+2. (`CdkApiGatewayDomainMultiRegion`) which can be deployed with the same alias in multiple regions.
+3. (`CdlApiGatewayDomainRoute53Alias`) which will be the Route 53 record that can be flipped between deployments in different regions.
 
 The construct defines an interface (`CdkApiGatewayDomainProps`) with the following properties that can be passed in:
 
   * companyDomainName => The Hosted Zone name in Route53 (ex. daysmart.com)
+  * domainName => 
   * companyHostedZoneId => The Hosted Zone ID in Route53 (ex. "Z2FDTNDATAQYW2")
   * project => The name of the project that is using this construct for some of its resources. (ex. pdfconverter)
   * baseEnv => The name of your base environment. (ex. dev, stage, prod)
@@ -18,3 +21,4 @@ The construct defines an interface (`CdkApiGatewayDomainProps`) with the followi
 
  * `npm run build`   compile typescript to js
  * `npm run watch`   watch for changes and compile
+ * `npm run test`    perform the jest unit tests
