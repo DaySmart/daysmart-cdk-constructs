@@ -39,7 +39,7 @@ export class CdkS3Deployment extends Construct {
     const handler = new lambda.SingletonFunction(this, 'BucketDeploymentHandler', {
       code: lambda.Code.fromAsset(path.join(__dirname, 'lambda')),
       layers: [new AwsCliLayer(this, 'AWSCliLayer')],
-      runtime: lambda.Runtime.PYTHON_3_6,
+      runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'handler.handler',
       lambdaPurpose: 'Custom::BucketDeployment',
       timeout: cdk.Duration.minutes(15),
