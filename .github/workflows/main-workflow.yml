@@ -2,7 +2,7 @@ name: CDK Publishing
 on:
   push:
     branches:
-      - main
+      - platform-slack
   
 jobs:
   get-file-changes-and-publish:
