@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { aws_s3 as s3 } from 'aws-cdk-lib';
 import { aws_cloudfront as cloudfront } from 'aws-cdk-lib';
-import { aws_iam as iam } from 'aws-cdk-lib'; 
+import { aws_iam as iam } from 'aws-cdk-lib';  
 
 export interface AppBucketProps {
     stage: string;

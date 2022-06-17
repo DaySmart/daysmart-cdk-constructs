@@ -318,4 +318,4 @@ jobs:
                   "workflowName": "${{ github.workflow }}"
                 }
         env:
-            SLACK_WEBHOOK_URL: ${{ secrets.DIRECT_SLACK_WEBHOOK }} 
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
