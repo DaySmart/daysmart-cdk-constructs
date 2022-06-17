@@ -315,8 +315,6 @@ jobs:
                 {
                   "runStatus": "${{ env.WORKFLOW_CONCLUSION }}",
                   "githubEmail": "${{ env.GIT_COMMIT_AUTHOR_EMAIL }}",
-                  "githubActionsUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "branchOrPRIdentifier": "${{ steps.commit_message.outputs.branch-identifier }}",
                   "workflowName": "${{ github.workflow }}"
                 }
         env:
