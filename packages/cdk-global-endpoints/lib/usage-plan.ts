@@ -1,6 +1,8 @@
 import { Construct } from 'constructs';
-import * as usage from 'aws-cdk-lib/aws-apigateway';
+import * as apigate from 'aws-cdk-lib/aws-apigateway';
 import { QuotaSettings, ThrottleSettings, UsagePlanPerApiStage } from 'aws-cdk-lib/aws-apigateway';
+import { ApiGateway } from 'aws-cdk-lib/aws-route53-targets';
+import { Stage } from 'aws-cdk-lib';
 
 export interface CdkUsagePlanProps {
     apiStages: UsagePlanPerApiStage[],
@@ -14,10 +16,33 @@ export class CdkUsagePlan extends Construct {
     constructor(scope: Construct, id: string, props: CdkUsagePlanProps) {
         super(scope, id);
 
-        let customPlan: usage.UsagePlan;
-        const plan = usage.addUsagePlan('UsagePlan', {
+        const api = new apigate.RestApi(this, 'api');
+        const stage = apiPlan.addApiStage({
+            stage: api.deploymentStage,
+            throttle: [
+                {
+                    method: echoMethod,
+                    throttle: {
+                        rateLimit: 10,
+                        burstLimit: 2
+                    }
+                }
+            ]
+        });
+        const plan = api.addUsagePlan('UsagePlan', {
             name: `${props.name}`,
-            throttle: `${props.ThrottleSettings}`
-        })
+            throttle: {
+                rateLimit: 10, // average request per burstLimit seconds
+                burstLimit: 2 // Max API request rate limit over 2 seconds
+            },
+            quota: {
+                limit: 10000, // Max number of requests that user can make
+                period: apigate.Period.WEEK // Max number in one week
+            },
+            apiStages: 
+        });
+
+        const key = api.addApiKey('ApiKey');
+        plan.addApiKey(key);
     }
 }
