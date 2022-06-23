@@ -14,7 +14,8 @@ test('App Cloudfront', () => {
         certificateArn: 'arn:aws:acm:us-east-1:123456:certificate/blah',
         domainNames: ['example.domain.com'],
         hostedZoneDomain: 'example.com',
-        originAccessIdentity: '98765'
+        originAccessIdentity: '98765',
+        removeBucket: true
     });
 
     const template = Template.fromStack(stack);

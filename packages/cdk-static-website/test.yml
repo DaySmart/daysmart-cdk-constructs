@@ -1,0 +1,18 @@
+env: taylor
+components:
+  - name: static-website
+    provider:
+      name: frankenstack-aws-cdk-v2-provider
+      config:
+        constructName: StaticWebsite 
+        constructPackage: './lib/index'
+        account: ${ds-booking-dev:aws}
+        region: 'us-east-2'
+        nodejsVersion: 14
+    inputs:
+      bucketName: bucket 
+      originAccessIdentity: 12345
+      certificateArn: arn:aws:acm:us-east-1:123456:certificate/blah
+      domainNames: [example.com, domain.com]
+      hostedZoneDomain: testing.com
+      removeBucket: true
