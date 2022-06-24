@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions"
-import { CdkS3Deployment } from '../lib/index'
+import { CdkS3Deployment } from '../lib/s3-deployment'
 
 const keyArn = 'arn:aws:s3:us-east-1:123456:key/blah';
 
