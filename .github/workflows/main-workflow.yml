@@ -291,15 +291,31 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
-  # Slack-on-failure:
-  #   if: always()
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Send slack message
-  #       uses: rtCamp/action-slack-notify@v2
-  #       env:
-  #         SLACK_CHANNEL: platform-alerts
-  #         SLACK_COLOR: ${{ job.status }}
-  #         SLACK_MESSAGE: 'Workflow was, ${{ job.status }}' 
-  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  Slack-on-failure:
+    if: ${{ always() && (needs.get-file-changes-and-publish.result =='failure') }}
+    needs: [get-file-changes-and-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Expose git commit data 
+        uses: rlespinasse/git-commit-data-action@v1
+      - uses: technote-space/workflow-conclusion-action@v3
+      - id: commit_message
+        run: |
+            commit_message=$(printf "%q" "${{ github.ref }}-${{ github.event.head_commit.message }}")
+            commit_message="${commit_message//'%'/' '}"
+            commit_message="${commit_message//$'\n'/' '}"
+            commit_message="${commit_message//$'\r'/' '}"
+            commit_message="${commit_message//$'refs/heads/'/''}"
+            echo "::set-output name=branch-identifier::$commit_message"
+      - name: Slack notification
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+            payload: |
+                {
+                  "runStatus": "${{ env.WORKFLOW_CONCLUSION }}",
+                  "githubEmail": "${{ env.GIT_COMMIT_AUTHOR_EMAIL }}",
+                  "workflowName": "${{ github.workflow }}"
+                }
+        env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
