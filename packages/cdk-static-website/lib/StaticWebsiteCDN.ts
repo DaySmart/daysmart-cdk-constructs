@@ -42,11 +42,6 @@ export interface StaticWebsiteCDNProps {
      * A custom origin path in the S3 bucket for the CloudFront origin
      */
     originPath?: string;
-
-    /**
-     * To allow for removal of bucket with Frank Remove
-     */
-    removeBucket?: boolean;
 }
 
 /**
@@ -57,11 +52,12 @@ export class StaticWebsiteCDN extends Construct {
     constructor(scope: Construct, id: string, props: StaticWebsiteCDNProps) {
         super(scope, id);
 
-        if(props.removeBucket){
             const appBucket = s3.Bucket.fromBucketName(this, 'AppBucket', props.bucketName);
 
-            const cfnBucket = appBucket.node.findChild('Resource') as CfnResource;
-            cfnBucket.applyRemovalPolicy(RemovalPolicy.DESTROY);
+            const loggingBucket = new s3.Bucket(this, 'loggingBucket', {
+                removalPolicy: cdk.RemovalPolicy.DESTROY,
+                autoDeleteObjects: true
+            });
       
             const distribution = new cloudfront.Distribution(this, 'Distribution', {
                 defaultBehavior: {
@@ -74,8 +70,8 @@ export class StaticWebsiteCDN extends Construct {
                 certificate: acm.Certificate.fromCertificateArn(this, 'Certificate', props.certificateArn),
                 domainNames: props.domainNames,
                 enableLogging: true,
+                logBucket: loggingBucket,
                 logIncludesCookies: true,
-                
                 defaultRootObject: 'index.html',
                 errorResponses: [
                     {
@@ -106,52 +102,5 @@ export class StaticWebsiteCDN extends Construct {
             value: distribution.distributionDomainName
         });
         distributionDomainNameOutput.overrideLogicalId('DistributionDomainName');
-        } else{
-            const appBucket = s3.Bucket.fromBucketName(this, 'AppBucket', props.bucketName);
-      
-            const distribution = new cloudfront.Distribution(this, 'Distribution', {
-                defaultBehavior: {
-                    origin: new origins.S3Origin(appBucket, {
-                        originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity),
-                        originPath: props.originPath
-                    }),
-                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-                },
-                certificate: acm.Certificate.fromCertificateArn(this, 'Certificate', props.certificateArn),
-                domainNames: props.domainNames,
-                enableLogging: true,
-                logIncludesCookies: true,
-                
-                defaultRootObject: 'index.html',
-                errorResponses: [
-                    {
-                        httpStatus: 404,
-                        responseHttpStatus: 200,
-                        responsePagePath: '/index.html'
-                    }
-                ]
-            })
-        
-        const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-            domainName: props.hostedZoneDomain
-        });
-
-        props.domainNames.forEach((domainName, i) => {
-            new route53.ARecord(this, `Alias${i}`, {
-                zone: hostedZone,
-                recordName: domainName,
-                target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
-            }) 
-        })
-        const distributionIdOutput = new CfnOutput(this, 'DistributionId', {
-            value: distribution.distributionId
-        });
-        distributionIdOutput.overrideLogicalId('DistributionId');
-
-        const distributionDomainNameOutput = new CfnOutput(this, 'DistributionDomainName', {
-            value: distribution.distributionDomainName
-        });
-        distributionDomainNameOutput.overrideLogicalId('DistributionDomainName');
-        }
     }
 }
