@@ -5,7 +5,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as alias from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
-import { CfnOutput, CfnResource, RemovalPolicy } from 'aws-cdk-lib';
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
 import * as cdk from 'aws-cdk-lib'
 
 
@@ -52,35 +52,34 @@ export class StaticWebsiteCDN extends Construct {
     constructor(scope: Construct, id: string, props: StaticWebsiteCDNProps) {
         super(scope, id);
 
-            const appBucket = s3.Bucket.fromBucketName(this, 'AppBucket', props.bucketName);
-
-            const loggingBucket = new s3.Bucket(this, 'loggingBucket', {
-                removalPolicy: cdk.RemovalPolicy.DESTROY,
-                autoDeleteObjects: true
-            });
+        const appBucket = s3.Bucket.fromBucketName(this, 'AppBucket', props.bucketName);
+        const loggingBucket = new s3.Bucket(this, 'loggingBucket', {
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            autoDeleteObjects: true
+        });
       
-            const distribution = new cloudfront.Distribution(this, 'Distribution', {
-                defaultBehavior: {
-                    origin: new origins.S3Origin(appBucket, {
-                        originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity),
-                        originPath: props.originPath
-                    }),
-                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-                },
-                certificate: acm.Certificate.fromCertificateArn(this, 'Certificate', props.certificateArn),
-                domainNames: props.domainNames,
-                enableLogging: true,
-                logBucket: loggingBucket,
-                logIncludesCookies: true,
-                defaultRootObject: 'index.html',
-                errorResponses: [
-                    {
-                        httpStatus: 404,
-                        responseHttpStatus: 200,
-                        responsePagePath: '/index.html'
-                    }
-                ]
-            })
+        const distribution = new cloudfront.Distribution(this, 'Distribution', {
+            defaultBehavior: {
+                origin: new origins.S3Origin(appBucket, {
+                    originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity),
+                    originPath: props.originPath
+                }),
+                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+            },
+            certificate: acm.Certificate.fromCertificateArn(this, 'Certificate', props.certificateArn),
+            domainNames: props.domainNames,
+            enableLogging: true,
+            logBucket: loggingBucket,
+            logIncludesCookies: true,
+            defaultRootObject: 'index.html',
+            errorResponses: [
+                {
+                    httpStatus: 404,
+                    responseHttpStatus: 200,
+                    responsePagePath: '/index.html'
+                }
+            ]
+        })
         
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
             domainName: props.hostedZoneDomain
