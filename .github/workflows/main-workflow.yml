@@ -17,8 +17,6 @@ jobs:
         id: cdk
         with:
           filters: |
-            cdk-app-bucket:
-              - 'packages/cdk-app-bucket/**'
             cdk-app-cloudfront:
               - 'packages/cdk-app-cloudfront/**'
             cdk-base-cf-acm-r53:
@@ -49,8 +47,6 @@ jobs:
               - 'packages/cdk-global-endpoints/**'
             cdk-multi-accont-dns:
               'packages/cdk-multi-accont-dns/**'
-            cdk-s3-deployment:
-              'packages/cdk-s3-deployment/**'
             cdk-s3-redirect:
               'packages/cdk-s3-redirect/**'
             cdk-shared-services-resources:
@@ -59,17 +55,6 @@ jobs:
               'packages/cdk-sns-topic/**'
             cdk-static-website:
               'packages/cdk-static-website/**'    
-
-      - if: steps.cdk.outputs.cdk-app-bucket == 'true'
-        run: | 
-          npm install
-          npm run build
-          npm run lint
-          npm run test 
-          npm publish 
-        working-directory: packages/cdk-app-bucket
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - if: steps.cdk.outputs.cdk-app-cloudfront == 'true'
         run: | 
@@ -233,17 +218,6 @@ jobs:
           npm run test           
           npm publish 
         working-directory: packages/cdk-multi-accont-dns
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - if: steps.cdk.outputs.cdk-s3-deployment == 'true'
-        run: | 
-          npm install
-          npm run build
-          npm run lint
-          npm run test           
-          npm publish 
-        working-directory: packages/cdk-s3-deployment
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
