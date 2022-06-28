@@ -1,8 +1,8 @@
 {
   "name": "@daysmart/cdk-s3-deployment",
-  "version": "1.0.3",
-  "main": "dist/lib/index.js",
-  "types": "dist/lib/index.d.ts",
+  "version": "1.0.4",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc && cp -R lib/lambda dist",
     "watch": "tsc -w",
