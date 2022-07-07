@@ -17,18 +17,6 @@ export class CdkUsagePlan extends Construct {
         super(scope, id);
 
         const api = new apigate.RestApi(this, 'api');
-        const stage = apiPlan.addApiStage({
-            stage: api.deploymentStage,
-            throttle: [
-                {
-                    method: echoMethod,
-                    throttle: {
-                        rateLimit: 10,
-                        burstLimit: 2
-                    }
-                }
-            ]
-        });
         const plan = api.addUsagePlan('UsagePlan', {
             name: `${props.name}`,
             throttle: {
@@ -39,9 +27,7 @@ export class CdkUsagePlan extends Construct {
                 limit: 10000, // Max number of requests that user can make
                 period: apigate.Period.WEEK // Max number in one week
             },
-            apiStages: 
         });
-
         const key = api.addApiKey('ApiKey');
         plan.addApiKey(key);
     }

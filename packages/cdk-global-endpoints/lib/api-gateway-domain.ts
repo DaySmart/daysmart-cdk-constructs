@@ -17,6 +17,7 @@ export interface CdkApiGatewayDomainProps {
   stageName?: string;
   appName?: string;
   apiKeyIDs?: string[];
+  usagePlanIDs?: string[];
 }
 
 export class CdkApiGatewayDomain extends Construct {
@@ -41,16 +42,19 @@ export class CdkApiGatewayDomain extends Construct {
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
       });
-
-      usagePlan = new apigw.CfnUsagePlan(this, "UsagePlan", {
-        usagePlanName: `${props.dynamicEnv}-${props.project}-usagePlan`,
-        apiStages: [
-          {
-            apiId: props.restApiId,
-            stage: stageName
-          }
-        ]
-      });
+      if(props.usagePlanIDs && props.usagePlanIDs.length < 0){
+        
+      } else {
+        usagePlan = new apigw.CfnUsagePlan(this, "UsagePlan", {
+          usagePlanName: `${props.dynamicEnv}-${props.project}-usagePlan`,
+          apiStages: [
+            {
+              apiId: props.restApiId,
+              stage: stageName
+            }
+          ]
+        });
+      }
 
       cloudformationBasePathMapping = new apigw.CfnBasePathMapping(this, "CloudformationBasePathMapping", {
         basePath: `${props.basePath}`,
@@ -65,7 +69,7 @@ export class CdkApiGatewayDomain extends Construct {
         endpointType: apigw.EndpointType.EDGE,
         securityPolicy: apigw.SecurityPolicy.TLS_1_0
       });
-
+      
       usagePlan = new apigw.CfnUsagePlan(this, "UsagePlan", {
         usagePlanName: `${props.baseEnv}-${props.project}-usagePlan`,
         apiStages: [
