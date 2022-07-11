@@ -6,6 +6,7 @@ export interface CdkDynamodbtableProps {
     replicationRegions?: string[];
     tableName: string;
     globalSecondaryIndexes?: [globalSecondaryIndex];
+    pointInTimeRecovery?: boolean;
 }
 
 export interface globalSecondaryIndex {
@@ -29,6 +30,7 @@ export class CdkDynamodbtable extends Construct {
         encryption: aws_dynamodb.TableEncryption.DEFAULT,
         sortKey: { name: 'SK', type: aws_dynamodb.AttributeType.STRING },
         tableName: props.tableName,
+        pointInTimeRecovery: true,
         removalPolicy: RemovalPolicy.RETAIN
     });
 
