@@ -30,7 +30,7 @@ export class CdkDynamodbtable extends Construct {
         encryption: aws_dynamodb.TableEncryption.DEFAULT,
         sortKey: { name: 'SK', type: aws_dynamodb.AttributeType.STRING },
         tableName: props.tableName,
-        pointInTimeRecovery: true,
+        pointInTimeRecovery: props.pointInTimeRecovery,
         removalPolicy: RemovalPolicy.RETAIN
     });
 

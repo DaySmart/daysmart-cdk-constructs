@@ -11,6 +11,7 @@ test('App Cloudfront', () => {
     });
     new CdkDynamodbtable(stack, 'AppCloudfront', {
         tableName: 'test',
+        pointInTimeRecovery: true
     });
 
     const template = Template.fromStack(stack);
