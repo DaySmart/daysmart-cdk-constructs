@@ -52,7 +52,7 @@ export class CdkRouteSplitting extends cdk.Construct {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
-        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.stage}-${props.projectName}-table`
       },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/add"),
@@ -63,7 +63,7 @@ export class CdkRouteSplitting extends cdk.Construct {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
-        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.stage}-${props.projectName}-table`
       },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/update"),
@@ -74,35 +74,35 @@ export class CdkRouteSplitting extends cdk.Construct {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
-        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.stage}-${props.projectName}-table`
       },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/delete"),
       handler: 'handler.del'
     });
 
-    const edgeFunc = new cloudfront.experimental.EdgeFunction(this, `${props.stage}-${props.appName}-get-origin`, {
-      // environment: {
-      //   ['DSI_AWS_REGION']: 'us-east-1',
-      //   ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
-      //   ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
-      // },
-      runtime: lambda.Runtime.NODEJS_14_X,
-      code: lambda.Code.fromAsset("./dist/get-origin"),
-      handler: "handler.getOrigin",
-      role: lambdaRole as any,
-    });
+    // const edgeFunc = new cloudfront.experimental.EdgeFunction(this, `${props.stage}-${props.appName}-get-origin`, {
+    //   environment: {
+    //     ['DSI_AWS_REGION']: 'us-east-1',
+    //     ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
+    //     ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+    //   },
+    //   runtime: lambda.Runtime.NODEJS_14_X,
+    //   code: lambda.Code.fromAsset("./dist/get-origin"),
+    //   handler: "handler.getOrigin",
+    //   role: lambdaRole as any,
+    // });
 
     new cloudfront.Distribution(this, `${props.stage}-${props.appName}-distribution`, {
       defaultBehavior: {
         origin: new HttpOrigin(props.originSourceDomain),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        edgeLambdas: [
-          {
-            functionVersion: edgeFunc.currentVersion,
-            eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
-          }
-        ]
+        // edgeLambdas: [
+        //   {
+        //     functionVersion: edgeFunc.currentVersion,
+        //     eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+        //   }
+        // ]
       },
       comment: `${props.stage} ${props.appName} route split Distribution`,
     });
@@ -131,7 +131,7 @@ export class CdkRouteSplitting extends cdk.Construct {
 
 
    const table = new dynamodb.Table(this, `${props.stage}-${props.appName}-route-splitting-table`, {
-      tableName: `${props.projectName}-table`,
+      tableName: `${props.stage}-${props.projectName}-table`,
       partitionKey: { name: props.partitionKey, type: dynamodb.AttributeType.STRING },
       replicationRegions: ['us-east-2', 'us-west-2'],
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -141,6 +141,6 @@ export class CdkRouteSplitting extends cdk.Construct {
     table.grantReadWriteData(addHandler);
     table.grantReadWriteData(updateHandler);
     table.grantReadWriteData(deleteHandler);
-    table.grantReadWriteData(edgeFunc);
+    // table.grantReadWriteData(edgeFunc);
   }
 }
