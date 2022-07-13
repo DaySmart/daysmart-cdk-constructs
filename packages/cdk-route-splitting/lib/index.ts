@@ -17,6 +17,7 @@ export interface CdkRouteSplittingProps {
   appName: string;
   partitionKey: string;
   stage: string;
+  originNotFoundUrl: string;
 }
 
 export class CdkRouteSplitting extends cdk.Construct {
@@ -48,27 +49,47 @@ export class CdkRouteSplitting extends cdk.Construct {
     });
 
     const addHandler = new lambda.Function(this, `${props.stage}-${props.appName}-add-index`, {
+      environment: {
+        ['DSI_AWS_REGION']: 'us-east-1',
+        ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+      },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/add"),
-      handler: 'handler.handler'
+      handler: 'handler.add'
     });
 
     const updateHandler = new lambda.Function(this, `${props.stage}-${props.appName}-update-index`, {
+      environment: {
+        ['DSI_AWS_REGION']: 'us-east-1',
+        ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+      },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/update"),
-      handler: 'handler.handler'
+      handler: 'handler.update'
     });
 
     const deleteHandler = new lambda.Function(this, `${props.stage}-${props.appName}-delete-index`, {
+      environment: {
+        ['DSI_AWS_REGION']: 'us-east-1',
+        ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
+        ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+      },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/delete"),
-      handler: 'handler.handler'
+      handler: 'handler.del'
     });
 
     const edgeFunc = new cloudfront.experimental.EdgeFunction(this, `${props.stage}-${props.appName}-get-origin`, {
+      // environment: {
+      //   ['DSI_AWS_REGION']: 'us-east-1',
+      //   ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
+      //   ['DSI_ROUTING_SPLIT_TABLE']: `${props.projectName}-table`
+      // },
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset("./dist/get-origin"),
-      handler: "handler.handler",
+      handler: "handler.getOrigin",
       role: lambdaRole as any,
     });
 
@@ -109,11 +130,17 @@ export class CdkRouteSplitting extends cdk.Construct {
     updateRecords.addMethod("POST", postUpdateIntegration);
 
 
-    new dynamodb.Table(this, `${props.stage}-${props.appName}-route-splitting-table`, {
+   const table = new dynamodb.Table(this, `${props.stage}-${props.appName}-route-splitting-table`, {
+      tableName: `${props.projectName}-table`,
       partitionKey: { name: props.partitionKey, type: dynamodb.AttributeType.STRING },
       replicationRegions: ['us-east-2', 'us-west-2'],
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
     });
+
+    table.grantReadWriteData(addHandler);
+    table.grantReadWriteData(updateHandler);
+    table.grantReadWriteData(deleteHandler);
+    table.grantReadWriteData(edgeFunc);
   }
 }

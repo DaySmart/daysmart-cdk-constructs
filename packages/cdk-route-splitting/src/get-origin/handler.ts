@@ -1,10 +1,10 @@
 import { CloudFrontRequest, CloudFrontRequestEvent, CloudFrontRequestResult, CloudFrontResponseResult, Context } from 'aws-lambda';
 import { createLogger, Logger, serializeError } from '@daysmart/aws-lambda-logger';
 import { action } from './action';
-import { getPathnameSegment, getQueryStrings } from '../shared/get-domain-data';
+import { getPathnameSegment, getQueryStrings } from './shared/get-domain-data';
 import { parse } from 'tldts';
 
-export const handler = async (
+export const getOrigin = async (
     event: CloudFrontRequestEvent,
     context: Context
 ): Promise<CloudFrontRequestResult | CloudFrontResponseResult> => {

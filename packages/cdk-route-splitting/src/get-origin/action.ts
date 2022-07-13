@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { getClient } from '../shared/get-client';
-import { createPK } from '../shared/make-keys';
-import { UrlSegment } from '../shared/url-segment.enum';
+import { getClient } from './shared/get-client';
+import { createPK } from './shared/make-keys';
+import { UrlSegment } from './shared/url-segment.enum';
 
 const makeKey = (urlKey: UrlSegment, part: string) => ({ PK: createPK(urlKey, `${part}`) } as DocumentClient.Key);
 export const action = async (

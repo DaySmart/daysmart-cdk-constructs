@@ -1,5 +1,5 @@
-import { getClient } from '../shared/get-client';
-import { createPK } from '../shared/make-keys';
+import { getClient } from './shared/get-client';
+import { createPK } from './shared/make-keys';
 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 

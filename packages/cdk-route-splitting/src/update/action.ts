@@ -1,7 +1,7 @@
-import { getClient } from '../shared/get-client';
-import { createPK } from '../shared/make-keys';
+import { getClient } from './shared/get-client';
+import { createPK } from './shared/make-keys';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { HttpError } from '../shared/http-error';
+import { HttpError } from './shared/http-error';
 
 export const action = async (key: string, value: string, priority: number, origin: string): Promise<void> => {
     const dynamo = getClient();
