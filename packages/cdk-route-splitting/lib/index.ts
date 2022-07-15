@@ -14,7 +14,6 @@ export interface CdkRouteSplittingProps {
   hostedZoneId: string;
   projectName: string;
   originSourceDomain: string;
-  appName: string;
   partitionKey: string;
   stage: string;
   originNotFoundUrl: string;
@@ -25,7 +24,7 @@ export class CdkRouteSplitting extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: CdkRouteSplittingProps) {
     super(scope, id);
 
-    const lambdaRole = new iam.Role(this, `${props.stage}-${props.appName}-edge-function-role`, {
+    const lambdaRole = new iam.Role(this, `${props.stage}-${props.projectName}-edge-function-role`, {
       assumedBy: new iam.CompositePrincipal(new iam.ServicePrincipal('lambda.amazonaws.com'), new iam.ServicePrincipal('edgelambda.amazonaws.com')),
     });
     lambdaRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"));
@@ -48,7 +47,7 @@ export class CdkRouteSplitting extends cdk.Construct {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    const addHandler = new lambda.Function(this, `${props.stage}-${props.appName}-add-index`, {
+    const addHandler = new lambda.Function(this, `${props.stage}-${props.projectName}-add-index`, {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
@@ -59,7 +58,7 @@ export class CdkRouteSplitting extends cdk.Construct {
       handler: 'handler.add'
     });
 
-    const updateHandler = new lambda.Function(this, `${props.stage}-${props.appName}-update-index`, {
+    const updateHandler = new lambda.Function(this, `${props.stage}-${props.projectName}-update-index`, {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
@@ -70,7 +69,7 @@ export class CdkRouteSplitting extends cdk.Construct {
       handler: 'handler.update'
     });
 
-    const deleteHandler = new lambda.Function(this, `${props.stage}-${props.appName}-delete-index`, {
+    const deleteHandler = new lambda.Function(this, `${props.stage}-${props.projectName}-delete-index`, {
       environment: {
         ['DSI_AWS_REGION']: 'us-east-1',
         ['DSI_ORIGIN_NOT_FOUND_URL']: props.originNotFoundUrl,
@@ -93,7 +92,7 @@ export class CdkRouteSplitting extends cdk.Construct {
     //   role: lambdaRole as any,
     // });
 
-    new cloudfront.Distribution(this, `${props.stage}-${props.appName}-distribution`, {
+    new cloudfront.Distribution(this, `${props.stage}-${props.projectName}-distribution`, {
       defaultBehavior: {
         origin: new HttpOrigin(props.originSourceDomain),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -104,11 +103,11 @@ export class CdkRouteSplitting extends cdk.Construct {
         //   }
         // ]
       },
-      comment: `${props.stage} ${props.appName} route split Distribution`,
+      comment: `${props.stage} ${props.projectName} Distribution`,
     });
 
-    const api = new apigateway.RestApi(this, `${props.stage}-${props.appName}-route-splitting-api`, {
-      restApiName: `${props.stage}-${props.appName}-route-splitting-api`,
+    const api = new apigateway.RestApi(this, `${props.stage}-${props.projectName}-api`, {
+      restApiName: `${props.stage}-${props.projectName}-api`,
       domainName: {
         domainName: domainName,
         certificate: cert as any,
@@ -130,7 +129,7 @@ export class CdkRouteSplitting extends cdk.Construct {
     updateRecords.addMethod("POST", postUpdateIntegration);
 
 
-   const table = new dynamodb.Table(this, `${props.stage}-${props.appName}-route-splitting-table`, {
+   const table = new dynamodb.Table(this, `${props.stage}-${props.projectName}-table`, {
       tableName: `${props.stage}-${props.projectName}-table`,
       partitionKey: { name: props.partitionKey, type: dynamodb.AttributeType.STRING },
       replicationRegions: ['us-east-2', 'us-west-2'],

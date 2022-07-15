@@ -4,7 +4,6 @@ export interface CdkRouteSplittingProps {
     hostedZoneId: string;
     projectName: string;
     originSourceDomain: string;
-    appName: string;
     partitionKey: string;
     stage: string;
     originNotFoundUrl: string;
