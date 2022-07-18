@@ -6,6 +6,7 @@ import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as iam from '@aws-cdk/aws-iam';
+import * as route53targets from '@aws-cdk/aws-route53-targets';
 
 const lambda = require('@aws-cdk/aws-lambda');
 
@@ -127,9 +128,14 @@ export class CdkRouteSplitting extends cdk.Construct {
     addRecords.addMethod("POST", postAddIntegration);
     deleteRecords.addMethod("DELETE", deleteDeleteIntegration);
     updateRecords.addMethod("POST", postUpdateIntegration);
+    
+    new route53.ARecord(this, `${props.stage}-${props.projectName}-a-record`, {
+      zone: hostedZone,
+      recordName: `${props.stage}-${props.projectName}`,
+      target: route53.RecordTarget.fromAlias(new route53targets.ApiGateway(api)),
+    });
 
-
-   const table = new dynamodb.Table(this, `${props.stage}-${props.projectName}-table`, {
+    const table = new dynamodb.Table(this, `${props.stage}-${props.projectName}-table`, {
       tableName: `${props.stage}-${props.projectName}-table`,
       partitionKey: { name: props.partitionKey, type: dynamodb.AttributeType.STRING },
       replicationRegions: ['us-east-2', 'us-west-2'],
