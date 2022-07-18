@@ -81,6 +81,8 @@ export class CdkRouteSplitting extends cdk.Construct {
       handler: 'handler.del'
     });
 
+    //TODO: Add back edge function when we implement custom origin headers in place of environment variables
+
     // const edgeFunc = new cloudfront.experimental.EdgeFunction(this, `${props.stage}-${props.appName}-get-origin`, {
     //   environment: {
     //     ['DSI_AWS_REGION']: 'us-east-1',
