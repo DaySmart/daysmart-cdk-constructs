@@ -1,0 +1,9 @@
+version: 0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: arn:aws:ecs:us-east-1:123456:task-definition/test-cdk
+        LoadBalancerInfo:
+          ContainerName: Container
+          ContainerPort: 80

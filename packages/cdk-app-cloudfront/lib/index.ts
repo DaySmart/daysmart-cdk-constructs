@@ -1,8 +1,9 @@
-import * as cdk from '@aws-cdk/core';
-import cloudfront = require('@aws-cdk/aws-cloudfront');
-import s3 = require('@aws-cdk/aws-s3');
-import route53 = require('@aws-cdk/aws-route53');
-import targets = require('@aws-cdk/aws-route53-targets');
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront'
+import * as route53 from 'aws-cdk-lib/aws-route53'
+import * as targets from 'aws-cdk-lib/aws-route53-targets'
 
 export interface CdkAppCloudfrontProps {
     s3BucketName: string;
@@ -19,9 +20,8 @@ export interface CdkAppCloudfrontProps {
     projectDomainName?: string;
 }
 
-export class CdkAppCloudfront extends cdk.Construct {
-
-  constructor(scope: cdk.Construct, id: string, props: CdkAppCloudfrontProps) {
+export class CdkAppCloudfront extends Construct {
+  constructor(scope: Construct, id: string, props: CdkAppCloudfrontProps) {
     super(scope, id);
 
     const codeBucket = s3.Bucket.fromBucketName(

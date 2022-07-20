@@ -1,5 +1,6 @@
-import * as cdk from '@aws-cdk/core';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as cdk from 'aws-cdk-lib/core';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import { Construct } from 'constructs';
 
 export interface CdkCloudfrontCachePolicyProps {
   queryStringBehavior: "all" | "none" | string[];
@@ -9,9 +10,9 @@ export interface CdkCloudfrontCachePolicyProps {
   description?: string;
 }
 
-export class CdkCloudfrontCachePolicy extends cdk.Construct {
+export class CdkCloudfrontCachePolicy extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkCloudfrontCachePolicyProps) {
+  constructor(scope: Construct, id: string, props: CdkCloudfrontCachePolicyProps) {
     super(scope, id);
     let queryStringBehavior: cloudfront.CacheQueryStringBehavior;
     let cookieBehavior: cloudfront.CacheCookieBehavior;
@@ -56,7 +57,6 @@ export class CdkCloudfrontCachePolicy extends cdk.Construct {
     var cachePolicyId = new cdk.CfnOutput(this, "CachePolicyId", {
       value: cachePolicy.cachePolicyId
     })
-
     cachePolicyId.overrideLogicalId("CachePolicyId");
   }
 }

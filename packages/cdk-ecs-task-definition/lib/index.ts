@@ -1,8 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as ecr from "@aws-cdk/aws-ecr";
-import * as iam from "@aws-cdk/aws-iam";
-import * as logs from "@aws-cdk/aws-logs";
+import * as cdk from "aws-cdk-lib/core";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as logs from "aws-cdk-lib/aws-logs";
+import { Construct } from 'constructs'; 
 
 export interface CdkEcsTaskDefinitionProps {
   appName: string;
@@ -12,37 +13,68 @@ export interface CdkEcsTaskDefinitionProps {
   taskRoleArn: string;
   memoryUnits: string;
   cpuUnits: string;
+  isFargate?: string;
+  containerPort?: string;
 }
 
-export class CdkEcsTaskDefinition extends cdk.Construct {
+export class CdkEcsTaskDefinition extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsTaskDefinitionProps) {
+  constructor(scope: Construct, id: string, props: CdkEcsTaskDefinitionProps) {
     super(scope, id);
 
+    let taskDefinition: ecs.TaskDefinition;
+    let portMappings: ecs.PortMapping[];
     const repository = ecr.Repository.fromRepositoryName(this, "Repo", props.repositoryName);
-
     var taskRole = iam.Role.fromRoleArn(this, "TaskRole", props.taskRoleArn)
-
-    const taskDefinition = new ecs.Ec2TaskDefinition(this, "TaskDefinition",
-      {
-        networkMode: ecs.NetworkMode.NAT,
+    if (props.isFargate) {
+      portMappings = [
+        {
+          containerPort: (props.containerPort) ? parseInt(props.containerPort) : 443,
+          protocol: ecs.Protocol.TCP
+        },
+        {
+          containerPort: 80,
+          protocol: ecs.Protocol.TCP
+        }
+      ];
+      taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDefinition", {
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.WINDOWS_SERVER_2019_FULL
+        },
+        cpu: 1024,
+        memoryLimitMiB: 2048,
         taskRole: taskRole,
         executionRole: taskRole,
         family: `${props.stage}-${props.appName}`
-      }
-    );
+      });
+    } else {
+      portMappings = [
+        {
+          containerPort: (props.containerPort) ? parseInt(props.containerPort) : 443,
+          hostPort: 0,
+          protocol: ecs.Protocol.TCP
+        },
+        {
+          containerPort: 80,
+          hostPort: 0,
+          protocol: ecs.Protocol.TCP
+        }
+      ];
+      taskDefinition = new ecs.Ec2TaskDefinition(this, "TaskDefinition",
+        {
+          networkMode: ecs.NetworkMode.NAT,
+          taskRole: taskRole,
+          executionRole: taskRole,
+          family: `${props.stage}-${props.appName}`
+        }
+      );
+    }
 
     taskDefinition.addContainer("Container", {
       image: ecs.ContainerImage.fromEcrRepository(repository, props.tag),
       memoryLimitMiB: parseInt(props.memoryUnits),
       cpu: parseInt(props.cpuUnits),
-      portMappings: [
-        {
-          containerPort: 80,
-          hostPort: 0,
-          protocol: ecs.Protocol.TCP,
-        },
-      ],
+      portMappings: portMappings,
       entryPoint: ["powershell", "-Command"],
       command: ["C:\\ServiceMonitor.exe w3svc"],
       logging: ecs.LogDriver.awsLogs({

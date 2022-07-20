@@ -1,9 +1,10 @@
-import * as cdk from '@aws-cdk/core';
-import * as route53 from "@aws-cdk/aws-route53";
-import * as targets from "@aws-cdk/aws-route53-targets";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as acm from "@aws-cdk/aws-certificatemanager";
-import * as s3 from "@aws-cdk/aws-s3";
+import * as cdk from 'aws-cdk-lib';
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import { Construct } from 'constructs';
 
 export interface CdkBaseCfAcmR53Props {
   defaultBehaviorOptions: cloudfront.BehaviorOptions;
@@ -21,10 +22,10 @@ export interface Zones {
   [key: string]: route53.IHostedZone
 }
 
-export class CdkBaseCfAcmR53 extends cdk.Construct {
+export class CdkBaseCfAcmR53 extends Construct {
   public distribution: cloudfront.Distribution;
 
-  constructor(scope: cdk.Construct, id: string, props: CdkBaseCfAcmR53Props) {
+  constructor(scope: Construct, id: string, props: CdkBaseCfAcmR53Props) {
     super(scope, id);
 
     let subjectAlternativeNames: string[] = [];
@@ -145,7 +146,6 @@ export class CdkBaseCfAcmR53 extends cdk.Construct {
         );
       }
     });
-
     return aliases;
   }
 }

@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App Cloudfront 1`] = `
+Object {
+  "Outputs": Object {
+    "CertificateArn": Object {
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "AppCloudfrontCertificateCertificateRequestorResourceB3F84B18",
+          "Arn",
+        ],
+      },
+    },
+  },
+  "Parameters": Object {
+    "BootstrapVersion": Object {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": Object {
+    "AppCloudfrontCertificateCertificateRequestorFunction5A8B9A23": Object {
+      "DependsOn": Array [
+        "AppCloudfrontCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy931E9DEF",
+        "AppCloudfrontCertificateCertificateRequestorFunctionServiceRole55D68447",
+      ],
+      "Properties": Object {
+        "Code": Object {
+          "S3Bucket": "cdk-hnb659fds-assets-123456-us-east-1",
+          "S3Key": "8ddf29ab619460567d3cda58de2ff1bf0f6e95d8822ff630ec58a4d52ed1fa67.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": Object {
+          "Fn::GetAtt": Array [
+            "AppCloudfrontCertificateCertificateRequestorFunctionServiceRole55D68447",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs12.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "AppCloudfrontCertificateCertificateRequestorFunctionServiceRole55D68447": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AppCloudfrontCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy931E9DEF": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "route53:changeResourceRecordSets",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AppCloudfrontCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy931E9DEF",
+        "Roles": Array [
+          Object {
+            "Ref": "AppCloudfrontCertificateCertificateRequestorFunctionServiceRole55D68447",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AppCloudfrontCertificateCertificateRequestorResourceB3F84B18": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "DomainName": "example.com",
+        "HostedZoneId": "DUMMY",
+        "ServiceToken": Object {
+          "Fn::GetAtt": Array [
+            "AppCloudfrontCertificateCertificateRequestorFunction5A8B9A23",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": Array [
+          "*.example.com",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": Object {
+    "CheckBootstrapVersion": Object {
+      "Assertions": Array [
+        Object {
+          "Assert": Object {
+            "Fn::Not": Array [
+              Object {
+                "Fn::Contains": Array [
+                  Array [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  Object {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

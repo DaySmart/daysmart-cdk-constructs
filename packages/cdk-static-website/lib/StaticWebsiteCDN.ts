@@ -1,10 +1,12 @@
-import * as cdk from '@aws-cdk/core';
-import * as acm from '@aws-cdk/aws-certificatemanager';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
-import * as origins from '@aws-cdk/aws-cloudfront-origins';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as route53 from '@aws-cdk/aws-route53';
-import * as alias from '@aws-cdk/aws-route53-targets';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as alias from 'aws-cdk-lib/aws-route53-targets';
+import { Construct } from 'constructs';
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib'
 
 
 /**
@@ -46,12 +48,16 @@ export interface StaticWebsiteCDNProps {
  * A CDN for a static website that includes a cloudfront distribution that directs traffic to
  * an S3 bucket and includes a Route 53 record set
  */
-export class StaticWebsiteCDN extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: StaticWebsiteCDNProps) {
+export class StaticWebsiteCDN extends Construct {
+    constructor(scope: Construct, id: string, props: StaticWebsiteCDNProps) {
         super(scope, id);
 
         const appBucket = s3.Bucket.fromBucketName(this, 'AppBucket', props.bucketName);
-
+        const loggingBucket = new s3.Bucket(this, 'loggingBucket', {
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            autoDeleteObjects: true
+        });
+      
         const distribution = new cloudfront.Distribution(this, 'Distribution', {
             defaultBehavior: {
                 origin: new origins.S3Origin(appBucket, {
@@ -63,6 +69,7 @@ export class StaticWebsiteCDN extends cdk.Construct {
             certificate: acm.Certificate.fromCertificateArn(this, 'Certificate', props.certificateArn),
             domainNames: props.domainNames,
             enableLogging: true,
+            logBucket: loggingBucket,
             logIncludesCookies: true,
             defaultRootObject: 'index.html',
             errorResponses: [
@@ -73,7 +80,7 @@ export class StaticWebsiteCDN extends cdk.Construct {
                 }
             ]
         })
-
+        
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
             domainName: props.hostedZoneDomain
         });
@@ -85,5 +92,14 @@ export class StaticWebsiteCDN extends cdk.Construct {
                 target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
             }) 
         })
+        const distributionIdOutput = new CfnOutput(this, 'DistributionId', {
+            value: distribution.distributionId
+        });
+        distributionIdOutput.overrideLogicalId('DistributionId');
+
+        const distributionDomainNameOutput = new CfnOutput(this, 'DistributionDomainName', {
+            value: distribution.distributionDomainName
+        });
+        distributionDomainNameOutput.overrideLogicalId('DistributionDomainName');
     }
 }

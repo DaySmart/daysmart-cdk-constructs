@@ -1,11 +1,11 @@
-import * as cdk from "@aws-cdk/core";
-import * as customresource from "@aws-cdk/custom-resources";
-import * as iam from "@aws-cdk/aws-iam";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cdk from "aws-cdk-lib/core";
+import * as customresource from "aws-cdk-lib/custom-resources";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import { Construct } from 'constructs';
 const fs = require('fs');
-const yaml = require('js-yaml');
+const yaml = require('js-yaml'); 
 
 export interface CdkEcsCodedeployResourcesProps {
   stage: string;
@@ -13,15 +13,19 @@ export interface CdkEcsCodedeployResourcesProps {
   serviceName: string;
   appName: string;
   listenerArn: string;
-  targetGroupName: string;
+  legacyTargetGroupName?: string;
+  targetGroup1Name: string;
+  targetGroup2Name?: string;
   commitHash: string;
   deployBucket: string;
   taskDefinitionVersion?: string;
+  taskDefinitionArn?: string;
+  containerPort?: string;
 }
 
-export class CdkEcsCodedeployResources extends cdk.Construct {
+export class CdkEcsCodedeployResources extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
+  constructor(scope: Construct, id: string, props: CdkEcsCodedeployResourcesProps) {
     super(scope, id);
 
     const codeDeployServiceRole = new iam.Role(this, "CodeDeployServiceRole", {
@@ -43,10 +47,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
           TargetService: {
             Type: "AWS::ECS::Service",
             Properties: {
-              TaskDefinition: (props.taskDefinitionVersion) ? `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}:${props.taskDefinitionVersion}` : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
+              TaskDefinition: (props.taskDefinitionArn) ? props.taskDefinitionArn : `arn:aws:ecs:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:task-definition/${appPrefix}`,
               LoadBalancerInfo: {
                 ContainerName: "Container",
-                ContainerPort: 80
+                ContainerPort: (props.containerPort) ? parseInt(props.containerPort) : 80,
               }
             }
           }
@@ -157,10 +161,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }
@@ -213,10 +217,10 @@ export class CdkEcsCodedeployResources extends cdk.Construct {
               },
               targetGroups: [
                 {
-                  name: `${props.targetGroupName}`
+                  name: `${props.targetGroup1Name}`
                 },
                 {
-                  name: `${appPrefix}-TargetGroup2`
+                  name: (props.legacyTargetGroupName) ? `${appPrefix}-TargetGroup2` : `${props.targetGroup2Name}`
                 }
               ]
             }
