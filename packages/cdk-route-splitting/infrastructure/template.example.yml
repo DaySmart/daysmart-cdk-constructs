@@ -1,0 +1,19 @@
+ env:
+ components:
+  - name: 
+    provider:
+      name: 
+      config:
+        constructName:
+        constructPackage:
+        account:
+        region:
+    inputs:
+      hostedZoneName:
+      hostedZoneId:
+      projectName: 
+      originSourceDomain: 
+      partitionKey: 
+      stage: 
+      originNotFoundUrl: 
+      domainName: 
