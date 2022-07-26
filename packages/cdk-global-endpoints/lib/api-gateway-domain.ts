@@ -3,7 +3,7 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CfnUsagePlanKey } from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs'; 
-import { CdkUsagePlan } from './usage-plan';
+import {AwsCustomResource} from './custom-resource';
 
 export interface CdkApiGatewayDomainProps {
   companyDomainName: string;
