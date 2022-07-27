@@ -3,124 +3,109 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: daily
-  
-  - package-ecosystem: "npm"
-    directory: "/packages/cdk-api-gateway-domain-multi-region"
-    schedule:
-      interval: daily
-
-  - package-ecosystem: "npm"
-    directory: "/packages/cdk-api-gateway-domain"
-    schedule:
-      interval: daily
-
-  - package-ecosystem: "npm"
-    directory: "/packages/cdk-app-bucket"
-    schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-app-cloudfront"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-base-cf-acm-r53"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-certificate"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-cloudfront-behavior"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-cloudfront-cache-policy"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-cloudfront-origin-request-policy"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-dynamodbtable"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-ecs-alb"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-ecs-codedeploy-resources"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-ecs-nlb"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-ecs-task-definition"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-environment-resources"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-files-bucket"
     schedule:
-      interval: daily
+      interval: weekly
+
+  - package-ecosystem: "npm"
+    directory: "/packages/cdk-global-endpoints"
+    schedule:
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-multi-account-dns"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-pipeline"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-route53-record"
     schedule:
-      interval: daily
-
-  - package-ecosystem: "npm"
-    directory: "/packages/cdk-s3-deployment"
-    schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-s3-redirect"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-shared-services-resources"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-sns-topic"
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: "npm"
     directory: "/packages/cdk-static-website"
     schedule:
-      interval: daily
+      interval: weekly
