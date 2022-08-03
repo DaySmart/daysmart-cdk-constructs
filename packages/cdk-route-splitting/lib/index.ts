@@ -18,6 +18,7 @@ export interface CdkRouteSplittingProps {
   partitionKey: string;
   stage: string;
   originNotFoundUrl: string;
+  domainName: string;
 }
 
 export class CdkRouteSplitting extends cdk.Construct {
@@ -36,15 +37,8 @@ export class CdkRouteSplitting extends cdk.Construct {
       hostedZoneId: props.hostedZoneId,
     });
 
-    let domainName: string;
-    if(props.stage == "prod") {
-      domainName = `${props.projectName}.${props.hostedZoneName}`;
-    } else {
-      domainName = `${props.stage}-${props.projectName}.${props.hostedZoneName}`;
-    }
-
     const cert = new acm.Certificate(this, "Certificate", {
-      domainName: domainName,
+      domainName: props.domainName,
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
@@ -112,7 +106,7 @@ export class CdkRouteSplitting extends cdk.Construct {
     const api = new apigateway.RestApi(this, `${props.stage}-${props.projectName}-api`, {
       restApiName: `${props.stage}-${props.projectName}-api`,
       domainName: {
-        domainName: domainName,
+        domainName: props.domainName,
         certificate: cert as any,
       },
       description: "Routing api for each lambda assosiated with routing service."

@@ -1,2 +1,4 @@
-infrastructure/
+infrastructure/template.dev.yml
+infrastructure/template.prod.yml
+infrastructure/template.stage.yml
 construct/
