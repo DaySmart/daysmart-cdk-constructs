@@ -8,9 +8,9 @@ import { CloudFrontAllowedCachedMethods, Distribution } from "aws-cdk-lib/aws-cl
 
 export interface CdkRoute53RecordProps {
   targetType: string;
-  loadBalancerArn: string;
+  loadBalancerArn?: string;
   distributionID: string;
-  distributionName: string;
+  distributionDomainName: string;
   hostedZoneDomainNames: string[];
   dnsRecords: string[];
 }
@@ -44,7 +44,7 @@ export class CdkRoute53Record extends Construct {
         case "cloudfront":
           var distribution = cloudfront.CloudFrontWebDistribution.fromDistributionAttributes(this, 'distribution', {
             distributionId: props.distributionID,
-            domainName: props.distributionName
+            domainName: props.distributionDomainName
           });
 
           var cloudfrontTarget = new targets.CloudFrontTarget(distribution);

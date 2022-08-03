@@ -47,7 +47,7 @@ test('App Cloudfront', () => {
         hostedZoneDomainNames: ['example.com'],
         loadBalancerArn: keyArn,
         targetType: 'cloudfront',
-        distributionName: 'testing'
+        distributionDomainName: 'testing'
         });
 
         const template = Template.fromStack(stack);
