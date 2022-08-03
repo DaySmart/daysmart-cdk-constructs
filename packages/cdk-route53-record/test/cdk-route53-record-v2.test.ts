@@ -42,7 +42,7 @@ test('App Cloudfront', () => {
         }
     });
     new CdkRoute53Record(stack, 'AppCloudfront', {
-        distributionID: '1234',
+        distributionId: '1234',
         dnsRecords: ['www.example.com'],
         hostedZoneDomainNames: ['example.com'],
         loadBalancerArn: keyArn,
