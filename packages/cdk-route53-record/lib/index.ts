@@ -2,11 +2,15 @@ import * as cdk from "aws-cdk-lib/core";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import { Construct } from 'constructs'; 
+import { CloudFrontAllowedCachedMethods, Distribution } from "aws-cdk-lib/aws-cloudfront";
 
 export interface CdkRoute53RecordProps {
   targetType: string;
   loadBalancerArn: string;
+  distributionID: string;
+  distributionName: string;
   hostedZoneDomainNames: string[];
   dnsRecords: string[];
 }
@@ -37,6 +41,28 @@ export class CdkRoute53Record extends Construct {
               recordName: props.dnsRecords[index]
             });
           }
+        case "cloudfront":
+          var distribution = cloudfront.CloudFrontWebDistribution.fromDistributionAttributes(this, 'distribution', {
+            distributionId: props.distributionID,
+            domainName: props.distributionName
+          });
+
+          var cloudfrontTarget = new targets.CloudFrontTarget(distribution);
+
+          for (let index = 0; index < props.dnsRecords.length; index++){
+            const domainHostedZone = route53.HostedZone.fromLookup(this, `${props.hostedZoneDomainNames[index]}-HostedZone`, {
+              domainName: props.hostedZoneDomainNames[index],
+              privateZone: false
+            });
+
+            const dnsRecord = new route53.ARecord(this, `${props.dnsRecords[index]}-Record`, {
+              target: route53.RecordTarget.fromAlias(cloudfrontTarget),
+              zone: domainHostedZone,
+              recordName: props.dnsRecords[index]
+            });
+          }
+
+
           break;
         // NOT YET IMPLEMENTED
         // case "nlb":
