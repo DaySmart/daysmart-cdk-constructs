@@ -20,7 +20,7 @@ export class CdkRoute53Record extends Construct {
   constructor(scope: Construct, id: string, props: CdkRoute53RecordProps) {
       super(scope, id);
 
-      if (props.dnsRecords.length == props.hostedZoneDomainNames.length || ((props.dnsRecords.length != props.hostedZoneDomainNames.length) && props.targetType == 'cloudfront')) {
+      if (props.dnsRecords.length == props.hostedZoneDomainNames.length) {
           switch (props.targetType) {
               case "alb":
                   var loadBalancer = elbv2.ApplicationLoadBalancer.fromLookup(this, "LoadBalancer", {
