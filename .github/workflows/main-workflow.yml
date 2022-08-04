@@ -47,6 +47,8 @@ jobs:
               - 'packages/cdk-global-endpoints/**'
             cdk-multi-accont-dns:
               'packages/cdk-multi-accont-dns/**'
+            cdk-route53-record:
+              'packages/cdk-route53-record/**'
             cdk-s3-redirect:
               'packages/cdk-s3-redirect/**'
             cdk-shared-services-resources:
@@ -218,6 +220,17 @@ jobs:
           npm run test           
           npm publish 
         working-directory: packages/cdk-multi-accont-dns
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+      - if: steps.cdk.outputs.cdk-route53-record == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-route53-record
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
