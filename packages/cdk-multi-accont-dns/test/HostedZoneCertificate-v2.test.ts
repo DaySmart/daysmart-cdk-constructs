@@ -10,7 +10,7 @@ test('App Cloudfront', () => {
         }
     });
     new HostedZoneCertificate(stack, 'AppCloudfront', {
-        domainName: 'example.com',
+        domainName: 'example.com'
     });
 
     const template = Template.fromStack(stack);
