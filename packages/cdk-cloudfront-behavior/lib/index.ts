@@ -1,4 +1,4 @@
-import * as cdk from 'aws-cdk-lib/core';
+import * as cdk from 'aws-cdk-lib';
 import * as base from '@daysmart/cdk-base-cf-acm-r53';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
