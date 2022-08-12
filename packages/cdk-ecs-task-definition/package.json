@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-ecs-task-definition",
-  "version": "1.0.3..",
+  "version": "1.0.3",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
   "scripts": {
