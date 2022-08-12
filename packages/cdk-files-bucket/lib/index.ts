@@ -1,4 +1,4 @@
-import * as cdk from 'aws-cdk-lib/core';
+import * as cdk from 'aws-cdk-lib';
 import s3 = require('aws-cdk-lib/aws-s3');
 import cloudfront = require('aws-cdk-lib/aws-cloudfront');
 import iam = require('aws-cdk-lib/aws-iam');
