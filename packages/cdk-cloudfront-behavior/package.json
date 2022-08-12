@@ -27,7 +27,7 @@
     "constructs": "^10.1.52"
   },
   "dependencies": {
-    "@daysmart/cdk-base-cf-acm-r53": "1.0.0"
+    "@daysmart/cdk-base-cf-acm-r53": "1.0.1"
   },
   "publishConfig": {
     "access": "public"
