@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as sns from 'aws-cdk-lib/aws-sns';
-import { Construct } from 'constructs';
+import { Construct } from 'constructs'; 
 
 export interface CdkSnsTopicProps {
   stage: string;

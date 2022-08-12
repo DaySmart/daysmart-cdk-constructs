@@ -3,7 +3,7 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import { Construct } from 'constructs'; 
+import { Construct } from 'constructs';
 import { CloudFrontAllowedCachedMethods, Distribution } from "aws-cdk-lib/aws-cloudfront"; 
 
 export interface CdkRoute53RecordProps {
