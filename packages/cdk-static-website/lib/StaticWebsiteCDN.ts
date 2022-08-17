@@ -34,9 +34,9 @@ export interface StaticWebsiteCDNProps {
     domainNames: string[];
 
     /**
-     * The name of the hosted zone that includes all of the domain names given
+     * The name of the hosted zones that includes all of the domain names given
      */
-    hostedZoneDomain: string;
+    hostedZoneDomains: string[];
 
     /**
      * A custom origin path in the S3 bucket for the CloudFront origin
@@ -80,18 +80,26 @@ export class StaticWebsiteCDN extends Construct {
                 }
             ]
         })
-        
-        const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-            domainName: props.hostedZoneDomain
-        });
 
         props.domainNames.forEach((domainName, i) => {
+          let hostedZone: route53.IHostedZone;
+            if (props.hostedZoneDomains.length > 1)  {
+              hostedZone = route53.HostedZone.fromLookup(this, `HostedZone${i}`, {
+                domainName: props.hostedZoneDomains[i]
+              });
+            } else {
+              hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+                domainName: props.hostedZoneDomains[0]
+              });
+            }
+            
             new route53.ARecord(this, `Alias${i}`, {
                 zone: hostedZone,
                 recordName: domainName,
                 target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
-            }) 
-        })
+            });
+        });
+        
         const distributionIdOutput = new CfnOutput(this, 'DistributionId', {
             value: distribution.distributionId
         });

@@ -12,8 +12,8 @@ test('App Cloudfront', () => {
     new StaticWebsiteCDN(stack, 'AppCloudfront', {
         bucketName: 'bucket',
         certificateArn: 'arn:aws:acm:us-east-1:123456:certificate/blah',
-        domainNames: ['example.domain.com'],
-        hostedZoneDomain: 'example.com',
+        domainNames: ['example.domain.com', 'domain.example.com'],
+        hostedZoneDomains: ['domain.com', 'example.com'],
         originAccessIdentity: '98765'
     });
 
@@ -23,7 +23,8 @@ test('App Cloudfront', () => {
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
         DistributionConfig: {
             Aliases: [
-                'example.domain.com'
+                'example.domain.com',
+                'domain.example.com'
             ]
         }
     });
@@ -37,6 +38,10 @@ test('App Cloudfront', () => {
     });
 
     template.hasResourceProperties('AWS::Route53::RecordSet', {
-        Name: "example.domain.com.example.com."
+      Name: "example.domain.com."
     });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+      Name: "domain.example.com."
+  });
 })
