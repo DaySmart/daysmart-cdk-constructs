@@ -13,7 +13,7 @@ test('App Cloudfront', () => {
         bucketName: 'bucket',
         certificateArn: 'arn:aws:acm:us-east-1:123456:certificate/blah',
         domainNames: ['example.domain.com'],
-        hostedZoneDomain: 'example.com',
+        hostedZoneDomains: ['example.com'],
         originAccessIdentity: '98765'
     });
 
