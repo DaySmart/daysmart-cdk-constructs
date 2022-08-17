@@ -84,7 +84,7 @@ export class StaticWebsiteCDN extends Construct {
         props.domainNames.forEach((domainName, i) => {
           let hostedZone: route53.IHostedZone;
             if (props.hostedZoneDomains.length > 1)  {
-              hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+              hostedZone = route53.HostedZone.fromLookup(this, `HostedZone${i}`, {
                 domainName: props.hostedZoneDomains[i]
               });
             } else {
