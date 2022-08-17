@@ -82,16 +82,24 @@ export class StaticWebsiteCDN extends Construct {
         })
 
         props.domainNames.forEach((domainName, i) => {
-            let hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-              domainName: props.hostedZoneDomains[i]
-            });
-
+          let hostedZone: route53.IHostedZone;
+            if (props.hostedZoneDomains.length > 1)  {
+              hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+                domainName: props.hostedZoneDomains[i]
+              });
+            } else {
+              hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+                domainName: props.hostedZoneDomains[0]
+              });
+            }
+            
             new route53.ARecord(this, `Alias${i}`, {
                 zone: hostedZone,
                 recordName: domainName,
                 target: route53.RecordTarget.fromAlias(new alias.CloudFrontTarget(distribution))
-            }) 
-        })
+            });
+        });
+        
         const distributionIdOutput = new CfnOutput(this, 'DistributionId', {
             value: distribution.distributionId
         });
