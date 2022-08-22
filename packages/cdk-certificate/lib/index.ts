@@ -5,10 +5,10 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager"
 
 
 export interface CdkCertificateProps {
-    companyDomainName: string;
+    companyDomainName: string[];
     stage: string;
     project: string;
-    companyHostedZoneId: string;
+    companyHostedZoneId: string[];
     projectDomainName?: string;
     projectHostedZoneId?: string;
 }
@@ -18,10 +18,21 @@ export class CdkCertificate extends Construct {
   constructor(scope: Construct, id: string, props: CdkCertificateProps) {
     super(scope, id);
 
-    const companyHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-        hostedZoneId: props.companyHostedZoneId,
-        zoneName: props.companyDomainName
-    });
+    // const companyHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+    //     hostedZoneId: props.companyHostedZoneId,
+    //     zoneName: props.companyDomainName
+    // });
+    props.companyDomainName.forEach((companyHostedZone, i) => {
+        let hostedZone: route53.IHostedZone;
+        if (props.companyHostedZoneId.length > 1) {
+            hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone${i}', {
+                hostedZoneId: props.companyHostedZoneId[i]
+                
+            })
+        }
+    })
+
+
 
     let subjectAlternativeNames = [
         `${props.stage}.${props.project}.${props.companyDomainName}`,
