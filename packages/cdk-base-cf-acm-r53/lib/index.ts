@@ -16,6 +16,7 @@ export interface CdkBaseCfAcmR53Props {
   certificateArn?: string;
   loggingBucketName?: string;
   domains: string[];
+  subdomains?: string[];
 }
 
 export interface Zones {
@@ -33,6 +34,7 @@ export class CdkBaseCfAcmR53 extends Construct {
     let certificate: acm.ICertificate;
     const companyDomainNames = props.domains;
     let logFilePrefix: string | undefined = undefined;
+    const companySubDomainNames = props.subdomains;
 
     if (props.certificateArn) {
       certificate = acm.Certificate.fromCertificateArn(this, "Certificate", props.certificateArn);
@@ -134,18 +136,37 @@ export class CdkBaseCfAcmR53 extends Construct {
 
   getAliases(props: CdkBaseCfAcmR53Props, companyDomainNames: string[]): string[] {
     let aliases: string[] = [];
-    companyDomainNames.forEach(companyDomainName => {
-      aliases.push(
-        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
-        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
-      );
-
-      if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
+     
+    if (props.subdomains && props.subdomains.length > 0){
+      companyDomainNames.forEach(companyDomainName => {
         aliases.push(
-          `${props.project}.${companyDomainName}`
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`,
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.subdomains}.${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.subdomains}.${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.subdomains}.${companyDomainName}` : `${props.baseEnv}-${props.subdomains}.${companyDomainName}`
         );
-      }
-    });
+  
+        if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
+          aliases.push(
+            `${props.project}.${companyDomainName}`,
+            `${props.project}.${props.subdomains}.${companyDomainName}`
+          );
+        }
+      });
+    } else{
+      companyDomainNames.forEach(companyDomainName => {
+        aliases.push(
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
+        );
+  
+        if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
+          aliases.push(
+            `${props.project}.${companyDomainName}`
+          );
+        }
+      });
+    }
     return aliases;
   }
 }
