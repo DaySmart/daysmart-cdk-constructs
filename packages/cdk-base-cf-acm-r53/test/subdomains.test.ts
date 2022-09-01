@@ -19,10 +19,9 @@ test('App Cloudfront', () => {
         baseEnv: 'test',
         componentName: 'component',
         defaultBehaviorOptions: {origin: new HttpOrigin('example.com')},
-        domains: ['example.com, example.domain.com'],
-        project: 'cdk',
+        domains: ['example.com', 'domain.com'],
+        projects: ['cloud', 'remote', 'online'],
         certificateArn: keyArn,
-        subdomains: ['cloud, remote']
     });
 
     const template = Template.fromStack(stack);
@@ -30,8 +29,18 @@ test('App Cloudfront', () => {
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
         DistributionConfig: {
             Aliases: [
-                'component.test.cdk.example.com, example.domain.com',
-                'test-cdk.example.com, example.domain.com'
+                "component.test.cloud.example.com",
+                "test-cloud.example.com",
+                "component.test.remote.example.com",
+                "test-remote.example.com",
+                "component.test.online.example.com",
+                "test-online.example.com",
+                "component.test.cloud.domain.com",
+                "test-cloud.domain.com",
+                "component.test.remote.domain.com",
+                "test-remote.domain.com",
+                "component.test.online.domain.com",
+                "test-online.domain.com"
             ]
         }
     });

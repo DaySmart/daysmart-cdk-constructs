@@ -19,8 +19,8 @@ test('App Cloudfront', () => {
         baseEnv: 'test',
         componentName: 'component',
         defaultBehaviorOptions: {origin: new HttpOrigin('example.com')},
-        domains: ['example.com, example.domain.com'],
-        project: 'cdk',
+        domains: ['example.com', 'domain.com'],
+        projects: ['cdk'],
         certificateArn: keyArn,
     });
 
@@ -28,8 +28,10 @@ test('App Cloudfront', () => {
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
         DistributionConfig: {
             Aliases: [
-                'component.test.cdk.example.com, example.domain.com',
-                'test-cdk.example.com, example.domain.com'
+                "component.test.cdk.example.com",
+                "test-cdk.example.com",
+                "component.test.cdk.domain.com",
+                "test-cdk.domain.com"
             ]
         }
     });
