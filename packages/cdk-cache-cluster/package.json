@@ -1,0 +1,35 @@
+{
+  "name": "@daysmart/cdk-cache-cluster",
+  "version": "0.0.1",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "@types/node": "18.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "eslint": "^8.20.0",
+    "eslint-plugin-react": "^7.29.4",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.2",
+    "typescript": "^4.7.4",
+    "aws-cdk-lib": "^2.33.0",
+    "constructs": "^10.1.52"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.33.0",
+    "constructs": "^10.1.52"
+  },
+  "gitHead": "ee505163f0cbd67206dfe03fe5840b7a5e949efe",
+  "publishConfig": {
+    "access": "public"
+  }
+}
