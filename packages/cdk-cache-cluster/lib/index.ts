@@ -1,4 +1,3 @@
-import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { aws_elasticache as elasticache } from 'aws-cdk-lib';
 
@@ -14,8 +13,8 @@ export class CdkCacheCluster extends Construct {
       super(scope, id);
 
       const cluster = new elasticache.CfnCacheCluster(this, 'MyCluster', {
-        cacheNodeType: props.cacheNodeType,
-        engine: props.engine,
+        cacheNodeType: `${props.cacheNodeType}`,
+        engine: `${props.engine}`,
         numCacheNodes: props.numCacheNodes
       })
     }
