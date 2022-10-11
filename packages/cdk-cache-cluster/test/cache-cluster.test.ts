@@ -20,7 +20,6 @@ test('Cache', () => {
     });
 
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2))
 
     template.hasResourceProperties('AWS::ElastiCache::CacheCluster', {
         CacheNodeType: 'cache.m6g.large',

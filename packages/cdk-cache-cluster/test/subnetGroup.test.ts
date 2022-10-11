@@ -15,7 +15,6 @@ test('Subnet', () => {
         subnetIds: ['testing', 'test']
     });
     const template = Template.fromStack(stack);
-    console.log(JSON.stringify(template, null, 2))
 
     template.hasResourceProperties('AWS::ElastiCache::SubnetGroup', {
         Description: 'testing subnet',
