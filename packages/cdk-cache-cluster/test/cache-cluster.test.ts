@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from "aws-cdk-lib/assertions";
-import { CdkCacheCluster } from '../lib/cacheCluster';
+import { CacheCluster } from '../lib/cacheCluster';
 
 test('Cache', () => {
     const stack = new cdk.Stack(undefined, 'stack', {
@@ -9,7 +9,7 @@ test('Cache', () => {
             region: 'us-east-1'
         }
     });
-    new CdkCacheCluster(stack, 'CacheCluster', {
+    new CacheCluster(stack, 'CacheCluster', {
         cacheNodeType: 'cache.m6g.large',
         engine: 'memcached',
         numCacheNodes: 1,

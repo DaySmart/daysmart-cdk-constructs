@@ -1,8 +1,7 @@
 import { Construct } from 'constructs';
 import { aws_elasticache, aws_elasticache as elasticache } from 'aws-cdk-lib';
-import { SubnetGroup } from './subnetGroup'
 
-export interface CdkCacheClusterProps {
+export interface CacheClusterProps {
     cacheNodeType: string,
     engine: string,
     numCacheNodes: number,
@@ -11,12 +10,11 @@ export interface CdkCacheClusterProps {
     cacheSubnetGroupName?: string
 }
 
-export class CdkCacheCluster extends Construct {
-    constructor(scope: Construct, id: string, props: CdkCacheClusterProps) {
+export class CacheCluster extends Construct {
+    constructor(scope: Construct, id: string, props: CacheClusterProps) {
       super(scope, id);
 
       let cluster: aws_elasticache.CfnCacheCluster;
-      const subnet = SubnetGroup;
 
       cluster = new aws_elasticache.CfnCacheCluster(this, 'Cluster', {
         clusterName: props.clusterName,
