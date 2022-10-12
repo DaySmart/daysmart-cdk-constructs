@@ -1,0 +1,31 @@
+env: taylor
+components:
+  - name: test-subnet
+    provider:
+      name: frankenstack-aws-cdk-v2-provider
+      config:
+        constructPath: 'lib/cacheCluster'
+        constructName: CacheCluster
+        account: ${og-legacy-main:aws}
+        region: us-east-1
+        nodejsVersion: 14
+    inputs:
+      description: testing subnet deploy
+      subnetIds: [taylor.testing, testing] 
+      cacheSubnetGroupName: taylor-testing-subnets  
+  - name: test-cluster
+    provider:
+      name: frankenstack-aws-cdk-v2-provider
+      config:
+        constructPath: 'lib/subnetGroup'
+        constructName: SubnetGroup
+        account: ${og-legacy-main:aws}
+        region: us-east-1
+        nodejsVersion: 14
+    inputs:
+      cacheNodeType: cache.t3.micro
+      engine: 1.6.12
+      numCacheNodes: 1
+      clusterName: test-rate-limit
+      port: 11211
+      cacheSubnetGroupName: ${taylor:test-subnet:cacheSubnetGroupName}
