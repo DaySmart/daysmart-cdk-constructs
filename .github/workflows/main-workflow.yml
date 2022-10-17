@@ -21,6 +21,8 @@ jobs:
               - 'packages/cdk-app-cloudfront/**'
             cdk-base-cf-acm-r53:
               - 'packages/cdk-base-cf-acm-r53/**'
+            cdk-cache-cluster:
+              - 'packages/cdk-cache-cluster/**'
             cdk-certificate:
               - 'packages/cdk-certificate/**'
             cdk-cloudfront-behavior:
@@ -77,6 +79,17 @@ jobs:
           npm run test   
           npm publish 
         working-directory: packages/cdk-base-cf-acm-r53
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - if: steps.cdk.outputs.cdk-cache-cluster == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test   
+          npm publish 
+        working-directory: packages/cdk-cache-cluster
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
