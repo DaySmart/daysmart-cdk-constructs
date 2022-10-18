@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
-import { aws_elasticache, aws_elasticache as elasticache, Stack } from 'aws-cdk-lib';
+import { aws_elasticache, aws_elasticache as elasticache, CfnOutput, Stack } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
-import { PrivateSubnet } from 'aws-cdk-lib/aws-ec2';
+import * as cdk from 'aws-cdk-lib';
 
 export interface CacheClusterProps {
     cacheNodeType: string,
@@ -48,5 +48,15 @@ export class CacheCluster extends Construct {
         vpcSecurityGroupIds: [vpcSecurityGroup.securityGroupId],
         cacheSubnetGroupName: subnetGroup.cacheSubnetGroupName
       });
+
+      const portOutput = new CfnOutput(this, 'Port', {
+        value: cluster.attrConfigurationEndpointPort
+      });
+      portOutput.overrideLogicalId('Port');
+
+      const hostedzoneNameOutput = new CfnOutput(this, 'HostedZoneName', {
+        value: cluster.attrConfigurationEndpointAddress
+      });
+      hostedzoneNameOutput.overrideLogicalId('HostedZoneName');
     }
 }
