@@ -54,9 +54,9 @@ export class CacheCluster extends Construct {
       });
       portOutput.overrideLogicalId('Port');
 
-      const hostedzoneNameOutput = new CfnOutput(this, 'HostedZoneName', {
+      const endpointOutput = new CfnOutput(this, 'Endpoint', {
         value: cluster.attrConfigurationEndpointAddress
       });
-      hostedzoneNameOutput.overrideLogicalId('HostedZoneName');
+      endpointOutput.overrideLogicalId('Endpoint');
     }
 }
