@@ -1,5 +1,6 @@
-import * as cdk from '@aws-cdk/core';
-import * as route53 from '@aws-cdk/aws-route53';
+import * as cdk from 'aws-cdk-lib';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import { Construct } from 'constructs';
 
 /**
  * Properties for a hosted zone to be delegated
@@ -8,14 +9,14 @@ export interface DelegatedHostedZoneProps {
     /**
      * Name of the hosted zone. i.e. example.domain.com
      */
-    zoneName: string;
+    zoneName: string; 
 }
 
 /**
  * A Route 53 hosted zone to be delegated from another account
  */
-export class DelegatedHostedZone extends cdk.Construct {
-    constructor(scope: cdk.Construct, id: string, props: DelegatedHostedZoneProps) {
+export class DelegatedHostedZone extends Construct {
+    constructor(scope: Construct, id: string, props: DelegatedHostedZoneProps) {
         super(scope, id);
 
         const hostedZone = new route53.HostedZone(this, 'HostedZone', {

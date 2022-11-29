@@ -1,6 +1,7 @@
-import * as cdk from '@aws-cdk/core';
-import * as codebuild from '@aws-cdk/aws-codebuild';
-import * as iam from '@aws-cdk/aws-iam';
+import * as cdk from 'aws-cdk-lib';
+import * as codebuild from 'aws-cdk-lib/aws-codebuild';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { Construct } from 'constructs';
 
 /**
  * Properties for a CodeBuild project to provision CodePipeline pipelines for all branches in a given repo
@@ -21,10 +22,10 @@ export interface PipelineProvisionerProps {
 /**
  * CodeBuild project with the necessary permissions to provision a CodePipeline for each branch
  */
-export class PipelineProvisioner extends cdk.Construct {
+export class PipelineProvisioner extends Construct {
     readonly buildProject: codebuild.IProject;
 
-    constructor(scope: cdk.Construct, id: string, props: PipelineProvisionerProps) {
+    constructor(scope: Construct, id: string, props: PipelineProvisionerProps) {
         super(scope, id);
 
         const role = new iam.Role(this, 'Role', {

@@ -1,6 +1,8 @@
-import * as cdk from '@aws-cdk/core';
-import acm = require('@aws-cdk/aws-certificatemanager');
-import route53 = require('@aws-cdk/aws-route53');
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as acm from "aws-cdk-lib/aws-certificatemanager"
+
 
 export interface CdkCertificateProps {
     companyDomainName: string;
@@ -11,9 +13,9 @@ export interface CdkCertificateProps {
     projectHostedZoneId?: string;
 }
 
-export class CdkCertificate extends cdk.Construct {
+export class CdkCertificate extends Construct {
 
-  constructor(scope: cdk.Construct, id: string, props: CdkCertificateProps) {
+  constructor(scope: Construct, id: string, props: CdkCertificateProps) {
     super(scope, id);
 
     const companyHostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
@@ -66,7 +68,6 @@ export class CdkCertificate extends cdk.Construct {
     let output = new cdk.CfnOutput(this, "CertificateArn",{
         value: cert.certificateArn
     });
-
     output.overrideLogicalId("CertificateArn");
   }
 }

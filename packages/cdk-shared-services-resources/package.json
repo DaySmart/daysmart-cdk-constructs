@@ -1,6 +1,6 @@
 {
   "name": "@daysmart/cdk-shared-services-resources",
-  "version": "0.1.2",
+  "version": "1.0.2",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -10,27 +10,24 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts."
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.129.0",
-    "@aws-cdk/assertions": "^1.129.0",
     "@types/jest": "^26.0.10",
-    "@types/node": "10.17.27",
-    "@typescript-eslint/eslint-plugin": "^5.17.0",
-    "@typescript-eslint/parser": "^5.17.0",
+    "@types/node": "18.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
     "eslint": "^8.12.0",
     "eslint-plugin-react": "^7.29.4",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
-    "typescript": "~3.9.7"
+    "typescript": "^4.7.4",
+    "aws-cdk-lib": "^2.33.0",
+    "constructs": "^10.1.52"
   },
   "peerDependencies": {
-    "@aws-cdk/core": "1.129.0"
+    "aws-cdk-lib": "^2.33.0",
+    "constructs": "^10.1.52"
   },
   "dependencies": {
-    "@aws-cdk/aws-codebuild": "^1.129.0",
-    "@aws-cdk/aws-iam": "^1.129.0",
-    "@aws-cdk/aws-kms": "^1.129.0",
-    "@aws-cdk/aws-s3": "^1.129.0",
-    "@aws-cdk/core": "1.129.0"
+
   },
   "publishConfig": {
     "access": "public"

@@ -1,0 +1,321 @@
+name: CDK Publishing
+on:
+  push:
+    branches:
+      - main
+  
+jobs:
+  get-file-changes-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: 
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+      - uses: dorny/paths-filter@v2
+        id: cdk
+        with:
+          filters: |
+            cdk-app-cloudfront:
+              - 'packages/cdk-app-cloudfront/**'
+            cdk-base-cf-acm-r53:
+              - 'packages/cdk-base-cf-acm-r53/**'
+            cdk-cache-cluster:
+              - 'packages/cdk-cache-cluster/**'
+            cdk-certificate:
+              - 'packages/cdk-certificate/**'
+            cdk-cloudfront-behavior:
+              - 'packages/cdk-cloudfront-behavior/**'
+            cdk-cloudfront-cache-policy:
+              - 'packages/cdk-cloudfront-cache-policy/**'
+            cdk-cloudfront-origin-request-policy:
+              - 'packages/cdk-cloudfront-origin-request-policy/**'
+            cdk-dynamodbtable:
+              - 'packages/cdk-dynamodbtable/**'
+            cdk-ecs-alb:
+              - 'packages/cdk-ecs-alb/**'
+            cdk-ecs-codedeploy-resources:
+              - 'packages/cdk-ecs-codedeploy-resources/**'
+            cdk-ecs-nlb:
+              - 'packages/cdk-ecs-nlb/**'
+            cdk-ecs-task-definition:
+              - 'packages/cdk-ecs-task-definition/**'  
+            cdk-environment-resources:
+              - 'packages/cdk-environment-resources/**'
+            cdk-files-bucket:
+              - 'packages/cdk-files-bucket/**'
+            cdk-global-endpoints:
+              - 'packages/cdk-global-endpoints/**'
+            cdk-multi-accont-dns:
+              'packages/cdk-multi-accont-dns/**'
+            cdk-route53-record:
+              'packages/cdk-route53-record/**'
+            cdk-s3-redirect:
+              'packages/cdk-s3-redirect/**'
+            cdk-shared-services-resources:
+              'packages/cdk-shared-services-resources/**'
+            cdk-sns-topic:
+              'packages/cdk-sns-topic/**'
+            cdk-static-website:
+              'packages/cdk-static-website/**'    
+
+      - if: steps.cdk.outputs.cdk-app-cloudfront == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test
+          npm publish 
+        working-directory: packages/cdk-app-cloudfront
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-base-cf-acm-r53 == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test   
+          npm publish 
+        working-directory: packages/cdk-base-cf-acm-r53
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - if: steps.cdk.outputs.cdk-cache-cluster == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test   
+          npm publish 
+        working-directory: packages/cdk-cache-cluster
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-certificate == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test          
+          npm publish 
+        working-directory: packages/cdk-certificate
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-cloudfront-behavior == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-cloudfront-behavior
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-cloudfront-cache-policy == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-cloudfront-cache-policy
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-cloudfront-origin-request-policy == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-cloudfront-origin-request-policy
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-dynamodbtable == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test 
+          npm publish 
+        working-directory: packages/cdk-dynamodbtable
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-ecs-alb == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-ecs-alb
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-ecs-codedeploy-resources == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test         
+          npm publish 
+        working-directory: packages/cdk-ecs-codedeploy-resources
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-ecs-nlb == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-ecs-nlb
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-ecs-task-definition == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-ecs-task-definition
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-environment-resources == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-environment-resources
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-files-bucket == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-files-bucket
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-global-endpoints == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-global-endpoints
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-multi-accont-dns == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-multi-accont-dns
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+      - if: steps.cdk.outputs.cdk-route53-record == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-route53-record
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-s3-redirect == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test           
+          npm publish 
+        working-directory: packages/cdk-s3-redirect
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-shared-services-resources == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test          
+          npm publish 
+        working-directory: packages/cdk-shared-services-resources
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-sns-topic == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test          
+          npm publish 
+        working-directory: packages/cdk-sns-topic
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: steps.cdk.outputs.cdk-static-website == 'true'
+        run: | 
+          npm install
+          npm run build
+          npm run lint
+          npm run test          
+          npm publish 
+        working-directory: packages/cdk-static-website
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  
+  Slack-on-failure:
+    if: ${{ always() && (needs.get-file-changes-and-publish.result =='failure') }}
+    needs: [get-file-changes-and-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Expose git commit data 
+        uses: rlespinasse/git-commit-data-action@v1
+      - uses: technote-space/workflow-conclusion-action@v3
+      - id: commit_message
+        run: |
+            commit_message=$(printf "%q" "${{ github.ref }}-${{ github.event.head_commit.message }}")
+            commit_message="${commit_message//'%'/' '}"
+            commit_message="${commit_message//$'\n'/' '}"
+            commit_message="${commit_message//$'\r'/' '}"
+            commit_message="${commit_message//$'refs/heads/'/''}"
+            echo "::set-output name=branch-identifier::$commit_message"
+      - name: Slack notification
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+            payload: |
+                {
+                  "runStatus": "${{ env.WORKFLOW_CONCLUSION }}",
+                  "githubEmail": "${{ env.GIT_COMMIT_AUTHOR_EMAIL }}",
+                  "workflowName": "${{ github.workflow }}"
+                }
+        env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
