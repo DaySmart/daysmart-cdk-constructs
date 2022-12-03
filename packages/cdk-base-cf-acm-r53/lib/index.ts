@@ -9,7 +9,7 @@ import { Construct } from 'constructs';
 export interface CdkBaseCfAcmR53Props {
   defaultBehaviorOptions: cloudfront.BehaviorOptions;
   errorResponses?: cloudfront.ErrorResponse[]
-  project: string;
+  projects: string[];
   baseEnv: string;
   componentName: string;
   dynamicEnv?: string;
@@ -44,15 +44,15 @@ export class CdkBaseCfAcmR53 extends Construct {
         });
 
         subjectAlternativeNames.push(
-          `${props.baseEnv}.${props.project}.${companyDomainName}`,
-          `*.${props.baseEnv}.${props.project}.${companyDomainName}`,
+          `${props.baseEnv}.${props.projects}.${companyDomainName}`,
+          `*.${props.baseEnv}.${props.projects}.${companyDomainName}`,
           `*.${companyDomainName}`
         );
 
         if (props.baseEnv === 'prod') {
           subjectAlternativeNames.push(
-            `${props.project}.${companyDomainName}`,
-            `*.${props.project}.${companyDomainName}`
+            `${props.projects}.${companyDomainName}`,
+            `*.${props.projects}.${companyDomainName}`
           );
         }
 
@@ -69,7 +69,7 @@ export class CdkBaseCfAcmR53 extends Construct {
     }
 
     if (props.loggingBucketName) {
-      logFilePrefix = (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}` : `${props.baseEnv}-${props.project}`
+      logFilePrefix = (props.dynamicEnv) ? `${props.dynamicEnv}-${props.projects}` : `${props.baseEnv}-${props.projects}`
     }
 
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
@@ -77,7 +77,7 @@ export class CdkBaseCfAcmR53 extends Construct {
       certificate: certificate,
       domainNames: this.getAliases(props, companyDomainNames),
       defaultRootObject: "index.html",
-      comment: (props.dynamicEnv) ? `${props.dynamicEnv} ${props.project}` : `${props.baseEnv} ${props.project}`,
+      comment: (props.dynamicEnv) ? `${props.dynamicEnv} ${props.projects}` : `${props.baseEnv} ${props.projects}`,
       enableLogging: (props.loggingBucketName) ? true : false,
       logBucket: (props.loggingBucketName) ? s3.Bucket.fromBucketName(this, "CloudfrontLoggingBucket", props.loggingBucketName) : undefined,
       logIncludesCookies: (props.loggingBucketName) ? true : false,
@@ -95,22 +95,22 @@ export class CdkBaseCfAcmR53 extends Construct {
         domainName: companyDomainName,
         privateZone: false
       });
-      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}-RecordSet` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}-RecordSet`, {
+      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.projects}.${companyDomainName}-RecordSet` : `${props.componentName}.${props.baseEnv}.${props.projects}.${companyDomainName}-RecordSet`, {
         zone: companyHostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`
+        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.projects}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.projects}.${companyDomainName}`
       });
-      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}-RecordSet` : `${props.baseEnv}-${props.project}.${companyDomainName}-RecordSet`, {
+      new route53.ARecord(this, (props.dynamicEnv) ? `${props.dynamicEnv}-${props.projects}.${companyDomainName}-RecordSet` : `${props.baseEnv}-${props.projects}.${companyDomainName}-RecordSet`, {
         zone: companyHostedZone,
         target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
+        recordName: (props.dynamicEnv) ? `${props.dynamicEnv}-${props.projects}.${companyDomainName}` : `${props.baseEnv}-${props.projects}.${companyDomainName}`
       });
 
       if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
-        new route53.ARecord(this, `${props.project}.${companyDomainName}-RecordSet`, {
+        new route53.ARecord(this, `${props.projects}.${companyDomainName}-RecordSet`, {
           zone: companyHostedZone,
           target: route53.RecordTarget.fromAlias(cloudfrontTarget),
-          recordName: `${props.project}.${companyDomainName}`
+          recordName: `${props.projects}.${companyDomainName}`
         });
       }
     });
@@ -135,16 +135,18 @@ export class CdkBaseCfAcmR53 extends Construct {
   getAliases(props: CdkBaseCfAcmR53Props, companyDomainNames: string[]): string[] {
     let aliases: string[] = [];
     companyDomainNames.forEach(companyDomainName => {
-      aliases.push(
-        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${props.project}.${companyDomainName}`,
-        (props.dynamicEnv) ? `${props.dynamicEnv}-${props.project}.${companyDomainName}` : `${props.baseEnv}-${props.project}.${companyDomainName}`
-      );
-
-      if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
+      props.projects.forEach(project => {
         aliases.push(
-          `${props.project}.${companyDomainName}`
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${props.componentName}.${props.baseEnv}.${project}.${companyDomainName}` : `${props.componentName}.${props.baseEnv}.${project}.${companyDomainName}`,
+          (props.dynamicEnv) ? `${props.dynamicEnv}-${project}.${companyDomainName}` : `${props.baseEnv}-${project}.${companyDomainName}`
         );
-      }
+  
+        if (props.dynamicEnv == undefined && props.baseEnv == "prod") {
+          aliases.push(
+            `${project}.${companyDomainName}`
+          );
+        }
+      })
     });
     return aliases;
   }
