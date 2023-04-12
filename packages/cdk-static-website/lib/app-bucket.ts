@@ -49,7 +49,7 @@ export class AppBucket extends Construct {
         });
 
         let output2 = new cdk.CfnOutput(this, "OriginAccessIdentity", {
-            value: originAccessIdentity.originAccessIdentityName
+            value: originAccessIdentity.originAccessIdentityId
         });
 
         output.overrideLogicalId("AppBucket");
