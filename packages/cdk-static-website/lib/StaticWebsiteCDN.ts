@@ -8,7 +8,6 @@ import { Construct } from 'constructs';
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
 import * as cdk from 'aws-cdk-lib'
 
-
 /**
  * Static website CDN properties
  */
