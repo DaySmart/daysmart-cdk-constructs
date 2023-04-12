@@ -61,7 +61,7 @@ export class StaticWebsiteCDN extends Construct {
         const distribution = new cloudfront.Distribution(this, 'Distribution', {
             defaultBehavior: {
                 origin: new origins.S3Origin(appBucket, {
-                    originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityName(this, 'OriginAccessIdentity', props.originAccessIdentity),
+                    originAccessIdentity: cloudfront.OriginAccessIdentity.fromOriginAccessIdentityId(this, 'OriginAccessIdentity', props.originAccessIdentity),
                     originPath: props.originPath
                 }),
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
