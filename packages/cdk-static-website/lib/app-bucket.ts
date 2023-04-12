@@ -20,7 +20,7 @@ export class AppBucket extends Construct {
             bucket = new s3.Bucket(this, 'Bucket', {
                 bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
                 versioned: true,
-                objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+                objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
                 blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
                 removalPolicy: cdk.RemovalPolicy.DESTROY,
                 autoDeleteObjects: true
@@ -29,7 +29,7 @@ export class AppBucket extends Construct {
             bucket = new s3.Bucket(this, 'Bucket', {
                 bucketName: `${props.dynamicEnvName}-${props.appName}.${props.stage}.${props.projectName}`,
                 versioned: true,
-                objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+                objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
                 blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
             });
         }
