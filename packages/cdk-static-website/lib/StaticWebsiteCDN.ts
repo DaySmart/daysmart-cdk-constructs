@@ -55,6 +55,7 @@ export class StaticWebsiteCDN extends Construct {
         const loggingBucket = new s3.Bucket(this, 'loggingBucket', {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
             autoDeleteObjects: true
         });
       
