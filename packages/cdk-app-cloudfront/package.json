@@ -20,13 +20,13 @@
     "ts-jest": "^26.5.2",
     "typescript": "^4.7.4",
     "aws-cdk-lib": "^2.33.0",
-    "constructs": "^10.1.52"
+    "constructs": "^10.2.60"
   },
   "dependencies": {
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.33.0",
-    "constructs": "^10.1.52"
+    "constructs": "^10.2.60"
   },
   "gitHead": "ee505163f0cbd67206dfe03fe5840b7a5e949efe",
   "publishConfig": {
